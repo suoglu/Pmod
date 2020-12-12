@@ -1,5 +1,5 @@
 /* ------------------------------------------------ *
- * Title       : Pmod MIC3 interface                *
+ * Title       : Pmod MIC3 interface v1.0           *
  * Project     : Pmod MIC3 interface                *
  * ------------------------------------------------ *
  * File        : mic3.v                             *
