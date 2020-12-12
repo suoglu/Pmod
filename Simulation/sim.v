@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : sim.v                              *
  * Author      : Yigit Suoglu                       *
- * Last Edit   :                                    *
+ * Last Edit   : 12/12/2020                         *
  * ------------------------------------------------ *
  * Description : Simulation code for Pmod MIC3      *
  *               interface                          *

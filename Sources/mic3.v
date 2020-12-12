@@ -34,7 +34,7 @@ module mic3(
 
   reg [3:0] transaction_counter;
   reg [1:0] state;
-  reg [11:0] rx_buff;
+  reg [12:0] rx_buff;
 
   //decode states for better readability
   assign in_IDLE    = (state == IDLE);
@@ -73,7 +73,7 @@ module mic3(
               end
             PRE:
               begin
-                state <= (SPI_SCLK == 1'b1) ? WORKING : state;
+                state <= (~clk_array[2]) ? WORKING : state;
               end
             WORKING:
               begin
@@ -109,14 +109,14 @@ module mic3(
         end
       else
         begin
-          rx_buff <= {rx_buff[10:0], MISO};
+          rx_buff <= {rx_buff[11:0], MISO};
         end
     end
 
   //Store receive buffer data to audio
   always@(posedge clk)
     begin  
-      audio <= (in_POST) ? rx_buff : audio;
+      audio <= (in_POST) ? rx_buff[12:1] : audio;
     end
 
   assign CS = in_IDLE;
