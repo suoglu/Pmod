@@ -13,7 +13,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start). This interface uses simplified version of my [spi](https://gitlab.com/suoglu/spi) project.
+Simple interface for the [Digilent Pmod MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start). This interface uses simplified version of my [spi](https://gitlab.com/suoglu/spi) master module.
 
 ## Brief information about Pmod MIC3
 
