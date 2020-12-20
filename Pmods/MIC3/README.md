@@ -25,9 +25,9 @@ This interface can be used to gather data from Pmod [MIC3](https://reference.dig
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: | ------ |
-|  `clk`   |   I   | 1 | System Clock, 100 MHz |
+|  `clk`   |   I   | 1 | System Clock (100 MHz) |
 |  `rst`   |   I   | 1 | System Reset |
-|  `SPI_SCLK`   |   O   | 1 | SPI Clock, 12,5 MHz |
+|  `SPI_SCLK`   |   O   | 1 | SPI Clock (12,5 MHz) |
 |  `CS`   |   O   | 1 | SPI Chip (Slave) select |
 |  `MISO`   |   I   | 1 | SPI Master In Slave Out |
 |  `read`   |   I   | 1 | Initiate a new read, keep high for continuous reading |
