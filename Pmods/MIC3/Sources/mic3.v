@@ -1,6 +1,6 @@
 /* ------------------------------------------------ *
  * Title       : Pmod MIC3 interface v1.0           *
- * Project     : Pmod MIC3 interface                *
+ * Project     : Pmod Collection                    *
  * ------------------------------------------------ *
  * File        : mic3.v                             *
  * Author      : Yigit Suoglu                       *
