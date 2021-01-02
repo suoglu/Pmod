@@ -3,3 +3,4 @@
 *vivado*
 *.vcd
 *.tcl
+tmp*
