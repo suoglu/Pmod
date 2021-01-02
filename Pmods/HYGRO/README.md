@@ -53,4 +53,4 @@ Module `hygro_lite` is tested on [Digilent Basys 3](https://reference.digilentin
 
 ## Status Information
 
-**Last test of `hygro_lite`:** 2 January 2020, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+**Last test of `hygro_lite`:** 2 January 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
