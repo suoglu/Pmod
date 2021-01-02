@@ -40,7 +40,7 @@ This interface can be used to gather data from Pmod [HYGRO](https://reference.di
 |  `sensNR`   | O | 1 | Sensor is not responding |
 |  `tem`   | O | 14 | Most recent temperature reading |
 |  `hum`   | O | 14 | Most recent humidity reading |
-|  `SCL`   | O | 1 | I²C clock |
+|  `SCL`   | O | 1 | I²C clock (390.625kHz) |
 |  `SDA`   | IO | 1 | I²C data |
 
 I: Input  O: Output
@@ -51,6 +51,6 @@ I: Input  O: Output
 
 Module `hygro_lite` is tested on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual) with [test_board.v](Test/test_board.v). Right button used to initiate new measurement. Measurement results with 2 extra 0s at LSBs shown on seven segment displays. Rightmost switch used to switch between temperature and humidity reading. Pmod [HYGRO](https://reference.digilentinc.com/reference/pmod/pmodhygro/start) connected to upper JB and; `newData`, `i2c_busy` and `dataUpdating` signals connected to JA. `sensNR` signal connected to rightmost LED. I²C, `newData`, `i2c_busy` and `dataUpdating` signals are monitored with [Digital Discovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start).
 
-## Status Informatio
+## Status Information
 
 **Last test of `hygro_lite`:** 2 January 2020, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
