@@ -78,7 +78,7 @@ I: Input  O: Output
 
 ## Simulation
 
-Module simulated in [sim.v](Simulation/sim.v). `getData` is connected to a  10 MHz clock signal.
+Module simulated in [sim.v](Simulation/sim.v). `SDATA` is connected to a  10 MHz clock signal.
 
 ## Test
 
