@@ -17,7 +17,7 @@ Simple interface for the [Digilent Pmod HYGRO](https://reference.digilentinc.com
 
 ## Brief information about Pmod HYGRO
 
-The [Digilent Pmod HYGRO](https://reference.digilentinc.com/reference/pmod/pmodhygro/start) contains a [Texas Instrument HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) digital humidity and temperature sensor. Module communicates with the host board via I²C protocol.
+The [Digilent Pmod HYGRO](https://reference.digilentinc.com/reference/pmod/pmodhygro/start) contains a [Texas Instruments HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) digital humidity and temperature sensor. Module communicates with the host board via I²C protocol.
 
 ## Modules
 
