@@ -6,7 +6,7 @@
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 12/12/2020                         *
  * ------------------------------------------------ *
- * Description : Simple interface to comunicate     *
+ * Description : Simple interface to communicate    *
  *               with Pmod MIC3                     *
  * ------------------------------------------------ */
 

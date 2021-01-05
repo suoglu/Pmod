@@ -6,7 +6,7 @@
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 01/01/2021                         *
  * ------------------------------------------------ *
- * Description : Simple interfaces to comunicate    *
+ * Description : Simple interfaces to communicate   *
  *               with Pmod HYGRO                    *
  * ------------------------------------------------ *
  * Revisions                                        *
