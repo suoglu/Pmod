@@ -53,11 +53,11 @@ This interface can be used to gather data from Pmod [AD1](https://reference.digi
 |  `clk`   | I | 1 | System Clock (100 MHz) |
 |  `rst`   | I | 1 | System Reset |
 |  `SCLK`   | I | 1 | Serial Clock |
-|  `SDATA`   | I | 1 | Serial Data |
+|  `SDATA`   | I | 1/2 | Serial Data |
 |  `CS`   | O | 1 | Chip Select |
 |  `getData`   | I | 1 | Initiate a new conversion, hold high for continuous conversion |
 |  `updatingData`   | O | 1 | Data registers are being updated, thus not valid |
-|  `activeCH`   | I | 2 | Activates the reading of corresponding channel |
+|  `activeCH`   | I | 0/2 | Activates the reading of corresponding channel |
 |  `data`   | O | 12 | Last read conversion results |
 
 I: Input  O: Output

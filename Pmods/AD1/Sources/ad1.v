@@ -1,16 +1,18 @@
 /* ------------------------------------------------ *
- * Title       : Pmod AD1 interface v1.0            *
+ * Title       : Pmod AD1 interface v1.1            *
  * Project     : Pmod AD1 interface                 *
  * ------------------------------------------------ *
  * File        : ad1.v                              *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 03/01/2021                         *
+ * Last Edit   : 06/01/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod AD1                      *
  * ------------------------------------------------ *
  * Revisions                                        *
  *     v1      : Inital version                     *
+ *     v1.1    : SDATA inputs in dual module        *
+ *               combined into a bus                *
  * ------------------------------------------------ */
 
 module ad1(
@@ -82,8 +84,7 @@ module ad1_dual(
   input rst,
   //Serial Interface
   input SCLK,
-  input SDATA0,
-  input SDATA1,
+  input [1:0] SDATA,
   output reg CS,
   //Data interface
   input getData,
@@ -125,8 +126,8 @@ module ad1_dual(
   //Output data
   always@(posedge SCLK)
     begin
-      data0 <= (sdataValid & (counter != 4'd0) & activeCH[0]) ? {data0[10:0], SDATA0} : data0;
-      data1 <= (sdataValid & (counter != 4'd0) & activeCH[1]) ? {data1[10:0], SDATA1} : data1;
+      data0 <= (sdataValid & (counter != 4'd0) & activeCH[0]) ? {data0[10:0], SDATA[0]} : data0;
+      data1 <= (sdataValid & (counter != 4'd0) & activeCH[1]) ? {data1[10:0], SDATA[1]} : data1;
     end
   
   //Data valid
