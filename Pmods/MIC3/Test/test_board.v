@@ -10,7 +10,7 @@
  * ------------------------------------------------ */
 
 //`include "Pmods/MIC3/Sources/mic3.v"
-//`include "Pmods/MIC3/Test/btn_debouncer.v"
+//`include "Utils/btn_debouncer.v"
 
 module board(
   input clk,

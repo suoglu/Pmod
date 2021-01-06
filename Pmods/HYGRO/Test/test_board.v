@@ -10,8 +10,8 @@
  * ------------------------------------------------ */
 
 // `include "Pmods/HYGRO/Sources/hygro.v"
-// `include "Pmods/HYGRO/Test/ssd_util.v"
-// `include "Pmods/HYGRO/Test/btn_debouncer.v"
+// `include "Utils/ssd_util.v"
+// `include "Utils/btn_debouncer.v"
 
 module lite_test(
   input clk,

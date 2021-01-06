@@ -10,8 +10,8 @@
  * ------------------------------------------------ */
 
 //  `include "Pmods/AD1/Sources/ad1.v"
-//  `include "Pmods/AD1/Test/ssd_util.v"
-//  `include "Pmods/AD1/Test/btn_debouncer.v"
+//  `include "Utils/ssd_util.v"
+//  `include "Utils/btn_debouncer.v"
 
 module board(
   input clk,
