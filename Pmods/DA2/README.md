@@ -34,9 +34,15 @@ Controls both channels of the [DA2](https://reference.digilentinc.com/reference/
 
 Clock divider to generate 25 MHz SCLK from 100 MHz system clock. It can be disabled.
 
+**`da2AutoUpdate`** and **`da2AutoUpdate_dual`**
+
+Generate `update` automatically when `value` and/or `chmod` changes.
+
 ## Interface Description
 
-**`da2`**
+***Note:** Dual modules has two bit `SDATA` and two `chmod` and `value` ports, one for each channel.*
+
+**`da2`** and **`da2_dual`**
 
 This interface can be used to gather data from Pmod [DA2](https://reference.digilentinc.com/reference/pmod/pmodda2/start) (or any other [DAC121S101](https://www.ti.com/lit/ds/symlink/dac121s101.pdf)) easily.
 
@@ -71,6 +77,19 @@ This module generates 25 MHz `SCLK` and can be enabled with `en`.
 |  `rst`   | I | 1 | System Reset |
 |  `en`   | I | 1 | Enable Serial Clock |
 |  `SCLK`   | O | 1 | Serial Clock |
+
+**`da2AutoUpdate`** and **`da2AutoUpdate_dual`**
+
+These modules sets `update` when `value` or `chmod` changes, and resets when `SYNC` is high. These modules can be used to keep DAC output equal to `value` without manually updating or continuously updating.
+
+|   Port   | Type | Width |  Description |
+| :------: | :----: | :----: | ------ |
+|  `clk`   | I | 1 | System Clock (100 MHz) |
+|  `rst`   | I | 1 | System Reset |
+|  `SYNC`   | I | 1 | Sync signal |
+|  `chmod`   | I | 2 | Channel Mode |
+|  `value`   | I | 12 | Channel Value |
+|  `update`   | O | 1 | Update the output values |
 
 ## Simulation
 

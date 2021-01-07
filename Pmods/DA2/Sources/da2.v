@@ -1,16 +1,19 @@
 /* ------------------------------------------------ *
- * Title       : Pmod DA2 interface v1.0            *
+ * Title       : Pmod DA2 interface v1.1            *
  * Project     : Pmod DA2 interface                 *
  * ------------------------------------------------ *
  * File        : da2.v                              *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 06/01/2021                         *
+ * Last Edit   : 07/01/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod DA2                      *
  * ------------------------------------------------ *
  * Revisions                                        *
  *     v1      : Inital version                     *
+ *     v1.1    : Module to generate update signal   *
+ *               automatically with a change in     *
+ *               value added                        *
  * ------------------------------------------------ */
 
 module da2(
@@ -279,6 +282,68 @@ module da2_dual(
         end
     end 
 endmodule//da2
+
+module da2AutoUpdate(
+  input clk,
+  input rst,
+  input SYNC,
+  output update,
+  input [1:0] chmode,
+  input [11:0] value);
+  reg [1:0] chmode_reg;
+  reg [11:0] value_reg;
+
+  assign update = (chmode != chmode_reg) | (value != value_reg);
+
+  //Store values to compare
+  always@(posedge SYNC or posedge rst)
+    begin
+      if(rst)
+        begin
+          chmode_reg <= 2'd0;
+          value_reg <= 12'd0;
+        end
+      else
+        begin
+          chmode_reg <= chmode;
+          value_reg <= value;
+        end
+    end
+endmodule//da2AutoUpdate
+
+module da2AutoUpdate_dual(
+  input clk,
+  input rst,
+  input SYNC,
+  output update,
+  input [1:0] chmode0,
+  input [1:0] chmode1,
+  input [11:0] value0,
+  input [11:0] value1);
+  reg [1:0] chmode_reg0, chmode_reg1;
+  reg [11:0] value_reg0, value_reg1;
+
+  assign update = (chmode0 != chmode_reg0) | (value0 != value_reg0) | (chmode1 != chmode_reg1) | (value1 != value_reg1);
+
+  //Store values to compare
+  always@(posedge SYNC or posedge rst)
+    begin
+      if(rst)
+        begin
+          chmode_reg0 <= 2'd0;
+          value_reg0 <= 12'd0;
+          chmode_reg1 <= 2'd0;
+          value_reg1 <= 12'd0;
+        end
+      else
+        begin
+          chmode_reg0 <= chmode0;
+          value_reg0 <= value0;
+          chmode_reg1 <= chmode1;
+          value_reg1 <= value1;
+        end
+    end
+endmodule//da2AutoUpdate
 
 module clkDiv25en(
   input clk,
