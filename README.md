@@ -23,6 +23,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  HYGRO   |   I²C   | [HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) | Relative humidity and temperature sensor |
 |  AD1   |   SPI   | [AD7476A](https://www.analog.com/media/cn/technical-documentation/evaluation-documentation/AD7476A_7477A_7478A.pdf) | Analog-to-digital converter |
 |  DA2   |   GPIO   | [DAC121S101-Q1](https://www.ti.com/lit/ds/symlink/dac121s101.pdf) | Digital-to-analog converter |
+|  KYPD   |   GPIO   | none | 4x4 Keypad |
 
 ## Information about Test Codes
 
