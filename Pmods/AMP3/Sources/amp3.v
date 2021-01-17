@@ -1,5 +1,5 @@
 /* ------------------------------------------------ *
- * Title       : Pmod AMP3 interface v1.0           *
+ * Title       : Pmod AMP3 interface v0.1           *
  * Project     : Pmod AMP3 interface                *
  * ------------------------------------------------ *
  * File        : amp3.v                             *
@@ -11,10 +11,12 @@
  *               Stand-Alone Mode.                  *
  * ------------------------------------------------ *
  * Revisions                                        *
- *     v1      : Inital version, lite interface     *
+ *     v0.1      : Inital version, lite interface,  *
+ *                 currently does not work
  * ------------------------------------------------ */
 
-//Left Justified Stand-Alone Mode
+//Left Justified Stand-Alone Mode, NOT WORKING
+//TODO: Solve the problem
 module amp3_Lite#(parameter dataW = 12)(
   input clk,
   input rst,
@@ -140,29 +142,32 @@ module amp3_Lite#(parameter dataW = 12)(
   BCLKgen bitclkGEN(clk, enabled, BCLK, BCLK_negedge);
 endmodule
 
-//Generate 10MHz BCLK with Negative edge notif.
+//Generate 5MHz BCLK with Negative edge notif.
 module BCLKgen(
   input clk,
   input en,
   output reg BCLK,
   output BCLK_negedge);
-  reg [2:0] counter;
+  reg [3:0] counter;
+  wire countDONE;
 
-  assign BCLK_negedge = BCLK & counter[2];
+  assign countDONE = (counter == 4'd9);
+
+  assign BCLK_negedge = BCLK & countDONE;
 
   always@(posedge clk)
     begin
       if(~en)
         BCLK <= 1'b0;
       else
-        BCLK <= (counter[2]) ? ~BCLK : BCLK;
+        BCLK <= (countDONE) ? ~BCLK : BCLK;
     end 
 
   always@(posedge clk)
     begin
       if(~en)
-        counter <= 3'd0;
+        counter <= 4'd0;
       else
-        counter <= (counter[2]) ? 3'd0 : (counter + 3'd1);
+        counter <= (countDONE) ? 4'd0 : (counter + 4'd1);
     end 
 endmodule

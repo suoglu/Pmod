@@ -9,10 +9,13 @@
 5. Test
 6. Status Information
 7. Possible Future Improvements
+8. Issues
 
 ---
 
 ## About
+
+**NOT WORKING!**
 
 Simple interface for the [Digilent Pmod AMP3](https://reference.digilentinc.com/reference/pmod/pmodamp3/start).
 
@@ -23,6 +26,8 @@ The [Digilent Pmod AMP3](https://reference.digilentinc.com/reference/pmod/pmodam
 ## Interface Description
 
 **`amp3_Lite`:**
+
+**NOT WORKING!**
 
 Module `amp3_Lite` communicate [AMP3](https://reference.digilentinc.com/reference/pmod/pmodamp3/start) in Left Justified Stand-Alone Mode. Parameter `dataW` corresponds to the size of the audio date registers, default is 12 bits to match Pmod [MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start).
 
@@ -49,14 +54,22 @@ Module `amp3_Lite` simulated with [simlite.v](Simulation/simlite.v). Constant va
 
 ## Test
 
-Noting yet
+**`amp3_Lite`:**
+
+**NOT WORKING!**
+
+[testBoard.v](Test/testBoard.v) is used to test `amp3_Lite`. Additionaly [MIC3](MIC3/Sources/mic3.v) interface is used in [testBoard.v](Test/testBoard.v). Audio data gathered with MIC3 and send to AMP3. `amp3_Lite` is not working currently.
 
 ## Status Information
 
 **Last Simulation:** 17 January 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
-**Last Test:** -
+**Last Test:** Failed
 
 ## Possible Future Improvements
 
 - I²C interface with configurations
+
+## Issues
+
+- `amp3_Lite` does not work
