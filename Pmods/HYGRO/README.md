@@ -8,6 +8,7 @@
 4. Interface Description
 5. Test
 6. Status Information
+7. Possible Future Improvements
 
 ---
 
@@ -54,3 +55,7 @@ Module `hygro_lite` is tested on [Digilent Basys 3](https://reference.digilentin
 ## Status Information
 
 **Last test of `hygro_lite`:** 2 January 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## Possible Future Improvements
+
+* Full module that can configure Pmod
