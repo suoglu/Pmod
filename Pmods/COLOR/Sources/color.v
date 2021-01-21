@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : color.v                            *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : /01/2021                         *
+ * Last Edit   : 20/01/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod COLOR                    *
@@ -66,6 +66,7 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
   wire i2cBitCounterDONE;
   wire I2CinREADY, I2CinSTART, I2CinADDRS, I2CinWRITE, I2CinWRITE_ACK, I2CinREAD, I2CinREAD_ACK, I2CinSTOP, I2CinACK;
   reg I2CinSTOP_d;
+  reg I2CinACK_d;
   wire I2CinSTOP_posedge;
   wire i2c_clk; //Used to shifting and sampling
   reg i2c_clk_half; //Low: Shift High: Sample
@@ -78,6 +79,7 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
   reg [7:0] I2Csend;
   reg [7:0] I2CsendBUFF, I2CrecBUFF;
   wire lastData;
+  reg writeCount;
 
   assign LEDenable = reflectiveMode & (inREADY | inUPDATE | inSENDADDRS);
   assign changeState = updateGain | I2CinSTOP_posedge | (measure & inREADY);
@@ -116,6 +118,24 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
             endcase
         end
     end
+  
+  //Save buffers
+  always@(posedge I2CinSTOP or posedge rst)
+    begin
+      if(rst)
+        begin
+          red <= 16'd0;
+          green <= 16'd0;
+          blue <= 16'd0;
+        end
+      else
+        begin
+          red <= (inUPDATE) ? red_buff : red;
+          green <= (inUPDATE) ? green_buff : green;
+          blue <= (inUPDATE) ? blue_buff : blue;
+        end
+    end
+  
 
   //Decode states
   assign inSLEEP = (state == SLEEP);
@@ -182,13 +202,14 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
   //Count read bytes
   always@(negedge I2CinACK or posedge I2CinSTART)
     begin
+      I2CinACK_d <= I2CinACK;
       if(I2CinSTART)
         begin
           dataCounter <= 3'd0;
         end
       else
         begin
-          dataCounter <= dataCounter + {2'd0, ~i2cGivingAddrs};
+          dataCounter <= dataCounter + {2'd0, (~i2cGivingAddrs/* & I2CinACK & ~I2CinACK_d*/)};
         end
     end
   
@@ -212,7 +233,7 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
         end
       else
         begin
-          case(state)
+          case(i2cState)
             i2cREADY:
               begin
                 i2cState <= (i2c_enable & i2c_clk_half) ? i2cSTART : i2cState;
@@ -260,11 +281,11 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
       case(state)
         SLEEP:
           begin
-            I2Csend = (~|dataCounter) ? ENABLEregAddrs : ENABLEregCont;
+            I2Csend = (writeCount) ? ENABLEregAddrs : ENABLEregCont;
           end
         READY:
           begin
-            I2Csend = (~|dataCounter) ? ENABLEregAddrs : 8'b0;
+            I2Csend = (writeCount) ? ENABLEregAddrs : 8'b0;
           end
         SENDADDRS:
           begin
@@ -272,7 +293,7 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
           end
         CHGAIN:
           begin
-            I2Csend = (~|dataCounter) ? GAINregAddrs : {6'b0, gain};
+            I2Csend = (writeCount) ? GAINregAddrs : {6'b0, gain};
           end
         default:
           begin
@@ -316,7 +337,7 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
       case(i2cState)
         i2cSTART: //At start load address and op
           begin
-            I2CsendBUFF <= {CHIPADDRS, i2cWrite};
+            I2CsendBUFF <= {CHIPADDRS, ~i2cWrite};
           end
         i2cADDRS: //During address shift
           begin
@@ -336,6 +357,19 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
           end
       endcase
     end
+  //writeCount
+  always@(posedge I2CinWRITE or posedge I2CinADDRS)
+    begin
+      if(I2CinADDRS)
+        begin
+          writeCount <= 1'd1;
+        end
+      else
+        begin
+          writeCount <= 1'd0;
+        end
+    end
+  
   //Handle data out buffer
   always@(posedge i2c_clk)
     begin
@@ -345,7 +379,7 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
   assign i2cBitCounterDONE = ~|i2cBitCounter;
   always@(negedge i2c_clk_half) 
     begin
-      case(state)
+      case(i2cState)
         i2cADDRS:
           begin
             i2cBitCounter <= i2cBitCounter + 3'd1;

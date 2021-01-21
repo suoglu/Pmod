@@ -47,7 +47,7 @@ set_property -dict { PACKAGE_PIN D12   IOSTANDARD LVCMOS33 } [get_ports { SDA0 }
 
 ## Pmod Header JD
 #set_property -dict { PACKAGE_PIN D4    IOSTANDARD LVCMOS33 } [get_ports { jd[0] }]; #IO_L11N_T1_SRCC_35 Sch=jd[1]
-set_property -dict { PACKAGE_PIN D3    IOSTANDARD LVCMOS33 } [get_ports { LEDenable0 }]; #IO_L12N_T1_MRCC_35 Sch=jd[2]
+set_property -dict { PACKAGE_PIN D3    IOSTANDARD LVCMOS33 } [get_ports { LEDenable1 }]; #IO_L12N_T1_MRCC_35 Sch=jd[2]
 set_property -dict { PACKAGE_PIN F4    IOSTANDARD LVCMOS33 } [get_ports { SCL1 }]; #IO_L13P_T2_MRCC_35 Sch=jd[3]
 set_property -dict { PACKAGE_PIN F3    IOSTANDARD LVCMOS33 } [get_ports { SDA1 }]; #IO_L13N_T2_MRCC_35 Sch=jd[4]
 
