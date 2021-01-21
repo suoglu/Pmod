@@ -14,7 +14,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start). This interface uses edited version of my [SPI](https://gitlab.com/suoglu/spi) master module.
+Simple interface for the [Digilent Pmod AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start). This interface uses modified version of my [SPI](https://gitlab.com/suoglu/spi) master module.
 
 ## Brief information about Pmod AD1
 
