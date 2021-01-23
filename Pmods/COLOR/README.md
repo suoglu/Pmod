@@ -50,7 +50,6 @@ I: Input  O: Output
 
 Module `colorlite` tested with [color_test.v](Pmods/COLOR/Test/color_test.v) and [Arty-A7-100-0.xdc](Pmods/COLOR/Test/Arty-A7-100-0.xdc). Two `colorlite` modules are used; one connected to a [Digilent Pmod COLOR](https://reference.digilentinc.com/reference/pmod/pmodcolor/start) other to a [Adafruit TCS34725 Color Sensor](https://learn.adafruit.com/adafruit-color-sensors). Outer RGB LEDs connected to Pmod inners connected to Adafruit sensor. Switch 0 used to enable/disable sensor (by putting it into sleep mode). Switches 2 and 1 are connected to `gain` ports. Switch 3 is connected to `reflectiveMode`. I²C signals and MSByte of RGB data registers (`red`, `green`, `blue`) are monitored with [Digilent Digital Discovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start).
 
-
 ## Status Information
 
 **Last Test:** 21 January 2021, on [Digilent Arty A7](https://reference.digilentinc.com/reference/programmable-logic/arty-a7/start).
