@@ -29,7 +29,7 @@ The [Digilent Pmod AMP3](https://reference.digilentinc.com/reference/pmod/pmodam
 
 **NOT WORKING!**
 
-Module `amp3_Lite` communicate [AMP3](https://reference.digilentinc.com/reference/pmod/pmodamp3/start) in Left Justified Stand-Alone Mode. Parameter `dataW` corresponds to the size of the audio date registers, default is 12 bits to match Pmod [MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start).
+Module `amp3_Lite` communicate [AMP3](https://reference.digilentinc.com/reference/pmod/pmodamp3/start) via I²S bus. Parameter `dataW` corresponds to the size of the audio date registers, default is 12 bits to match Pmod [MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start).
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: |  ------  |
@@ -42,7 +42,7 @@ Module `amp3_Lite` communicate [AMP3](https://reference.digilentinc.com/referenc
 | `dataR` | I | `dataW` | Right Channel Data |
 | `dataL` | I | `dataW` | Left Channel Data |
 | `enable` | I | 1 | Enable the interface |
-| `idle` | O | 1 | Indicates interface at IDLE state |
+| `RightNLeft` | O | 1 | `LRCLK` without shift |
 
 I: Input  O: Output
 
@@ -50,7 +50,7 @@ I: Input  O: Output
 
 **`amp3_Lite`:**
 
-Module `amp3_Lite` simulated with [simlite.v](Simulation/simlite.v). Constant values 0xA5A and 0x468 are applied to channels. `SDATA` observed to be equal to `dataR` and `dataL` values in corresponding `BCLK` edge and `LRCLK` values, without extra edge.
+Module `amp3_Lite` simulated with [simlite.v](Simulation/simlite.v). Constant values 0xFFF and 0x000 are applied to channels.
 
 ## Test
 
@@ -62,7 +62,7 @@ Module `amp3_Lite` simulated with [simlite.v](Simulation/simlite.v). Constant va
 
 ## Status Information
 
-**Last Simulation:** 17 January 2021, with [Icarus Verilog](http://iverilog.icarus.com).
+**Last Simulation:** 24 January 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last Test:** Failed
 

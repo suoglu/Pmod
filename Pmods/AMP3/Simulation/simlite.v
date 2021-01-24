@@ -13,12 +13,13 @@
 
 module testbench();
   reg clk, rst, enable;
-  wire SDATA, BCLK, LRCLK, nSHUT, idle;
+  wire SDATA, BCLK, LRCLK, nSHUT, BCLKgen,RightNLeft;
   reg [11:0] dataR, dataL;
 
   always #5 clk <= ~clk;
 
-  amp3_Lite uut(clk, rst, SDATA, BCLK, LRCLK, nSHUT, dataR, dataL, enable, idle);
+  amp3_Lite uut(clk,rst,SDATA,LRCLK,nSHUT,BCLK,BCLKgen,dataR,dataL,enable,RightNLeft);
+  BCLKGen uutClkGen(clk,rst,BCLKgen);
 
   initial
       begin
@@ -32,15 +33,16 @@ module testbench();
         $dumpvars(6, dataR);
         $dumpvars(7, dataL);
         $dumpvars(8, enable);
-        $dumpvars(9, idle);
+        $dumpvars(9, BCLKgen);
+        $dumpvars(10, RightNLeft);
         #40000
         $finish;
       end
   initial
     begin
       clk = 0;
-      dataR = 12'hA5A;
-      dataL = 12'h468;
+      dataR = 12'hfff;
+      dataL = 12'h000;
       enable = 0;
       rst = 0;
       #13

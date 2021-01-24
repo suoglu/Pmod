@@ -1,173 +1,129 @@
 /* ------------------------------------------------ *
- * Title       : Pmod AMP3 interface v0.1           *
+ * Title       : Pmod AMP3 interface v0.2           *
  * Project     : Pmod AMP3 interface                *
  * ------------------------------------------------ *
  * File        : amp3.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 17/01/2021                         *
+ * Last Edit   : 24/01/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
- *               with Pmod AMP3 in Left Justified   *
- *               Stand-Alone Mode.                  *
+ *               with Pmod AMP3 in I2S Mode         *
  * ------------------------------------------------ *
  * Revisions                                        *
  *     v0.1      : Inital version, lite interface,  *
  *                 currently does not work
  * ------------------------------------------------ */
 
-//Left Justified Stand-Alone Mode, NOT WORKING
+//I2S Stand-Alone Mode, NOT WORKING
 //TODO: Solve the problem
-module amp3_Lite#(parameter dataW = 12)(
+module amp3_Lite#(parameter DATASIZE = 12)(
   input clk,
   input rst,
   //AMP3 Interface
   output SDATA,
-  output BCLK,
-  output LRCLK,
+  output reg LRCLK,
   output nSHUT,
+  output BCLK_o,
+  input BCLK_i,
   //Data interface
-  input [(dataW-1):0] dataR,
-  input [(dataW-1):0] dataL,
+  input [(DATASIZE-1):0] dataR,
+  input [(DATASIZE-1):0] dataL,
   input enable,
-  output idle);
-  localparam counterSIZE = $clog2(dataW);
-  localparam IDLE = 2'b00,
-             PREP = 2'b01,
-          RIGHTCH = 2'b11,
-           LEFTCH = 2'b10;
-  reg [1:0] state;
-  reg enabled;
-  wire inIDLE, inRIGHTCH, inLEFTCH, inPREP, sending;
-  reg [dataW:0] dataR_buff, dataL_buff;
-  reg [(counterSIZE-1):0] counter;
-  wire BCLK_negedge;
-  wire counterDONE;
+  output reg RightNLeft);
+  //Current channel
+  localparam LEFT = 1'b0, RIGHT = 1'b1;
+  //Bit counter
+  localparam counterSIZE = $clog2(DATASIZE-1);
+  reg [counterSIZE-1:0] bitCounter;
+  wire bitCounterDone;
+  //Bit clock
+  wire BCLK;
+  //Data buffer to transmit
+  reg [DATASIZE-1:0] dataBuff;
+  wire updatePulse;
 
-  //Decode States
-  assign inIDLE = (state == IDLE);
-  assign inRIGHTCH = (state == RIGHTCH);
-  assign inLEFTCH = (state == LEFTCH);
-  assign inPREP= (state == PREP);
-  assign sending = inRIGHTCH | inLEFTCH;
-  assign nSHUT = enabled;
-  assign LRCLK = ~inRIGHTCH;
-  assign idle = inIDLE | (inPREP & ~enable & ~enabled);
+  //Shutdown when not enabled
+  assign nSHUT = enable;
 
-  //State transactions
-  always@(posedge clk or posedge rst)
+  assign BCLK = BCLK_i;
+  assign BCLK_o = BCLK & enable;
+
+  //Serial data
+  assign SDATA = dataBuff[DATASIZE-1];
+  assign updatePulse = LRCLK ^ RightNLeft;
+  always@(negedge BCLK)
+    begin
+      if(updatePulse)
+        dataBuff[DATASIZE-1:0] <= (LRCLK == RIGHT) ? dataR : dataL;
+      else
+        dataBuff <= (enable) ? (dataBuff << 1) : dataBuff;
+    end
+  
+  //Handle LRCLK
+  always@(negedge BCLK or posedge rst)
     begin
       if(rst)
         begin
-          state <= IDLE;
+          LRCLK <= LEFT;
         end
       else
         begin
-          case(state)
-            IDLE:
-              begin
-                state <= (enabled) ? PREP : state;
-              end
-            PREP:
-              begin
-                state <= (enabled) ? ((BCLK_negedge) ? RIGHTCH : state) : IDLE;
-              end
-            RIGHTCH:
-              begin
-                state <= (BCLK_negedge & counterDONE) ? LEFTCH : state;
-              end
-            LEFTCH:
-              begin
-                state <= (counterDONE) ? ((enable) ? PREP : ((BCLK_negedge) ? IDLE : state)) : state;
-              end
-          endcase
-          
+          LRCLK <= (bitCounterDone) ? ~RightNLeft : LRCLK;
         end
     end
-  
-  //Counters
-  assign counterDONE = (inRIGHTCH) ? (counter == dataW) : ~|counter;
-  always@(posedge BCLK or posedge rst)
+  //Bit counter
+  assign bitCounterDone = bitCounter == (DATASIZE-1);
+  always @(negedge BCLK or posedge rst) 
     begin
       if(rst)
-        begin
-          counter <= {counterSIZE{1'b0}};
-        end
+        bitCounter <= DATASIZE-1;
       else
-        begin
-          counter <= (counterDONE & inLEFTCH) ? {counterSIZE{1'b0}} : (counter + ({{(counterSIZE-1){1'b0}}, sending} ^ {counterSIZE{inLEFTCH}}) + {{(counterSIZE-1){1'b0}}, inLEFTCH});
-        end
+        bitCounter <= (bitCounterDone) ? {counterSIZE{1'b0}} : (bitCounter + {{counterSIZE-1{1'b0}}, enable});
     end
-  
-  //Enabled signal
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          enabled <= 1'b0;
-        end
-      else
-        begin
-          case(enabled)
-            1'b0:
-              begin
-                enabled <= enable;
-              end
-            1'b1:
-              begin
-                enabled <= (inIDLE) ? enable : enabled;
-              end
-          endcase
-          
-        end
-    end
-  
-  //Data buffers
-  always@(negedge BCLK or posedge inPREP)
-    begin
-      if(inPREP)
-        begin
-          dataR_buff <= {1'b0, dataR};
-          dataL_buff <= {1'b0, dataL};
-        end
-      else
-        begin
-          dataR_buff <= (inRIGHTCH) ? (dataR_buff << 1) : dataR_buff;
-          dataL_buff <= (inLEFTCH)  ? (dataL_buff << 1) : dataL_buff;
-        end
-    end
-  
-  //SDATA
-  assign SDATA = (sending) ? ((inRIGHTCH) ? dataR_buff[dataW] : dataL_buff[dataW]) : 1'b0;
 
-  BCLKgen bitclkGEN(clk, enabled, BCLK, BCLK_negedge);
+  //Actual channel comes one edge after
+  always@(negedge BCLK)
+    begin
+      RightNLeft <= LRCLK;
+    end
 endmodule
 
-//Generate 5MHz BCLK with Negative edge notif.
-module BCLKgen(
-  input clk,
-  input en,
-  output reg BCLK,
-  output BCLK_negedge);
-  reg [3:0] counter;
-  wire countDONE;
+//Output 3.125 MHz
+module BCLKGen(clk, rst, BCLK);
+  input clk, rst;
+  output BCLK;  
+  reg [4:0] clk_array; //Clock generation array, asynchronous reset
 
-  assign countDONE = (counter == 4'd9);
+  assign BCLK = clk_array[4];
 
-  assign BCLK_negedge = BCLK & countDONE;
-
-  always@(posedge clk)
+  //Clock dividers
+  always@(posedge clk or posedge rst)
     begin
-      if(~en)
-        BCLK <= 1'b0;
+      if(rst)
+        begin
+          clk_array[0] <= 0;
+        end
       else
-        BCLK <= (countDONE) ? ~BCLK : BCLK;
-    end 
+        begin
+          clk_array[0] <= ~clk_array[0];
+        end
+    end
 
-  always@(posedge clk)
-    begin
-      if(~en)
-        counter <= 4'd0;
-      else
-        counter <= (countDONE) ? 4'd0 : (counter + 4'd1);
-    end 
+    genvar i;
+    generate
+      for (i = 0; i < 4; i = i + 1) 
+        begin
+          always@(posedge clk_array[i] or posedge rst)
+            begin
+              if(rst)
+                begin
+                  clk_array[i+1] <= 0;
+                end
+              else
+                begin
+                  clk_array[i+1] <= ~clk_array[i+1];
+                end
+            end
+        end
+    endgenerate
 endmodule
