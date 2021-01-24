@@ -8,6 +8,7 @@
 4. Simulation
 5. Test
 6. Status Information
+7. Issues
 
 ---
 
@@ -51,3 +52,7 @@ Module is tested on [Digilent Basys 3](https://reference.digilentinc.com/referen
 **Last simulation:** 12 December 2020, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 12 December 2020, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## Issues
+
+- During testing a 12 bit data read, however content of the read data needs verification!
