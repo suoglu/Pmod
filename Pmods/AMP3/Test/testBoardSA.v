@@ -1,8 +1,8 @@
 /* ------------------------------------------------ *
- * Title       : AMP3 Test                          *
+ * Title       : AMP3 standalone Test               *
  * Project     : Pmod AMP3 interface                *
  * ------------------------------------------------ *
- * File        : testBoard.v                        *
+ * File        : testBoardSA.v                      *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 17/01/2021                         *
  * ------------------------------------------------ *
@@ -11,7 +11,7 @@
  *               additionally to AMP3 interface     *
  * ------------------------------------------------ */
 
-//`include "Pmods/AMP3/Sources/amp3.v"
+//`include "Pmods/AMP3/Sources/amp3SA.v"
 //`include "Pmods/MIC3/Sources/mic3.v"
 
 module testboard(

@@ -50,7 +50,7 @@ I: Input  O: Output
 
 **`amp3_Lite`:**
 
-Module `amp3_Lite` simulated with [simlite.v](Simulation/simlite.v). Constant values 0xFFF and 0x000 are applied to channels.
+Module `amp3_Lite` simulated with [simSA.v](Simulation/simSA.v). Constant values 0xFFF and 0x000 are applied to channels.
 
 ## Test
 
@@ -58,7 +58,7 @@ Module `amp3_Lite` simulated with [simlite.v](Simulation/simlite.v). Constant va
 
 **NOT WORKING!**
 
-[testBoard.v](Test/testBoard.v) is used to test `amp3_Lite`. Additionaly [MIC3](MIC3/Sources/mic3.v) interface is used in [testBoard.v](Test/testBoard.v). Audio data gathered with MIC3 and send to AMP3. `amp3_Lite` is not working currently.
+[testBoardSA.v](Test/testBoardSA.v) is used to test `amp3_Lite`. Additionaly [MIC3](MIC3/Sources/mic3.v) interface is used in [testBoardSA.v](Test/testBoardSA.v). Audio data gathered with MIC3 and send to AMP3. `amp3_Lite` is not working currently.
 
 ## Status Information
 

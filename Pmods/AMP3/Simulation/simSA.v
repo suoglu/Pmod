@@ -1,15 +1,15 @@
 /* ------------------------------------------------ *
- * Title       : Pmod AMP3 Simulation               *
+ * Title       : Pmod AMP3 standalone Simulation    *
  * Project     : Pmod AMP3 interface                *
  * ------------------------------------------------ *
- * File        : simlite.v                          *
+ * File        : simSA.v                            *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 17/01/2021                         *
  * ------------------------------------------------ *
  * Description : Simulation for Pmod AMP3 interface *
  * ------------------------------------------------ */
 
-`include "Pmods/AMP3/Sources/amp3.v"
+`include "Pmods/AMP3/Sources/amp3SA.v"
 
 module testbench();
   reg clk, rst, enable;
@@ -18,7 +18,7 @@ module testbench();
 
   always #5 clk <= ~clk;
 
-  amp3_Lite uut(clk,rst,SDATA,LRCLK,nSHUT,BCLK,BCLKgen,dataR,dataL,enable,RightNLeft);
+  amp3_SA uut(clk,rst,SDATA,LRCLK,nSHUT,BCLK,BCLKgen,dataR,dataL,enable,RightNLeft);
   BCLKGen uutClkGen(clk,rst,BCLKgen);
 
   initial

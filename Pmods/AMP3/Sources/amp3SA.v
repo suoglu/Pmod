@@ -1,22 +1,21 @@
-/* ------------------------------------------------ *
- * Title       : Pmod AMP3 interface v0.2           *
- * Project     : Pmod AMP3 interface                *
- * ------------------------------------------------ *
- * File        : amp3.v                             *
- * Author      : Yigit Suoglu                       *
- * Last Edit   : 24/01/2021                         *
- * ------------------------------------------------ *
- * Description : Simple interface to communicate    *
- *               with Pmod AMP3 in I2S Mode         *
- * ------------------------------------------------ *
- * Revisions                                        *
- *     v0.1      : Inital version, lite interface,  *
- *                 currently does not work
- * ------------------------------------------------ */
+/* ------------------------------------------------- *
+ * Title       : Pmod AMP3 standalone interface v0.2 *
+ * Project     : Pmod AMP3 interface                 *
+ * ------------------------------------------------- *
+ * File        : amp3SA.v                            *
+ * Author      : Yigit Suoglu                        *
+ * Last Edit   : 24/01/2021                          *
+ * ------------------------------------------------- *
+ * Description : Simple interface to communicate     *
+ *               with Pmod AMP3 in standalone Mode   *
+ * ------------------------------------------------- *
+ * Revisions                                         *
+ *     v1      :                                     *
+ * ------------------------------------------------- */
 
 //I2S Stand-Alone Mode, NOT WORKING
 //TODO: Solve the problem
-module amp3_Lite#(parameter DATASIZE = 12)(
+module amp3_SA#(parameter DATASIZE = 12)(
   input clk,
   input rst,
   //AMP3 Interface
