@@ -1,6 +1,19 @@
+# For macOS systems
 .DS_Store
-*.out
+
+# Vivado directory
 *vivado*
+
+# For icarus Verilog
+*.out
 *.vcd
-*.tcl
-tmp*
+
+# Diagrams
+*.drawio
+
+# Any tmp
+*tmp*
+
+#Text editor configs
+*.geany
+.vscode
