@@ -13,6 +13,419 @@
  *     v1      : Inital version for lite interface  *
  * ------------------------------------------------ */
 
+module hygro(
+  input clk,
+  input rst,
+  //Control signals
+  input measureT,
+  input measureH,
+  output newData,
+  output dataUpdating,
+  output reg sensNR, //Sensor is not responding
+  //Data output
+  output reg [13:0] tem,
+  output reg [13:0] hum,
+  //Configurations
+  input heater,
+  input acMode,
+  input TRes,
+  input [1:0] HRes,
+  input swRst,
+  //I2C pins
+  inout SCL/* synthesis keep = 1 */, 
+  inout SDA/* synthesis keep = 1 */);
+  localparam CHIPADDRS = 7'h40,
+          TEMPREGADDRS = 8'h00,
+           HUMREGADDRS = 8'h01,
+        CONFIGREGADDRS = 8'h02,
+        CONFIGRSTVALUE = 8'h90;
+  wire i2c_2clk; //Used to shifting and sampling, 781.25kHz
+  wire i2c_clk; //390.625kHz
+  wire SDA_Claim;
+  wire SDA_Write;
+  //I2C flow control
+  wire gettingTEM, gettingHUM;
+  reg SDA_d;
+  //Module states
+  reg [1:0] state;
+  localparam SLEEP = 3'b000,
+            CONFIG = 3'b101,
+             SWRST = 3'b111,
+            TADDRS = 3'b001,
+            HADDRS = 3'b100,
+            GETRES = 3'b010;
+  wire inSLEEP, inCONFIG, inSWRST, inTADDRS, inHADDRS, inGETRES;
+  //I2C states
+  reg [2:0] i2c_state;
+  localparam I2C_READY = 3'b000,
+             I2C_START = 3'b001,
+             I2C_ADDRS = 3'b011,
+             I2C_WRITE = 3'b110,
+         I2C_WRITE_ACK = 3'b010,
+              I2C_READ = 3'b111,
+          I2C_READ_ACK = 3'b101,
+              I2C_STOP = 3'b100;
+  wire I2Cin_READY, I2Cin_START, I2Cin_ADDRS, I2Cin_WRITE, I2Cin_WRITE_ACK, I2Cin_READ, I2Cin_READ_ACK, I2Cin_STOP, I2Cin_ACK;
+  //Initiate I2C transaction
+  wire I2Cinit;
+  wire I2Cdone;
+  reg i2c_busy;
+  //Counters
+  reg [2:0] i2cBitCounter; //Count current bit
+  reg [2:0] i2cByteCounter; //Count databytes
+  wire i2cBitCounterDONE;
+  reg i2cByteCounterDONE;
+  wire SDA_posedge, SDA_negedge;
+  wire startCond, stopCond;
+  reg [7:0] SDAbuff;
+  reg [7:0] SDAbuffin;
+
+  //Store config regs
+  reg heater_reg,acMode_reg, TRes_reg;
+  reg [1:0]  HRes_reg;
+  wire configUp;
+  wire modeSingle, modeBoth;
+  reg tempM, humM;
+  wire updateConfig;
+
+  //States and state driven signals
+  assign inSLEEP  = (state == SLEEP);
+  assign inCONFIG = (state == CONFIG);
+  assign inSWRST  = (state == SWRST);
+  assign inTADDRS = (state == TADDRS);
+  assign inHADDRS = (state == HADDRS);
+  assign inGETRES = (state == GETRES);
+  assign I2Cinit = ~inSLEEP;
+
+  //State transactions
+  always@(posedge clk or posedge rst)
+    begin
+      if(rst)
+        state <= SLEEP;
+      else
+        case(state)
+          SLEEP:
+            begin
+              if(swRst)
+                state <= SWRST;
+              else if(updateConfig)
+                state <= CONFIG;
+              else if(measureT)
+                state <= TADDRS;
+              else if(measureH)
+                begin
+                  if(modeBoth)
+                    state <= TADDRS;
+                  else
+                    state <= HADDRS;
+                end
+            end
+          CONFIG:
+            begin
+              state <= (I2Cdone) ? SLEEP : state;
+            end
+          SWRST:
+            begin
+              state <= (I2Cdone) ? SLEEP : state;
+            end
+          TADDRS:
+            begin
+              state <= (I2Cdone) ? GETRES : state;
+            end
+          HADDRS:
+            begin
+              state <= (I2Cdone) ? GETRES : state;
+            end
+          GETRES:
+            begin
+              state <= (I2Cdone) ? SLEEP : state;
+            end
+        endcase
+    end
+
+  //I2C states and I2C state drived signals
+  assign I2Cin_READY = (i2c_state == I2C_READY);
+  assign I2Cin_START = (i2c_state == I2C_START);
+  assign I2Cin_ADDRS = (i2c_state == I2C_ADDRS);
+  assign I2Cin_WRITE = (i2c_state == I2C_WRITE);
+  assign I2Cin_WRITE_ACK = (i2c_state == I2C_WRITE_ACK);
+  assign I2Cin_READ = (i2c_state == I2C_READ);
+  assign I2Cin_READ_ACK = (i2c_state == I2C_READ_ACK);
+  assign I2Cin_STOP = (i2c_state == I2C_STOP);
+  assign I2Cin_ACK = I2Cin_WRITE_ACK | I2Cin_READ_ACK;
+
+  //I2C state transactions
+  assign I2Cdone = i2cByteCounterDONE;
+  always@(negedge i2c_2clk or posedge rst)
+    begin
+      if(rst)
+        i2c_state <= I2C_READY;
+      else
+        case(i2c_state)
+          I2C_READY:
+            begin
+              i2c_state <= (~i2c_busy & I2Cinit & i2c_clk) ? I2C_START : i2c_state;
+            end
+          I2C_START:
+            begin
+              i2c_state <= (~SCL) ? I2C_ADDRS : i2c_state;
+            end
+          I2C_ADDRS:
+            begin
+              i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_WRITE_ACK : i2c_state;
+            end
+          I2C_WRITE_ACK:
+            begin
+              i2c_state <= (~SCL) ? ((~SDA_d & ~i2cByteCounterDONE) ? ((~inGETRES) ? I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
+            end
+          I2C_WRITE:
+            begin
+              i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_WRITE_ACK : i2c_state;
+            end
+          I2C_READ:
+            begin
+              i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_READ_ACK : i2c_state;
+            end
+          I2C_READ_ACK:
+            begin
+              i2c_state <= (~SCL) ? ((i2cByteCounterDONE) ? I2C_STOP : I2C_READ) : i2c_state;
+            end
+          I2C_STOP:
+            begin
+              i2c_state <= (SCL) ?  I2C_READY : i2c_state;
+            end
+        endcase
+    end
+
+  //SDA content control
+  assign dataUpdating = I2Cin_READ | I2Cin_READ_ACK;
+  assign gettingTEM = ((i2cByteCounter == 3'd1) | ((i2cByteCounter == 3'd2) & (i2cBitCounter < 3'd6))) & (modeBoth | tempM);
+  assign gettingHUM = ((i2cByteCounter == 3'd3) | ((i2cByteCounter == 3'd4) & (i2cBitCounter < 3'd6))) | ((i2cByteCounter == 3'd1) | ((i2cByteCounter == 3'd2) & (i2cBitCounter < 3'd6))) & humM;
+  always@(posedge clk)
+    begin
+      case(state)
+        SLEEP:
+          begin
+            tempM <= 1'd0;
+             humM <= 1'd0;
+          end
+        TADDRS:
+          begin
+            tempM <= modeSingle;
+          end
+        HADDRS:
+          begin
+             humM <= modeSingle;
+          end
+      endcase 
+    end
+
+  //I2C signals control
+  assign SCL = (I2Cin_READY) ? 1'bZ : i2c_clk;
+  assign SDA = (SDA_Claim) ? SDA_Write : 1'bZ;
+  assign SDA_Claim = I2Cin_START | I2Cin_ADDRS | I2Cin_WRITE | I2Cin_READ_ACK | I2Cin_STOP;
+  assign SDA_Write = (I2Cin_READ_ACK | I2Cin_START | I2Cin_STOP) ? (I2Cin_READ_ACK & i2cByteCounterDONE) : SDAbuff[7];
+  always@(posedge clk)
+    begin
+      SDA_d <= SDA;
+    end
+  
+  //I2C multi master control
+  assign SDA_posedge = SDA & ~SDA_d;
+  assign SDA_negedge = ~SDA & SDA_d;
+  assign startCond = SCL & SDA_negedge;
+  assign stopCond = SCL & SDA_posedge;
+  always@(posedge clk)
+    begin
+      if(I2Cin_READY)
+        begin
+          if(startCond)
+            i2c_busy <= 1'd1;
+          else if(stopCond)
+            i2c_busy <= 1'd0;
+        end
+      else
+        begin
+          i2c_busy <= 1'd0;
+        end
+    end
+
+  //Responded
+  always@(negedge i2c_2clk)
+    begin
+      if(i2c_clk & I2Cin_WRITE_ACK & (i2cByteCounterDONE == 3'd1))
+        begin
+          sensNR <= SDA;
+        end
+    end
+
+  //I2C bit counter
+  assign i2cBitCounterDONE = ~|i2cBitCounter;
+  always@(posedge SCL) 
+    begin
+      case(i2c_state)
+        I2C_ADDRS:
+          begin
+            i2cBitCounter <= i2cBitCounter + 3'd1;
+          end
+        I2C_WRITE:
+          begin
+            i2cBitCounter <= i2cBitCounter + 3'd1;
+          end
+        I2C_READ:
+          begin
+            i2cBitCounter <= i2cBitCounter + 3'd1;
+          end
+        default:
+          begin
+            i2cBitCounter <= 3'd0;
+          end
+      endcase
+    end
+
+  //I2C byte counter
+  always@(posedge I2Cin_ACK or posedge I2Cin_START)
+    begin
+      if(I2Cin_START)
+        begin
+          i2cByteCounter <= 3'd0;
+        end
+      else
+        begin
+          i2cByteCounter <= i2cByteCounter + 3'd1;
+        end
+    end
+  always@*
+    begin
+      case(state)
+        CONFIG:
+          begin
+            i2cByteCounterDONE = (i2cByteCounter == 3'd4);
+          end
+        SWRST:
+          begin
+            i2cByteCounterDONE = (i2cByteCounter == 3'd4);
+          end
+        TADDRS:
+          begin
+            i2cByteCounterDONE = (i2cByteCounter == 3'd2);
+          end
+        HADDRS:
+          begin
+            i2cByteCounterDONE = (i2cByteCounter == 3'd2);
+          end
+        GETRES:
+          begin
+            i2cByteCounterDONE = (modeSingle) ? (i2cByteCounter == 3'd3) : (i2cByteCounter == 3'd5);
+          end
+        default:
+          begin
+            i2cByteCounterDONE = 1'd1;
+          end
+      endcase
+    end
+  
+  //SDA buffer
+  always@*
+    begin
+      case(i2cByteCounter)
+        3'd0:
+          begin
+            SDAbuffin <= {CHIPADDRS,(inCONFIG|inSWRST|inTADDRS|inHADDRS)};
+          end
+        3'd1:
+          begin
+            case(state)
+              CONFIG: SDAbuffin <= CONFIGREGADDRS;
+              SWRST: SDAbuffin <= CONFIGREGADDRS;
+              TADDRS: SDAbuffin <= TEMPREGADDRS;
+              HADDRS: SDAbuffin <= HUMREGADDRS;
+              default: SDAbuffin <= 8'h00;
+            endcase
+          end
+        3'd2:
+          begin
+            case(state)
+              CONFIG: SDAbuffin <= {2'b0,heater,acMode,1'b0,TRes,HRes};
+              SWRST: SDAbuffin <= CONFIGRSTVALUE;
+              default: SDAbuffin <= 8'h00;
+            endcase
+          end
+        default:
+          begin
+            SDAbuffin <= 8'h00;
+          end
+      endcase
+    end
+  always@(negedge i2c_2clk)
+    begin
+      if(~i2c_clk)
+        case(i2c_state)
+          I2C_START:
+            begin
+              SDAbuff <= SDAbuffin;
+            end
+          I2C_WRITE_ACK:
+            begin
+              SDAbuff <= SDAbuffin;
+            end
+          I2C_ADDRS:
+            begin
+              SDAbuff <= (SDAbuff << 1);
+            end
+          I2Cin_WRITE:
+            begin
+              SDAbuff <= (SDAbuff << 1);
+            end
+        endcase
+    end
+
+  //Temperature register
+  always@(negedge i2c_2clk or posedge rst)
+    begin
+      if(rst)
+        begin
+          tem <= 14'd0;
+        end
+      else if (i2c_clk & I2Cin_READ)
+        begin
+          tem <= (gettingTEM) ? {tem[12:0], SDA}: tem;
+        end
+    end
+
+  //Humidity register
+  always@(negedge i2c_2clk or posedge rst)
+    begin
+      if(rst)
+        begin
+          hum <= 14'd0;
+        end
+      else if (i2c_clk & I2Cin_READ)
+        begin
+          hum <= (gettingHUM) ? {hum[12:0], SDA}: hum;
+        end
+    end
+  
+  //Handle config regs
+  assign configUp = inCONFIG | rst;
+  assign updateConfig = ({heater_reg, TRes_reg, HRes_reg, acMode_reg} !=  {heater, TRes, HRes, acMode});
+  assign modeBoth = acMode_reg;
+  assign modeSingle = ~acMode_reg;
+  always@(posedge configUp or posedge inSWRST)
+    begin
+      if(inSWRST)
+        begin
+          {heater_reg, TRes_reg, HRes_reg, acMode_reg} <= {1'd0, 1'd0,2'd0, 1'd1};
+        end
+      else
+        begin
+          {heater_reg, TRes_reg, HRes_reg, acMode_reg} <=  {heater, TRes, HRes, acMode};
+        end
+    end
+  
+  clockGen_i2c clkGEN(clk, rst, i2c_2clk, i2c_clk);
+endmodule
+
 //Lite module uses default settings of sensor
 module hygro_lite(
   input clk,
@@ -67,8 +480,6 @@ module hygro_lite(
   //Edge detection for i2c_2clk
   reg i2c_2clk_d;
   wire i2c_2clk_negedge;
-  //DEBUG
-  assign debug = {bitCounter,byteCounter};
   //I2C decode states and I2C state drived signals
   assign I2Cin_READY = (i2c_state == I2C_READY);
   assign I2Cin_START = (i2c_state == I2C_START);
