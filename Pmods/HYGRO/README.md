@@ -96,4 +96,4 @@ Module `hygro` is tested on [Digilent Basys 3](https://reference.digilentinc.com
 
 ## Issues
 
-* **In `hygro`:** Changing measurement resolutions doesn't seem to work, even though I²C transmisson looks correct.
+* **In `hygro`:** Changing measurement resolutions doesn't seem to work, even though I²C transmission looks correct.
