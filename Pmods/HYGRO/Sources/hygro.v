@@ -1,16 +1,17 @@
 /* ------------------------------------------------ *
- * Title       : Pmod HYGRO interface v1.0          *
+ * Title       : Pmod HYGRO interface v2.0          *
  * Project     : Pmod HYGRO interface               *
  * ------------------------------------------------ *
  * File        : hygro.v                            *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 01/01/2021                         *
+ * Last Edit   : 02/02/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod HYGRO                    *
  * ------------------------------------------------ *
  * Revisions                                        *
  *     v1      : Inital version for lite interface  *
+ *     v2      : Full module                        *
  * ------------------------------------------------ */
 
 module hygro(
@@ -43,11 +44,12 @@ module hygro(
   wire i2c_clk; //390.625kHz
   wire SDA_Claim;
   wire SDA_Write;
+  reg SCL_d;
   //I2C flow control
   wire gettingTEM, gettingHUM;
-  reg SDA_d;
+  reg SDA_d, SDA_dd;
   //Module states
-  reg [1:0] state;
+  reg [2:0] state;
   localparam SLEEP = 3'b000,
             CONFIG = 3'b101,
              SWRST = 3'b111,
@@ -153,9 +155,14 @@ module hygro(
   assign I2Cin_READ_ACK = (i2c_state == I2C_READ_ACK);
   assign I2Cin_STOP = (i2c_state == I2C_STOP);
   assign I2Cin_ACK = I2Cin_WRITE_ACK | I2Cin_READ_ACK;
+  assign newData = inGETRES & I2Cdone;
 
   //I2C state transactions
-  assign I2Cdone = i2cByteCounterDONE;
+  assign I2Cdone = i2cByteCounterDONE & I2Cin_STOP;
+  always@(negedge i2c_2clk)
+    begin
+      SDA_dd <= SDA;
+    end
   always@(negedge i2c_2clk or posedge rst)
     begin
       if(rst)
@@ -176,7 +183,7 @@ module hygro(
             end
           I2C_WRITE_ACK:
             begin
-              i2c_state <= (~SCL) ? ((~SDA_d & ~i2cByteCounterDONE) ? ((~inGETRES) ? I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
+              i2c_state <= (~SCL) ? ((~SDA_dd & ~i2cByteCounterDONE) ? ((~inGETRES) ? I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
             end
           I2C_WRITE:
             begin
@@ -229,6 +236,10 @@ module hygro(
     begin
       SDA_d <= SDA;
     end
+  always@(posedge i2c_2clk)
+    begin
+      SCL_d <= SCL;
+    end
   
   //I2C multi master control
   assign SDA_posedge = SDA & ~SDA_d;
@@ -261,7 +272,7 @@ module hygro(
 
   //I2C bit counter
   assign i2cBitCounterDONE = ~|i2cBitCounter;
-  always@(posedge SCL) 
+  always@(posedge SCL_d) 
     begin
       case(i2c_state)
         I2C_ADDRS:
@@ -331,7 +342,7 @@ module hygro(
       case(i2cByteCounter)
         3'd0:
           begin
-            SDAbuffin <= {CHIPADDRS,(inCONFIG|inSWRST|inTADDRS|inHADDRS)};
+            SDAbuffin <= {CHIPADDRS,inGETRES};
           end
         3'd1:
           begin
@@ -373,7 +384,7 @@ module hygro(
             begin
               SDAbuff <= (SDAbuff << 1);
             end
-          I2Cin_WRITE:
+          I2C_WRITE:
             begin
               SDAbuff <= (SDAbuff << 1);
             end
