@@ -68,7 +68,7 @@ I: Input  O: Output
 |  `acMode`   | I | 1 | Acquisition Mode  |
 | `TRes` | I | 1 | Temperature Measurement Resolution |
 |  `HRes`   | I | 2 | Humidity Measurement Resolution  |
-|  `swRst`   | I | 1 | I²C Bus is busy |
+|  `swRst`   | I | 1 | Software Reset |
 
 I: Input O: Output
 
