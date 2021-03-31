@@ -6,9 +6,8 @@
 2. Brief information about Pmod MIC3
 3. Interface Description
 4. Simulation
-5. Test
+5. Tests
 6. Status Information
-7. Issues
 
 ---
 
@@ -45,14 +44,16 @@ Module simulated in [sim.v](Simulation/sim.v). MISO signal inverted every 70ns t
 
 ## Test
 
+### Test 1
+
 Module is tested on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual) with [test_board.v](Test/test_board.v). A very simple test module is implemented. Audio output of the interface connected to LEDs. Right button is used to get a single reading. Right most switch is used to enable continuous read mode. [Pmod MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start) is connected to upper part of Pmod port B (JB1-4).
+
+### Test 2
+
+Second test utilizes pmod [DA2](Pmods/DA2) to output read audio data from pmod [MIC3](https://reference.digilentinc.com/reference/pmod/pmodmic3/start). [testBoard_dacOut.v](Test/testBoard_dacOut.v) and [Basys3_da_test.xdc](Test/Basys3_da_test.xdc) are used in second test. Analog output monitored via [OpenScope MZ](https://reference.digilentinc.com/reference/instrumentation/openscope-mz/start). Sinusoidal and triangular tones of different frequencies are applied and observed.
 
 ## Status Information
 
 **Last simulation:** 12 December 2020, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
-**Last test:** 12 December 2020, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
-
-## Issues
-
-- During testing a 12 bit data read, however content of the read data needs verification!
+**Last test:** 31 March 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
