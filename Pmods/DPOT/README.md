@@ -8,7 +8,7 @@
 4. Simulation
 5. Test
 6. Status Information
-7. Issues
+7. Warning
 
 ---
 
@@ -43,18 +43,24 @@ I: Input  O: Output
 
 ## Simulation
 
-Module `dpot` simulated on [sim.v](Simulation/sim.v).
+Modules `dpot` and `autoUpdate` simulated on [sim.v](Simulation/sim.v).
 
 ## Test
 
-xxx
+Module `dpot` tested with [board.v](Test/board.v) and [Basys3.xdc](Test/Basys3.xdc) with clock divider `clkDiv`. Module `autoUpdate` is not tested. `update` connected to leftmost switch and `value` is connected to eight rightmost switches. Pmod [DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start) used as voltage divider. Approximately  1 V applied between ports A and B. Voltage value of port W observed with [OpenScope MZ](https://reference.digilentinc.com/reference/instrumentation/openscope-mz/start).
 
 ## Status Information
 
-**Last simulation:**  1 April 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
+**Last simulation:** 1 April 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
-**Last test:** 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+**Last test:** 1 April 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
 
-## Issues
+## Warning
 
--
+In referance manual from [reference.digilentinc.com](https://reference.digilentinc.com/reference/pmod/pmoddpot/reference-manual) it is written that
+> ...provide 8-bits of data on the falling Serial Clock...
+
+However, in the AD5160 manual from [analog.com](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) it says
+> ...positive-edge sensitive CLK...
+
+Modules in this repository implemented assuming the data is sampled in the positive edge of the SCLK, and the negative edge of the SCLK is used to shift data and change chip select signal. Everthing seem to work in this implementation.
