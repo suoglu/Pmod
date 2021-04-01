@@ -138,3 +138,50 @@ module clkDiv4(
         end
     end
 endmodule
+
+module autoUpdate(
+  input clk,
+  input rst,
+  input ready,
+  input [7:0] value,
+  output reg update);
+  
+  reg [7:0] valueStore;
+
+  wire notEqual;
+
+  assign notEqual = ~(value == valueStore);
+
+  always@(posedge update or posedge rst)
+    begin
+      if(rst)
+        begin
+          valueStore <= value;
+        end
+      else
+        begin
+          valueStore <= value;
+        end
+    end
+
+  always@(posedge clk or posedge rst)
+    begin
+      if(rst)
+        begin
+          update <= 1'd0;
+        end
+      else
+        begin
+          case(update)
+            1'd0:
+              begin
+                update <= notEqual & ready;
+              end
+            1'd1:
+              begin
+                update <= ready;
+              end
+          endcase
+        end
+    end
+endmodule
