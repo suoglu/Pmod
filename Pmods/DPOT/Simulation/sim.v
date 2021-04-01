@@ -15,24 +15,26 @@
 
 module tb();
   reg clk, rst, update;
-  wire nCS, MOSI, spi_clk_i, SCLK, ready;
+  wire nCS, MOSI, spi_clk_i, SCLK, ready, updateAuto;
   reg [7:0] value;
 
   always #5 clk <= ~clk;
 
   dpot uut(rst, nCS, MOSI, SCLK, spi_clk_i, value, update, ready);
   clkDiv4 clkGen(clk, rst, spi_clk_i);
+  autoUpdate uut2(clk, rst, ready, value, updateAuto);
 
   initial
     begin
       clk <= 0;
       update <= 0;
       rst <= 0;
-      value <= 8'hA5;
+      value <= 8'h00;
       #7
       rst <= 1;
       #10
       rst <= 0;
+      value <= 8'hA5;
       #50
       update <= 1;
       #50
