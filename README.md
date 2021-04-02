@@ -24,6 +24,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  [COLOR](Pmods/COLOR)   |   I²C   | [TCS3472](https://ams.com/documents/20143/36005/TCS3472_DS000390_3-00.pdf/6fe47e15-e32f-7fa7-03cb-22935da44b26) | Color Sensor Module | - |
 |  [DA2](Pmods/DA2)   |   GPIO   | [DAC121S101-Q1](https://www.ti.com/lit/ds/symlink/dac121s101.pdf) | Digital-to-analog converter | - |
 |  [DPOT](Pmods/DPOT)   |   SPI   | [AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) | Digital Potentiometer | - |
+|  [ENC](Pmods/ENC)   |   GPIO   | None | Rotary Encoder | - |
 |  [HYGRO](Pmods/HYGRO)   |   I²C   | [HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) | Relative humidity and temperature sensor | - |
 |  [KYPD](Pmods/KYPD)   |   GPIO   | None | 4x4 Keypad | - |
 |  [MIC3](Pmods/MIC3)   |   SPI   | [ADCS7476](http://www.ti.com/lit/ds/symlink/adcs7476.pdf), [SPA2410LR5H-B](https://reference.digilentinc.com/_media/reference/pmod/pmodmic3/mic3microphone_datasheet.pdf) | Small microphone module | - |
