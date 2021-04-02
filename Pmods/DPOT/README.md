@@ -14,7 +14,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmodhygro/start). This interface uses SPI to communicate with [Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmodhygro/start).
+Simple interface for the [Digilent Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start). This interface uses SPI to communicate with [Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start).
 
 ## Brief information about Pmod DPOT
 
