@@ -1,8 +1,9 @@
 # For macOS systems
 .DS_Store
 
-# Vivado directory
+# Vivado & Vitis directory
 *vivado*
+*vitis*
 
 # For icarus Verilog
 *.out
