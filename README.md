@@ -28,6 +28,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  [HYGRO](Pmods/HYGRO)   |   I²C   | [HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) | Relative humidity and temperature sensor | - |
 |  [KYPD](Pmods/KYPD)   |   GPIO   | None | 4x4 Keypad | - |
 |  [MIC3](Pmods/MIC3)   |   SPI   | [ADCS7476](http://www.ti.com/lit/ds/symlink/adcs7476.pdf), [SPA2410LR5H-B](https://reference.digilentinc.com/_media/reference/pmod/pmodmic3/mic3microphone_datasheet.pdf) | Small microphone module | - |
+|  [TC1](Pmods/TC1)   |   SPI   | [MAX31855](https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf) | K-Type Thermocouple Module | - |
 
 ## Information about Test Codes
 
