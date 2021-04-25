@@ -66,6 +66,8 @@ The [TC1](https://reference.digilentinc.com/reference/pmod/pmodtc1/start) interf
 |   Connected Signal   | Push Button | Switch |
 | :------: | :----: | :----: |
 |  `update`   |   *btnU*   | *sw[0]* |
+|  `update_fault`   |   *btnR*   | *sw[1]* |
+|  `update_all`   |   *btnD*   | *sw[2]* |
 
 ## Status Information
 
