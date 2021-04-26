@@ -14,7 +14,7 @@
 
 # Any tmp
 tmp_*
-*tmp*
+*tmp
 WIP*
 
 #Text editor configs
