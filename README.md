@@ -29,6 +29,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  [KYPD](Pmods/KYPD)   |   GPIO   | None | 4x4 Keypad | - |
 |  [MIC3](Pmods/MIC3)   |   SPI   | [ADCS7476](http://www.ti.com/lit/ds/symlink/adcs7476.pdf), [SPA2410LR5H-B](https://reference.digilentinc.com/_media/reference/pmod/pmodmic3/mic3microphone_datasheet.pdf) | Small microphone module | - |
 |  [TC1](Pmods/TC1)   |   SPI   | [MAX31855](https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf) | K-Type Thermocouple Module | - |
+|  [TMP3](Pmods/TMP3)   |   I²C   | [TCN75A](https://ww1.microchip.com/downloads/en/DeviceDoc/21935D.pdf) |  Temperature Sensor  | - |
 
 ## Information about Test Codes
 
