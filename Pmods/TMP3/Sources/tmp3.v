@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : tmp3.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 26/04/2021                         *
+ * Last Edit   : 27/04/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod TMP3                     *
@@ -59,7 +59,7 @@ module tmp3(
   reg [2:0] I2C_state;
   wire I2C_done;
   wire I2CinReady, I2CinStart, I2CinAddrs, I2CinWrite, I2CinWriteAck, I2CinRead, I2CinReadAck, I2CinStop, I2CinAck;
-  reg I2CinAck_d, I2CinStop_d;
+  reg I2CinAck_d, I2CinStop_d, SDA_d_i2c;
   //Generate I2C signals with tri-state
   reg SCLK; //Internal I2C clock, always thicks
   wire SCL_claim;
@@ -127,10 +127,10 @@ module tmp3(
         end
       else
         begin
-          if(inUpdate & SCL)
+          if(I2CinRead & inUpdate & SCL)
             case(byteCounter)
               2'd0: temperature_o <= {temperature_o[10:0],SDA};
-              2'd1: temperature_o <= (bitCounter < 3'd5) ? {temperature_o[10:0],SDA} : temperature_o;
+              2'd1: temperature_o <= (bitCounter < 3'd4) ? {temperature_o[10:0],SDA} : temperature_o;
             endcase
         end
     end
@@ -147,7 +147,7 @@ module tmp3(
         end
       else
         case(valid_o)
-          1'b0: valid_o <= I2C_done & inUpdate;
+          1'b0: valid_o <= I2C_done & inUpdate & (byteCounter == 2'd2);
           1'b1: valid_o <= ~I2CinStart;
         endcase
     end
@@ -198,6 +198,52 @@ module tmp3(
           endcase
         end
     end
+  
+  //I2C state transactions
+  always@(negedge clkI2Cx2 or posedge rst)
+    begin
+      if(rst)
+        begin
+          I2C_state <= I2C_READY;
+        end
+      else
+        begin
+          case(I2C_state)
+            I2C_READY:
+              begin
+                I2C_state <= (~(inIdle | inShutdown) & SCLK & ~i2cBusy) ? I2C_START : I2C_state;
+              end
+            I2C_START:
+              begin
+                I2C_state <= (~SCL) ? I2C_ADDRS : I2C_state;
+              end
+            I2C_ADDRS:
+              begin
+                I2C_state <= (~SCL & bitCountDone) ? I2C_WRITE_ACK : I2C_state;
+              end
+            I2C_WRITE_ACK:
+              begin
+                I2C_state <= (~SCL) ? ((~SDA_d_i2c & ~byteCountDone) ? ((~read_nwrite) ? I2C_WRITE : I2C_READ): I2C_STOP) : I2C_state;
+              end
+            I2C_WRITE:
+              begin
+                I2C_state <= (~SCL & bitCountDone) ? I2C_WRITE_ACK : I2C_state;
+              end
+            I2C_READ:
+              begin
+                I2C_state <= (~SCL & bitCountDone) ? I2C_READ_ACK : I2C_state;
+              end
+            I2C_READ_ACK:
+              begin
+                I2C_state <= (~SCL) ? ((byteCountDone) ? I2C_STOP : I2C_READ) : I2C_state;
+              end
+            I2C_STOP:
+              begin
+                I2C_state <= (SCL) ? I2C_READY : I2C_state;
+              end
+          endcase
+        end
+    end
     
   //Delays
   always@(posedge clk)
@@ -205,6 +251,10 @@ module tmp3(
       SDA_d <= SDA;
       I2CinAck_d <= I2CinAck;
       I2CinStop_d <= I2CinStop;
+    end
+  always@(negedge clkI2Cx2)
+    begin
+      SDA_d_i2c <= SDA;
     end
   
   //Buffer control
