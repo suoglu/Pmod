@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : tmp2.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 28/04/2021                         *
+ * Last Edit   : 29/04/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod TMP2                     *
@@ -76,17 +76,16 @@ module tmp2(
   wire SDA_claim;
   wire SDA_write;
   //State
-  localparam IDLE = 4'h0,
-           SW_RST = 4'h7,
-           UPDATE = 4'h2,
-           CONFIG = 4'h8,
-         ONE_SHOT = 4'hE,
-         SHUTDOWN = 4'hC,
-        WRITE_TMP = 4'h4,
-        WRITE_PTR = 4'h1,
-        WAIT_SHUT = 4'hA;
-  reg [3:0] state;
-  wire inIdle, inSWreset, inUpdate, inConfig, inOneShot, inShutdown, inWriteTmp, inWritePtr, inWaitShut;
+  localparam IDLE = 3'h0,
+           SW_RST = 3'h7,
+           UPDATE = 3'h1,
+           CONFIG = 3'h3,
+         ONE_SHOT = 3'h5,
+         SHUTDOWN = 3'h2,
+        WRITE_TMP = 3'h4,
+        WRITE_PTR = 3'h6;
+  reg [2:0] state;
+  wire inIdle, inSWreset, inUpdate, inConfig, inOneShot, inShutdown, inWriteTmp, inWritePtr;
   //Address byte
   localparam FIX_ADDRS = 5'b10010;
   wire [7:0] addressByte, configByte;
@@ -111,7 +110,6 @@ module tmp2(
   reg [1:0] fault_queue_reg;
   reg [1:0] op_mode;
   //Extra control signals
-  reg wentToShutdown;
   wire register_rst;
 
   //Form bytes
@@ -132,7 +130,7 @@ module tmp2(
 
   //Control Signals
   assign ch_config = (resolution_reg != resolution) | (comparator_mode_reg != comparator_mode) | (fault_queue_reg != fault_queue) | (polarity_ct_reg != polarity_ct) | (polarity_int_reg != polarity_int) | (sps1_reg != sps1);
-  assign read_nwrite = inUpdate | inWaitShut;
+  assign read_nwrite = inUpdate;
   assign I2C_done = I2CinStop & ~I2CinStop_d;
   assign busy = ~I2CinReady;
   assign register_rst = rst | sw_rst;
@@ -146,27 +144,6 @@ module tmp2(
         case(valid_o)
           1'b0: valid_o <= I2C_done & inUpdate & byteCountDone;
           1'b1: valid_o <= ~I2CinStart;
-        endcase
-    end
-  always@(negedge clkI2Cx2 or posedge rst) //wentToShutdown
-    begin
-      if(rst)
-        begin
-          wentToShutdown  <= 1'b0;
-        end
-      else
-        case(wentToShutdown)
-          1'b0:
-            begin
-              if(SCL)
-                begin
-                  wentToShutdown  <= inWaitShut & SDA & (byteCounter == 2'd1) & (bitCounter == 3'd2);
-                end
-            end
-          1'b1: 
-            begin
-              wentToShutdown  <= inWaitShut;
-            end 
         endcase
     end
   
@@ -225,14 +202,13 @@ module tmp2(
   assign     inShutdown = (state == SHUTDOWN);
   assign     inWriteTmp = (state == WRITE_TMP);
   assign     inWritePtr = (state == WRITE_PTR);
-  assign     inWaitShut = (state == WAIT_SHUT);
 
   //State transactions
   always@(posedge clk or posedge rst)
     begin
       if(rst)
         begin
-          state <= IDLE;
+          state <= SW_RST;
         end
       else
         case(state)
@@ -250,11 +226,7 @@ module tmp2(
             end
           ONE_SHOT:
             begin
-              state <= (I2C_done) ? WAIT_SHUT : state;
-            end
-          WAIT_SHUT:
-            begin
-              state <= (I2C_done & wentToShutdown) ? WRITE_PTR : state;
+              state <= (I2C_done) ? SHUTDOWN : state;
             end
           CONFIG:
             begin
@@ -446,12 +418,11 @@ module tmp2(
   always@*
     begin
       case(state)
-           SW_RST: byteCountDone = (byteCounter == 2'd0);
+           SW_RST: byteCountDone = (byteCounter == 2'd1);
            UPDATE: byteCountDone = (byteCounter == 2'd2);
            CONFIG: byteCountDone = (byteCounter == 2'd2);
          ONE_SHOT: byteCountDone = (byteCounter == 2'd2);
         WRITE_PTR: byteCountDone = (byteCounter == 2'd1);
-        WAIT_SHUT: byteCountDone = (byteCounter == 2'd1);
         WRITE_TMP: byteCountDone = (write_temp_target == T_HYST) ?(byteCounter == 2'd2) : (byteCounter == 2'd3);
         default:   byteCountDone = 1'b1;
       endcase
