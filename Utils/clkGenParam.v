@@ -9,18 +9,19 @@
  * Description : Generates various clock freq.  *
  * -------------------------------------------- */
 
-module clkGenP #(parameter PERIOD = 1020, parameter CLKPERIOD = 10)(
+//OUTPUT_PERIOD should be even multiple of INPUT_PERIOD
+module clock_generator_parametric #(parameter OUTPUT_PERIOD = 1000, parameter INPUT_PERIOD = 10)(
   input clk_i,
   input rst,
   input en,
   output reg clk_o);
-  localparam CYCLESinHALFP = PERIOD / (2 * CLKPERIOD);
-  localparam COUNTERSIZE = $clog2(CYCLESinHALFP-1);
+  localparam CYCLE_COUNT = (OUTPUT_PERIOD / INPUT_PERIOD) / 2;
+  localparam COUNTER_SIZE = $clog2(CYCLE_COUNT-1);
 
   wire countDone;
-  reg [COUNTERSIZE-1:0] counter;
+  reg [COUNTER_SIZE:0] counter;
 
-  assign countDone = (counter == (CYCLESinHALFP-1));
+  assign countDone = (counter == (CYCLE_COUNT-1));
 
   always@(posedge clk_i or posedge rst)
     begin
@@ -33,8 +34,8 @@ module clkGenP #(parameter PERIOD = 1020, parameter CLKPERIOD = 10)(
   always@(posedge clk_i or posedge rst)
     begin
       if(rst)
-          counter <= {COUNTERSIZE{1'd0}};
+          counter <= {COUNTER_SIZE{1'd0}};
       else
-          counter <= (countDone) ? {COUNTERSIZE{1'd0}} : (counter + {{(COUNTERSIZE-1){1'd0}},en});
+          counter <= (countDone) ? {COUNTER_SIZE{1'd0}} : (counter + {{(COUNTER_SIZE-1){1'd0}},en});
     end
 endmodule//bitClkGen
