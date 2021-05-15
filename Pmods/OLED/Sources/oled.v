@@ -92,8 +92,6 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire SCK_negedge;
   reg inChContrast_d;
   wire inChContrast_posedge;
-  reg spi_working_d;
-  wire spi_working_posedge;
   //Registers for power pins
   reg vdd_reg, vbat_reg;
   //Counter for waits
@@ -150,8 +148,8 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
       else
         case(spi_done)
-          1'b0: spi_done <= spi_working & last_byte & bit_counter_done;
-          1'b1: spi_done <= inSPIState;
+          1'b0: spi_done <= ~|bit_counter & spi_working & last_byte & bit_counter_done;
+          1'b1: spi_done <= 1'b0;
         endcase
     end
   always@(posedge clk or posedge rst)
@@ -260,8 +258,8 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
     end
 
   //Send buffer control
-  assign send_buffer_shift = ~send_buffer_write & SCK_negedge;
-  assign send_buffer_write = (SCK_negedge & bit_counter_done) | spi_working_posedge;
+  assign send_buffer_shift = ~send_buffer_write & SCK_negedge & |bit_counter;
+  assign send_buffer_write = (SCK_negedge & ~|bit_counter)/*  | spi_working_posedge */;
 
   //Determine send_buffer_next
   always@*
@@ -341,11 +339,11 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
     end
   
-  //Byte counter done
-  always@*
+  //last byte
+  always@(posedge ext_spi_clk)
     case(state)
       UPDATE: last_byte = &byte_counter;
-      CH_DISPLAY: last_byte = (byte_counter == 9'h1);
+      CH_CONTRAST: last_byte = (byte_counter == 9'h1);
       PONS_INIT_DIS: last_byte = (byte_counter == 9'h1);
       POST_RESET: last_byte = (byte_counter == 9'h1);
       default: last_byte = 1'b1;
@@ -372,12 +370,10 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   //Delay Signals and edge detect
   assign SCK_negedge = ~SCK & SCK_d;
   assign inChContrast_posedge = ~inChContrast_d & inChContrast;
-  assign spi_working_posedge = ~spi_working_d & spi_working;
   always@(posedge clk)
     begin
       SCK_d <= SCK;
       inChContrast_d <= inChContrast;
-      spi_working_d <= spi_working;
     end
   
   //Store Signals & Configs
@@ -451,7 +447,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
 
   //Helper modules for decoding
   decode8x8 char_decoder(display_array[data_index],current_bitmap);
-  bitmap_column column_extractor(current_bitmap,bit_counter,current_colmn); //TODO include cursor at current bitmap
+  bitmap_column column_extractor(current_bitmap,byte_counter[2:0],current_colmn); //TODO include cursor at current bitmap
 
   //Map display_data into display_array
   always@* //Inside of this always generated automatically
