@@ -4,13 +4,13 @@
  * ------------------------------------------------ *
  * File        : oled.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 13/05/2021                         *
+ * Last Edit   : 15/05/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod OLED                     *
  * ------------------------------------------------ */
 
-//* Pmod OLED driver which uses codes for content
+//* Pmod OLED driver which uses codes for content *//
 module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   input clk,
   input rst,
@@ -34,9 +34,9 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
      LSB(display_data[7:0]): right bottum most) */
   input [1:0] line_count,
   input [7:0] contrast,
-  input cursor_enable, //TODO
-  input cursor_flash, //TODO
-  input [5:0] cursor_pos); //TODO
+  input cursor_enable,
+  input cursor_flash,
+  input [5:0] cursor_pos);
   //Commands, not all of them
   localparam     CMD_NOP = 8'hE3,
           CMD_DISPLAY_ON = 8'hAF,
@@ -79,7 +79,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire [3:0] position_in_line; //rename byte counter for data access
   //Intermediate signals
   wire [63:0] current_bitmap;
-  wire [7:0] current_colmn;
+  wire [7:0] current_colmn, current_colmn_pre;
   //Transmisson control singals
   reg spi_done;
   reg spi_working;
@@ -87,6 +87,15 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   reg [7:0] send_buffer_next;
   wire send_buffer_write;
   wire send_buffer_shift;
+  //Cursor control
+  wire cursor_on;
+  wire cursor_update;
+  localparam CURSOR_FLASH_PERIOD = 1_000_000_000 / CLK_PERIOD;
+  localparam CURSOR_COUNTER_SIZE = $clog2(CURSOR_FLASH_PERIOD-1);
+  reg [CURSOR_COUNTER_SIZE:0] cursor_counter;
+  reg [5:0] cursor_pos_reg;
+  reg cursor_flash_mode;
+  reg cursor_enable_reg;
   //Delays
   reg SCK_d;
   wire SCK_negedge;
@@ -229,7 +238,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
                   begin
                     state <= CH_CONTRAST;
                   end
-                else if(update)
+                else if(update | cursor_update)
                   begin
                     state <= UPDATE;
                   end
@@ -445,9 +454,40 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
     end
 
+  //Cursor control
+  assign current_colmn = (cursor_on) ?  ~current_colmn_pre : current_colmn_pre; //Default cursor inverts char, thus implemented by inverting column. For more advenced cursorsors current_bitmap can be edited
+  assign cursor_on = cursor_enable & (~cursor_flash | cursor_counter[CURSOR_COUNTER_SIZE]) & (cursor_pos_reg == {current_line,position_in_line});
+  always@(posedge clk or posedge rst) //Store cursor configs
+    begin
+      if(rst)
+        begin
+          cursor_pos_reg <= 6'd0;
+          cursor_flash_mode  <= 1'd0;
+          cursor_enable_reg  <= 1'd0;
+        end
+      else
+        begin
+          cursor_pos_reg <= (cursor_update & inUpdate) ? cursor_pos : cursor_pos_reg;
+          cursor_flash_mode <= (cursor_update & inUpdate) ? cursor_counter[CURSOR_COUNTER_SIZE] : cursor_flash_mode;
+          cursor_enable_reg <= (cursor_update & inUpdate) ? cursor_enable : cursor_enable_reg;
+        end
+    end
+  always@(posedge clk or posedge rst) //Cursor counter
+    begin
+      if(rst)
+        begin
+          cursor_counter <= {(CURSOR_COUNTER_SIZE+1){1'b0}}; 
+        end
+      else
+        begin
+          cursor_counter <= cursor_counter + {{CURSOR_COUNTER_SIZE{1'b0}},(cursor_enable & cursor_flash)}; 
+        end
+    end
+  assign cursor_update = (cursor_pos != cursor_pos_reg) | (cursor_enable != cursor_enable_reg) | (cursor_flash_mode != cursor_counter[CURSOR_COUNTER_SIZE]);
+
   //Helper modules for decoding
   decode8x8 char_decoder(display_array[data_index],current_bitmap);
-  bitmap_column column_extractor(current_bitmap,byte_counter[2:0],current_colmn); //TODO include cursor at current bitmap
+  bitmap_column column_extractor(current_bitmap,byte_counter[2:0],current_colmn);
 
   //Map display_data into display_array
   always@* //Inside of this always generated automatically
