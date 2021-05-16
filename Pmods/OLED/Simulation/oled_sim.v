@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : oled_sim.v                         *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 13/05/2021                         *
+ * Last Edit   : 16/05/2021                         *
  * ------------------------------------------------ *
  * Description : Simulation code for Pmod OLED      *
  * ------------------------------------------------ */
@@ -19,6 +19,8 @@ module tb();
   reg [1:0] line_count;
   reg [7:0] contrast;
   reg [7:0] display_array[0:63];
+  wire [7:0] character_code;
+  wire [63:0] current_bitmap;
   integer i;
 
   always #5 clk <= ~clk;
@@ -93,7 +95,8 @@ module tb();
       display_array[63] = display_data[7:0];
     end
 
-  oled #(10000) uut(clk, rst, ext_spi_clk, CS, MOSI, SCK, data_command_cntr, power_rst, vbat_c, vdd_c, power_on, display_reset, display_off, update, display_data, line_count, contrast, 1'b0, 1'b0, );
+  oled #(10000) uut(clk, rst, ext_spi_clk,character_code,current_bitmap, CS, MOSI, SCK, data_command_cntr, power_rst, vbat_c, vdd_c, power_on, display_reset, display_off, update, display_data, line_count, contrast, 1'b0, 1'b0, );
+  oled_decoder decoder(character_code,current_bitmap);
 
   initial
     begin

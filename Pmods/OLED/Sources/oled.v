@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : oled.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 15/05/2021                         *
+ * Last Edit   : 16/05/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod OLED                     *
@@ -15,6 +15,9 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   input clk,
   input rst,
   input ext_spi_clk,
+  //Connection to decoder
+  output [7:0] character_code,
+  input [63:0] current_bitmap,
   //Module connections
   output CS,
   output MOSI,
@@ -52,24 +55,28 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
              ADDRS_MODE_VER = 2'b01, //This mode is used here
              ADDRS_MODE_PAG = 2'b10;
   //States
-  localparam IDLE = 4'h0, //Display powered and on, module waiting//After display reset
-           UPDATE = 4'h2, //Currently writing new data to display
-          D_RESET = 4'h4, //Wait after display reset pin
-        POWER_OFF = 4'hF, //Display power off, module waiting
-       PONS_DELAY = 4'h3, //100ms wait of power on seq
-       POST_RESET = 4'h7, //update settings after reset
-       CH_DISPLAY = 4'h6, //Turn on/off display
-      CH_CONTRAST = 4'h5, //Change contrast
-      DISPLAY_OFF = 4'h1, //Display powered but off
-      POFFS_DELAY = 4'hD, //100ms wait of power off seq
-     PONS_DIS_OFF = 4'hB, //Power on seq, send display off cmd
-    PONS_INIT_DIS = 4'h9; //Initialize display
+  localparam IDLE = 4'b0000, //Display powered and on, module waiting//After display reset
+           UPDATE = 4'b0010, //Currently writing new data to display
+          D_RESET = 4'b0100, //Wait after display reset pin
+        POWER_OFF = 4'b1111, //Display power off, module waiting
+       PONS_DELAY = 4'b0011, //100ms wait of power on seq
+       POST_RESET = 4'b0111, //update settings after reset
+       CH_DISPLAY = 4'b0110, //Turn on/off display
+      CH_CONTRAST = 4'b0101, //Change contrast
+      DISPLAY_OFF = 4'b0001, //Display powered but off
+      POFFS_DELAY = 4'b1101, //100ms wait of power off seq
+     PONS_DIS_OFF = 4'b1100, //Power on seq, send display off cmd
+    PONS_INIT_DIS = 4'b1001; //Initialize display
   reg [3:0] state;
   wire inIdle, inUpdate, inDReset, inPowerOff, inPOnSDelay, inChContrast, inDisplayOff, inPOffDelay, inPOnSDisOff, inPOnSInitDis, inPostReset, inChDisplay;
   wire inDelayState, inSPIState;
   //Mapping for display_data
   reg [7:0] display_array[0:63];
   reg [5:0] data_index;
+  //Generate SPI clk
+  reg spi_clk;
+  //Clk domain change for inputs
+  reg display_reset_reg, update_reg;
   //Counter for data
   reg [2:0] bit_counter;
   reg bit_counter_done;
@@ -78,7 +85,6 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire [1:0] current_line; //rename byte counter for data access
   wire [3:0] position_in_line; //rename byte counter for data access
   //Intermediate signals
-  wire [63:0] current_bitmap;
   wire [7:0] current_colmn, current_colmn_pre;
   //Transmisson control singals
   reg spi_done;
@@ -88,17 +94,13 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire send_buffer_write;
   wire send_buffer_shift;
   //Cursor control
-  wire cursor_on;
-  wire cursor_update;
+  wire cursor_update, cursor_in_pos, cursor_flash_on;
   localparam CURSOR_FLASH_PERIOD = 1_000_000_000 / CLK_PERIOD;
   localparam CURSOR_COUNTER_SIZE = $clog2(CURSOR_FLASH_PERIOD-1);
   reg [CURSOR_COUNTER_SIZE:0] cursor_counter;
   reg [5:0] cursor_pos_reg;
-  reg cursor_flash_mode;
-  reg cursor_enable_reg;
+  reg cursor_flash_mode, cursor_enable_reg;
   //Delays
-  reg SCK_d;
-  wire SCK_negedge;
   reg inChContrast_d;
   wire inChContrast_posedge;
   //Registers for power pins
@@ -121,12 +123,12 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   assign MOSI = send_buffer[7];
   assign data_command_cntr = inUpdate; //Only high during data write
   assign CS = ~spi_working;
-  assign SCK = (spi_working) ? ext_spi_clk : 1'b1;
+  assign SCK = (spi_working) ? spi_clk : 1'b1;
   assign vdd_c = vdd_reg;
   assign vbat_c = vbat_reg;
 
   //Use registers for stable power control
-  always@(posedge clk)
+  always@(posedge ext_spi_clk)
     begin
       vdd_reg <= inPowerOff;
       vbat_reg <= inPowerOff | inPOnSDisOff | inPOnSInitDis | inPOffDelay;
@@ -149,7 +151,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   assign     inSPIState = inUpdate | inChContrast | inPOnSDisOff | inPOnSInitDis | inPostReset | inChDisplay;
 
   //SPI flags
-  always@(posedge clk or posedge rst)
+  always@(negedge ext_spi_clk or posedge rst)
     begin
       if(rst)
         begin
@@ -157,11 +159,11 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
       else
         case(spi_done)
-          1'b0: spi_done <= ~|bit_counter & spi_working & last_byte & bit_counter_done;
+          1'b0: spi_done <= spi_working & last_byte & bit_counter_done;
           1'b1: spi_done <= 1'b0;
         endcase
     end
-  always@(posedge clk or posedge rst)
+  always@(negedge ext_spi_clk or posedge rst)
     begin
       if(rst)
         begin
@@ -169,13 +171,13 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
       else
         case(spi_working)
-          1'b0: spi_working <= ~spi_done & inSPIState & ext_spi_clk;
+          1'b0: spi_working <= ~spi_done & inSPIState & spi_clk;
           1'b1: spi_working <= ~spi_done;
         endcase
     end
 
   //State transactions
-  always@(posedge clk or posedge rst)
+  always@(posedge spi_clk or posedge rst)
     begin
       if(rst)
         begin
@@ -234,11 +236,15 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
                   begin
                     state <= CH_DISPLAY;
                   end
+                else if(display_reset_reg)
+                  begin
+                    state <= D_RESET;
+                  end
                 else if(ch_contrast)
                   begin
                     state <= CH_CONTRAST;
                   end
-                else if(update | cursor_update)
+                else if(update_reg | cursor_update)
                   begin
                     state <= UPDATE;
                   end
@@ -253,11 +259,15 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
                   begin
                     state <= CH_DISPLAY;
                   end
+                else if(display_reset_reg)
+                  begin
+                    state <= D_RESET;
+                  end
                 else if(ch_contrast)
                   begin
                     state <= CH_CONTRAST;
                   end
-                else if(update)
+                else if(update_reg)
                   begin
                     state <= UPDATE;
                   end
@@ -265,10 +275,31 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
           endcase
         end
     end
+  
+  //Clk domain change for inputs
+  always@(posedge clk or posedge rst)
+    begin
+      if(rst)
+        begin
+          display_reset_reg <= 1'b0;
+          update_reg <= 1'b0;
+        end
+      else
+        begin
+          case(update_reg)
+            1'b0: update_reg <= update;
+            1'b1: update_reg <= ~inUpdate;
+          endcase
+          case(display_reset_reg)
+            1'b0: display_reset_reg <= display_reset;
+            1'b1: display_reset_reg <= ~inDReset;
+          endcase
+        end
+    end
 
   //Send buffer control
-  assign send_buffer_shift = ~send_buffer_write & SCK_negedge & |bit_counter;
-  assign send_buffer_write = (SCK_negedge & ~|bit_counter)/*  | spi_working_posedge */;
+  assign send_buffer_shift = ~send_buffer_write & |bit_counter;
+  assign send_buffer_write = ~|bit_counter/*  | spi_working_posedge */;
 
   //Determine send_buffer_next
   always@*
@@ -322,7 +353,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
       endcase
     end
 
-  always@(posedge clk)
+  always@(negedge spi_clk)
     begin
       if(send_buffer_write)
         begin
@@ -336,7 +367,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
 
   //Byte counter
   assign {current_line, position_in_line} = byte_counter[8:3];
-  always@(posedge ext_spi_clk)
+  always@(negedge ext_spi_clk)
     begin
       if(~spi_working)
         begin
@@ -344,12 +375,12 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
       else
         begin
-          byte_counter <= byte_counter + {8'h0, (~last_byte & bit_counter_done)};
+          byte_counter <= byte_counter + {8'h0, (~last_byte & bit_counter_done & spi_clk)};
         end
     end
   
   //last byte
-  always@(posedge ext_spi_clk)
+  always@*
     case(state)
       UPDATE: last_byte = &byte_counter;
       CH_CONTRAST: last_byte = (byte_counter == 9'h1);
@@ -359,12 +390,9 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
     endcase
 
   //Bit counter
-  always@(negedge ext_spi_clk)
-    begin
-      bit_counter_done <= &bit_counter;
-    end 
+  always@* bit_counter_done = &bit_counter;
   
-  always@(posedge ext_spi_clk or posedge rst)
+  always@(negedge ext_spi_clk or posedge rst)
     begin
       if(rst)
         begin
@@ -372,16 +400,14 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
       else
         begin
-          bit_counter <= bit_counter + {2'd0, spi_working};
+          bit_counter <= bit_counter + {2'd0, spi_working & spi_clk};
         end
     end
 
   //Delay Signals and edge detect
-  assign SCK_negedge = ~SCK & SCK_d;
   assign inChContrast_posedge = ~inChContrast_d & inChContrast;
   always@(posedge clk)
     begin
-      SCK_d <= SCK;
       inChContrast_d <= inChContrast;
     end
   
@@ -424,6 +450,19 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
 
   //Change flags
   assign ch_contrast = (contrast_reg != contrast);
+
+  //Generate spi clock
+  always@(posedge ext_spi_clk or posedge rst)
+    begin
+      if(rst)
+        begin
+          spi_clk <= 1'b1;
+        end
+      else
+        begin
+          spi_clk <= ~spi_clk;
+        end
+    end
   
   //Delay wait
   assign delaying = ~delay_done & inDelayState;
@@ -455,8 +494,9 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
     end
 
   //Cursor control
-  assign current_colmn = (cursor_on) ?  ~current_colmn_pre : current_colmn_pre; //Default cursor inverts char, thus implemented by inverting column. For more advenced cursorsors current_bitmap can be edited
-  assign cursor_on = cursor_enable & (~cursor_flash | cursor_counter[CURSOR_COUNTER_SIZE]) & (cursor_pos_reg == {current_line,position_in_line});
+  assign current_colmn = (cursor_enable & cursor_flash_on & cursor_in_pos) ?  ~current_colmn_pre :  current_colmn_pre; //Default cursor inverts char, thus implemented by inverting column. For more advenced cursorsors current_bitmap can be edited
+  assign cursor_in_pos = (cursor_pos_reg == {current_line,position_in_line});
+  assign cursor_flash_on = ~cursor_flash | cursor_counter[CURSOR_COUNTER_SIZE];
   always@(posedge clk or posedge rst) //Store cursor configs
     begin
       if(rst)
@@ -483,11 +523,11 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
           cursor_counter <= cursor_counter + {{CURSOR_COUNTER_SIZE{1'b0}},(cursor_enable & cursor_flash)}; 
         end
     end
-  assign cursor_update = (cursor_pos != cursor_pos_reg) | (cursor_enable != cursor_enable_reg) | (cursor_flash_mode != cursor_counter[CURSOR_COUNTER_SIZE]);
+  assign cursor_update = (cursor_pos != cursor_pos_reg) | (cursor_enable != cursor_enable_reg) | (cursor_flash_mode != cursor_counter[CURSOR_COUNTER_SIZE]); 
 
   //Helper modules for decoding
-  decode8x8 char_decoder(display_array[data_index],current_bitmap);
-  bitmap_column column_extractor(current_bitmap,byte_counter[2:0],current_colmn);
+  assign character_code = display_array[data_index];
+  bitmap_column column_extractor(current_bitmap,byte_counter[2:0],current_colmn_pre);
 
   //Map display_data into display_array
   always@* //Inside of this always generated automatically
@@ -602,15 +642,15 @@ module bitmap_column(
   wire [2:0] column_index;
 
   assign column_index = 3'b111 - column_number;
-
-  assign column[0] = decoded_bitmap[{3'b111,column_index}];
-  assign column[1] = decoded_bitmap[{3'b110,column_index}];
-  assign column[2] = decoded_bitmap[{3'b101,column_index}];
-  assign column[3] = decoded_bitmap[{3'b100,column_index}];
-  assign column[4] = decoded_bitmap[{3'b011,column_index}];
-  assign column[5] = decoded_bitmap[{3'b010,column_index}];
-  assign column[6] = decoded_bitmap[{3'b001,column_index}];
-  assign column[7] = decoded_bitmap[{3'b000,column_index}];
+  
+  assign column = {decoded_bitmap[{3'b000,column_index}],
+                   decoded_bitmap[{3'b001,column_index}],
+                   decoded_bitmap[{3'b010,column_index}],
+                   decoded_bitmap[{3'b011,column_index}],
+                   decoded_bitmap[{3'b100,column_index}],
+                   decoded_bitmap[{3'b101,column_index}],
+                   decoded_bitmap[{3'b110,column_index}],
+                   decoded_bitmap[{3'b111,column_index}]};
   
 endmodule
 
@@ -621,7 +661,7 @@ endmodule
  * decoded_bitmap = {row0,row1,...,row7}
  * ------------------------------------- */
 //* Converts a 8 bit code in to 8x8 bit array with ilimunated pixels high
-module decode8x8(
+module oled_decoder(
   input [7:0] character_code,
   output reg [63:0] decoded_bitmap);
   localparam    space = 8'h00,
@@ -771,7 +811,9 @@ module decode8x8(
                stick0 = 8'h90,
               stick45 = 8'h91,
               stick90 = 8'h92,
-             stick135 = 8'h93;
+             stick135 = 8'h93,
+               anchor = 8'h94,
+             sailboat = 8'h95;
 
   always@*
     /* 
@@ -781,6 +823,8 @@ module decode8x8(
      * where pix0 is the leftmost pixel and pix7 is the rightmost pixel
      */
     case(character_code)
+      sailboat: decoded_bitmap = /* sailboat / */ {8'h10, 8'h18, 8'h1c, 8'h1e, 8'h1f, 8'h10, 8'hff, 8'h7e};
+      anchor: decoded_bitmap = /* anchor / */ {8'h10, 8'h28, 8'h10, 8'h38, 8'h10, 8'h92, 8'h54, 8'h38};
       stick135: decoded_bitmap = /* thick / */ {8'h3, 8'h7, 8'he, 8'h1c, 8'h38, 8'h70, 8'he0, 8'hc0};
       stick90: decoded_bitmap = /* thick | */ {8'h18, 8'h18, 8'h18, 8'h18, 8'h18, 8'h18, 8'h18, 8'h18};
       stick45: decoded_bitmap = /* thick \ */ {8'hc0, 8'he0, 8'h70, 8'h38, 8'h1c, 8'he, 8'h7, 8'h3};
