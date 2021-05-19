@@ -42,33 +42,46 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   input [5:0] cursor_pos);
   //Commands, not all of them
   localparam     CMD_NOP = 8'hE3,
+           CMD_PRE_CHR_P = 8'hD9,
+          CMD_COM_CONFIG = 8'hDA,
           CMD_DISPLAY_ON = 8'hAF,
          CMD_DISPLAY_OFF = 8'hAE,
+       CMD_CHRG_PMP_CONF = 8'h8D,
+       CMD_SET_MUX_RATIO = 8'hA8,
        CMD_SET_CONSTRAST = 8'h81,
       CMD_SET_ADDRS_MODE = 8'h20,
       CMD_SET_CLMN_ADDRS = 8'h21,
       CMD_SET_PAGE_ADDRS = 8'h22, //Set to 0-7
+      CMD_SCAN_DIR_NORML = 8'hC0,
+     CMD_SET_HIGH_CLMN_0 = 8'h10,
      CMD_ACTIVATE_SCROLL = 8'h2F,
+    CMD_CLMN_INV_DISABLE = 8'hA0,
    CMD_DEACTIVATE_SCROLL = 8'h2E;
+  localparam CONFIG_PRE_CHR_P = 8'hF1,
+            CONFIG_COM_CONFIG = 8'h00,
+         CONFIG_CHRG_PMP_CONF = 8'h14;
   //Addressing modes, used with CMD_SET_ADDRS_MODE
-  localparam ADDRS_MODE_HOR = 2'b00,
-             ADDRS_MODE_VER = 2'b01, //This mode is used here
+  localparam ADDRS_MODE_HOR = 2'b00, //This mode is used here
+             ADDRS_MODE_VER = 2'b01, 
              ADDRS_MODE_PAG = 2'b10;
   //States
-  localparam IDLE = 4'b0000, //Display powered and on, module waiting//After display reset
-           UPDATE = 4'b0010, //Currently writing new data to display
-          D_RESET = 4'b0100, //Wait after display reset pin
-        POWER_OFF = 4'b1111, //Display power off, module waiting
-       PONS_DELAY = 4'b0011, //100ms wait of power on seq
-       POST_RESET = 4'b0111, //update settings after reset
-       CH_DISPLAY = 4'b0110, //Turn on/off display
-      CH_CONTRAST = 4'b0101, //Change contrast
-      DISPLAY_OFF = 4'b0001, //Display powered but off
-      POFFS_DELAY = 4'b1101, //100ms wait of power off seq
-     PONS_DIS_OFF = 4'b1100, //Power on seq, send display off cmd
-    PONS_INIT_DIS = 4'b1001; //Initialize display
-  reg [3:0] state;
-  wire inIdle, inUpdate, inDReset, inPowerOff, inPOnSDelay, inChContrast, inDisplayOff, inPOffDelay, inPOnSDisOff, inPOnSInitDis, inPostReset, inChDisplay;
+  localparam IDLE = 4'h0, //Ready display on #9
+           UPDATE = 4'h2, //Update display content #8-9b
+            RESET = 4'hC, //100ms wait in reset #2
+        POWER_OFF = 4'hF, //This is inital state, where the display is not powered #0
+       PONS_DELAY = 4'hE, //VDD on, VBAT off #1
+       POST_RESET = 4'hD, //1ms wait after reset #3
+       CH_DISPLAY = 4'h6, //Turn on/off display
+      CH_CONTRAST = 4'h3, //Change contrast #8-9a
+      WRITE_ADDRS = 4'h4,
+      DISPLAY_OFF = 4'h1, //ready but display off #8
+      POFFS_DELAY = 4'h7, //VDD on, VBAT off #10
+     PONS_DIS_OFF = 4'hB, //send display off #4
+    PONS_DIS_WAIT = 4'hA, //2ms wait before crg pump #5
+    PONS_INIT_DIS = 4'h8, //init configs #6
+   PONS_INIT_WAIT = 4'h9; //100ms wait after init #7
+  reg [3:0] state, state_d;
+  wire inIdle, inUpdate, inReset, inPowerOff, inPOnSDelay, inChContrast, inDisplayOff, inPOffDelay, inPOnSDisOff, inPOnSDisWait, inPOnSInitDis, inPostReset, inChDisplay, inPOnSInitWait, inWriteAddrs;
   wire inDelayState, inSPIState;
   //Mapping for display_data
   reg [7:0] display_array[0:63];
@@ -95,7 +108,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire send_buffer_shift;
   //Cursor control
   wire cursor_update, cursor_in_pos, cursor_flash_on;
-  localparam CURSOR_FLASH_PERIOD = 1_000_000_000 / CLK_PERIOD;
+  localparam CURSOR_FLASH_PERIOD = 500_000_000 / CLK_PERIOD;
   localparam CURSOR_COUNTER_SIZE = $clog2(CURSOR_FLASH_PERIOD-1);
   reg [CURSOR_COUNTER_SIZE:0] cursor_counter;
   reg [5:0] cursor_pos_reg;
@@ -106,12 +119,15 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   //Registers for power pins
   reg vdd_reg, vbat_reg;
   //Counter for waits
-  localparam POWER_DELAY = 100_000_000 / CLK_PERIOD,
-             RESET_DELAY = 3_000 / CLK_PERIOD;
-  localparam COUNTER_SIZE = $clog2(POWER_DELAY-1);
+  localparam DELAY_4us =       4_000 / CLK_PERIOD,
+             DELAY_1ms =   1_000_000 / CLK_PERIOD,
+             DELAY_2ms =   2_000_000 / CLK_PERIOD,
+           DELAY_100ms = 100_000_000 / CLK_PERIOD;
+  localparam LONGEST_DELAY = DELAY_100ms;
+  localparam COUNTER_SIZE = $clog2(LONGEST_DELAY-1);
   reg [COUNTER_SIZE:0] delay_counter;
   reg delay_done;
-  wire delay_count_done;
+  reg delay_count_done;
   wire delaying;
   //Save status
   reg [7:0] contrast_reg;
@@ -119,7 +135,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire ch_contrast;
 
   //Module connections
-  assign power_rst = ~inDReset;
+  assign power_rst = ~inReset;
   assign MOSI = send_buffer[7];
   assign data_command_cntr = inUpdate; //Only high during data write
   assign CS = ~spi_working;
@@ -131,24 +147,27 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   always@(posedge ext_spi_clk)
     begin
       vdd_reg <= inPowerOff;
-      vbat_reg <= inPowerOff | inPOnSDisOff | inPOnSInitDis | inPOffDelay;
+      vbat_reg <= inPowerOff | inPOnSDelay | inPOffDelay;
     end  
 
   //State decoding
   assign         inIdle = (state == IDLE);
+  assign        inReset = (state == RESET);
   assign       inUpdate = (state == UPDATE);
-  assign       inDReset = (state == D_RESET);
   assign     inPowerOff = (state == POWER_OFF);
   assign    inChDisplay = (state == CH_DISPLAY);
   assign    inPOnSDelay = (state == PONS_DELAY);
   assign    inPostReset = (state == POST_RESET);
   assign    inPOffDelay = (state == POFFS_DELAY);
+  assign   inWriteAddrs = (state == WRITE_ADDRS);
   assign   inChContrast = (state == CH_CONTRAST);
   assign   inDisplayOff = (state == DISPLAY_OFF);
   assign   inPOnSDisOff = (state == PONS_DIS_OFF);
+  assign  inPOnSDisWait = (state == PONS_DIS_WAIT);
   assign  inPOnSInitDis = (state == PONS_INIT_DIS);
-  assign   inDelayState = inDReset | inPOnSDelay | inPOffDelay;
-  assign     inSPIState = inUpdate | inChContrast | inPOnSDisOff | inPOnSInitDis | inPostReset | inChDisplay;
+  assign inPOnSInitWait = (state == PONS_INIT_WAIT);
+  assign   inDelayState = inReset | inPOnSDelay | inPOffDelay | inPOnSDisWait | inPOnSInitWait | inPostReset;
+  assign     inSPIState = inUpdate | inChContrast | inPOnSDisOff | inPOnSInitDis | inChDisplay | inWriteAddrs;
 
   //SPI flags
   always@(negedge ext_spi_clk or posedge rst)
@@ -188,57 +207,65 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
           case(state)
             POWER_OFF:
               begin
-                state <= (power_on) ? PONS_DIS_OFF : state;
-              end
-            PONS_DIS_OFF:
-              begin
-                state <= (spi_done) ? PONS_INIT_DIS : state;
-              end
-            PONS_INIT_DIS:
-              begin
-                state <= (spi_done) ? PONS_DELAY : state;
+                state <= (power_on) ? PONS_DELAY : state;
               end
             PONS_DELAY:
               begin
-                state <= (delay_done) ? DISPLAY_OFF : state;
+                state <= (delay_done) ? RESET : state;
               end
-            CH_DISPLAY:
-              begin
-                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            CH_CONTRAST:
-              begin
-                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            D_RESET:
+            RESET:
               begin
                 state <= (delay_done) ?  POST_RESET : state;
               end
             POST_RESET:
               begin
-                state <= (spi_done) ?  DISPLAY_OFF : state;
+                state <= (delay_done) ?  PONS_DIS_OFF : state;
+              end
+            PONS_DIS_OFF:
+              begin
+                state <= (spi_done) ? PONS_DIS_WAIT : state;
+              end
+            PONS_DIS_WAIT:
+              begin
+                state <= (delay_done) ? PONS_INIT_DIS : state;
+              end
+            PONS_INIT_DIS:
+              begin
+                state <= (spi_done) ? PONS_INIT_WAIT : state;
+              end
+            PONS_INIT_WAIT:
+              begin
+                state <= (delay_done) ? DISPLAY_OFF : state;
+              end
+            CH_DISPLAY:
+              begin
+                state <= (spi_done) ? ((~power_on | display_off_reg) ? DISPLAY_OFF : IDLE): state;
+              end
+            CH_CONTRAST:
+              begin
+                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
               end
             UPDATE:
               begin
                 state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
               end
-            POST_RESET:
-              begin
-                state <= (spi_done) ?  DISPLAY_OFF : state;
-              end
             POFFS_DELAY:
               begin
                 state <= (delay_done) ?  POWER_OFF : state;
               end
+            WRITE_ADDRS:
+              begin
+                state <= (spi_done) ?  UPDATE : state;
+              end
             IDLE:
               begin
-                if(~power_on | display_off)
+                if(display_reset_reg)
+                  begin
+                    state <= RESET;
+                  end
+                else if(~power_on | display_off)
                   begin
                     state <= CH_DISPLAY;
-                  end
-                else if(display_reset_reg)
-                  begin
-                    state <= D_RESET;
                   end
                 else if(ch_contrast)
                   begin
@@ -246,12 +273,16 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
                   end
                 else if(update_reg | cursor_update)
                   begin
-                    state <= UPDATE;
+                    state <= WRITE_ADDRS;
                   end
               end
             DISPLAY_OFF:
               begin
-                if(~power_on)
+                if(display_reset_reg)
+                  begin
+                    state <= RESET;
+                  end
+                else if(~power_on)
                   begin
                     state <= POFFS_DELAY;
                   end
@@ -259,17 +290,13 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
                   begin
                     state <= CH_DISPLAY;
                   end
-                else if(display_reset_reg)
-                  begin
-                    state <= D_RESET;
-                  end
                 else if(ch_contrast)
                   begin
                     state <= CH_CONTRAST;
                   end
                 else if(update_reg)
                   begin
-                    state <= UPDATE;
+                    state <= WRITE_ADDRS;
                   end
               end
           endcase
@@ -292,23 +319,50 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
           endcase
           case(display_reset_reg)
             1'b0: display_reset_reg <= display_reset;
-            1'b1: display_reset_reg <= ~inDReset;
+            1'b1: display_reset_reg <= ~inReset;
           endcase
         end
     end
 
   //Send buffer control
-  assign send_buffer_shift = ~send_buffer_write & |bit_counter;
-  assign send_buffer_write = ~|bit_counter/*  | spi_working_posedge */;
+  assign send_buffer_shift = ~send_buffer_write;
+  assign send_buffer_write = ~|bit_counter;
 
   //Determine send_buffer_next
   always@*
     begin
       case(state)
+        WRITE_ADDRS:
+          case(byte_counter)
+            //Set colmn limits
+            9'h00:  send_buffer_next = CMD_SET_CLMN_ADDRS;
+            9'h01:  send_buffer_next = 8'd0;
+            9'h02:  send_buffer_next = 8'd127;
+            //Set page limits
+            9'h03:  send_buffer_next = CMD_SET_PAGE_ADDRS;
+            9'h04:  send_buffer_next = 8'd0;
+            9'h05:  send_buffer_next = 8'd3;
+            9'h06:  send_buffer_next = CMD_SET_HIGH_CLMN_0;
+            default: send_buffer_next = CMD_NOP;
+          endcase
         PONS_INIT_DIS:
           case(byte_counter)
-            9'h0: send_buffer_next = CMD_SET_ADDRS_MODE;
-            9'h1: send_buffer_next = {6'h0,ADDRS_MODE_VER};
+            //Charge pump enable 
+            9'h00:  send_buffer_next = CMD_CHRG_PMP_CONF;
+            9'h01:  send_buffer_next = CONFIG_CHRG_PMP_CONF;
+            //Set pre-charge period 
+            9'h02:  send_buffer_next = CMD_PRE_CHR_P;
+            9'h03:  send_buffer_next = CONFIG_PRE_CHR_P;
+            //Column inversion disable 
+            9'h04:  send_buffer_next = CMD_CLMN_INV_DISABLE;
+            //COM Output Scan Direction normal
+            9'h05:  send_buffer_next = CMD_SCAN_DIR_NORML;
+            //COM pins configuration 
+            9'h06:  send_buffer_next = CMD_COM_CONFIG;
+            9'h07:  send_buffer_next = CONFIG_COM_CONFIG;
+            //Set addressing mode
+            9'h08:  send_buffer_next = CMD_SET_ADDRS_MODE;
+            9'h09:  send_buffer_next = {6'h0,ADDRS_MODE_HOR};
             default: send_buffer_next = CMD_NOP;
           endcase
         PONS_DIS_OFF: send_buffer_next = CMD_DISPLAY_OFF;
@@ -319,12 +373,6 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
             default: send_buffer_next = CMD_NOP;
           endcase
         CH_DISPLAY: send_buffer_next = (display_off_reg) ? CMD_DISPLAY_OFF : CMD_DISPLAY_ON;
-        POST_RESET:
-          case(byte_counter)
-            9'h0: send_buffer_next = CMD_SET_ADDRS_MODE;
-            9'h1: send_buffer_next = {6'h0,ADDRS_MODE_VER};
-            default: send_buffer_next = CMD_NOP;
-          endcase
         UPDATE:
           case(line_count)
             2'd3: //4 lines
@@ -361,7 +409,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         end
       else
         begin
-          send_buffer <= (send_buffer_shift) ? (send_buffer << 1) : send_buffer;
+          send_buffer <= (send_buffer_shift) ? {send_buffer[6:0],send_buffer[0]} : send_buffer;
         end
     end
 
@@ -384,8 +432,8 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
     case(state)
       UPDATE: last_byte = &byte_counter;
       CH_CONTRAST: last_byte = (byte_counter == 9'h1);
-      PONS_INIT_DIS: last_byte = (byte_counter == 9'h1);
-      POST_RESET: last_byte = (byte_counter == 9'h1);
+      WRITE_ADDRS: last_byte = (byte_counter == 9'h6);
+      PONS_INIT_DIS: last_byte = (byte_counter == 9'h9);
       default: last_byte = 1'b1;
     endcase
 
@@ -409,12 +457,13 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   always@(posedge clk)
     begin
       inChContrast_d <= inChContrast;
+      state_d <= state;
     end
   
   //Store Signals & Configs
   always@(posedge clk)
     begin
-      if(rst | inDReset) begin
+      if(rst | inReset) begin
           contrast_reg <= 8'h7F;
       end else begin
           contrast_reg <= (inChContrast_posedge) ? contrast : contrast_reg;
@@ -466,7 +515,17 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   
   //Delay wait
   assign delaying = ~delay_done & inDelayState;
-  assign delay_count_done = (inDReset) ? (delay_counter == RESET_DELAY) : (delay_counter == POWER_DELAY);
+  always@*
+    case(state)
+               RESET: delay_count_done = (delay_counter == DELAY_4us);
+          POST_RESET: delay_count_done = (delay_counter == DELAY_1ms);
+          PONS_DELAY: delay_count_done = (delay_counter == DELAY_100ms);
+         POFFS_DELAY: delay_count_done = (delay_counter == DELAY_100ms);
+       PONS_DIS_WAIT: delay_count_done = (delay_counter == DELAY_2ms);
+      PONS_INIT_WAIT: delay_count_done = (delay_counter == DELAY_100ms);
+      default: delay_count_done = 1'b1;
+    endcase
+  
   always@(posedge clk)
     begin
       if(delay_done | rst)
@@ -488,7 +547,7 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
         begin
           case(delay_done)
             1'b0: delay_done <= delay_count_done;
-            1'b1: delay_done <= inDelayState;
+            1'b1: delay_done <= (state_d == state); //Delay done when we change state
           endcase
         end
     end
