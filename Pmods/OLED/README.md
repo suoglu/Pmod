@@ -141,6 +141,10 @@ Mapping can be edited easily via localparameters of `oled_decoder`. New characte
 - On Artix-7 XC7A35T-1CPG236C:
   - Slice LUTs: 234 (as Logic)
 
+### `oled_raw`
+
+Work in progress...
+
 ## Simulation
 
 Module `oled` simulated on [oled_sim.v](Simulation/oled_sim.v). In simulation delay times reduced to 1/1000th. Only a simple update and power up sequence is simulated.
