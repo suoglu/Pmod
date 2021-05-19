@@ -53,12 +53,14 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
       CMD_SET_CLMN_ADDRS = 8'h21,
       CMD_SET_PAGE_ADDRS = 8'h22, //Set to 0-7
       CMD_SCAN_DIR_NORML = 8'hC0,
+      CMD_SCAN_DIR_INVRT = 8'hC8,
+      CMD_SEG_INV_ENABLE = 8'hA1,
+     CMD_SEG_INV_DISABLE = 8'hA0,
      CMD_SET_HIGH_CLMN_0 = 8'h10,
      CMD_ACTIVATE_SCROLL = 8'h2F,
-    CMD_CLMN_INV_DISABLE = 8'hA0,
    CMD_DEACTIVATE_SCROLL = 8'h2E;
   localparam CONFIG_PRE_CHR_P = 8'hF1,
-            CONFIG_COM_CONFIG = 8'h00,
+            CONFIG_COM_CONFIG = 8'h22,
          CONFIG_CHRG_PMP_CONF = 8'h14;
   //Addressing modes, used with CMD_SET_ADDRS_MODE
   localparam ADDRS_MODE_HOR = 2'b00, //This mode is used here
@@ -353,10 +355,10 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
             //Set pre-charge period 
             9'h02:  send_buffer_next = CMD_PRE_CHR_P;
             9'h03:  send_buffer_next = CONFIG_PRE_CHR_P;
-            //Column inversion disable 
-            9'h04:  send_buffer_next = CMD_CLMN_INV_DISABLE;
-            //COM Output Scan Direction normal
-            9'h05:  send_buffer_next = CMD_SCAN_DIR_NORML;
+            //Column inversion enable 
+            9'h04:  send_buffer_next = CMD_SEG_INV_ENABLE;
+            //COM Output Scan Direction
+            9'h05:  send_buffer_next = CMD_SCAN_DIR_INVRT;
             //COM pins configuration 
             9'h06:  send_buffer_next = CMD_COM_CONFIG;
             9'h07:  send_buffer_next = CONFIG_COM_CONFIG;
@@ -701,7 +703,7 @@ module bitmap_column(
   wire [2:0] column_index;
 
   assign column_index = 3'b111 - column_number;
-  
+
   assign column = {decoded_bitmap[{3'b000,column_index}],
                    decoded_bitmap[{3'b001,column_index}],
                    decoded_bitmap[{3'b010,column_index}],
@@ -710,7 +712,6 @@ module bitmap_column(
                    decoded_bitmap[{3'b101,column_index}],
                    decoded_bitmap[{3'b110,column_index}],
                    decoded_bitmap[{3'b111,column_index}]};
-  
 endmodule
 
 /* ------------------------------------- *
