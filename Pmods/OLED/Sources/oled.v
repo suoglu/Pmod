@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : oled.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 16/05/2021                         *
+ * Last Edit   : 19/05/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod OLED                     *
@@ -383,19 +383,19 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
               end
             2'd2: //3 lines
               case(current_line)
-                2'd1: send_buffer_next = {4'h0,current_colmn};
-                2'd2: send_buffer_next = {current_colmn,4'h0};
+                2'd2: send_buffer_next = {4'h0,current_colmn[7:4]};
+                2'd1: send_buffer_next = {current_colmn[3:0],4'h0};
                 default: send_buffer_next = current_colmn;
               endcase
             2'd1: //2 lines
               case(current_line[0])
-                1'b0: send_buffer_next = {4'h0,current_colmn};
-                1'b1: send_buffer_next = {current_colmn,4'h0};
+                1'b1: send_buffer_next = {4'h0,current_colmn[7:4]};
+                1'b0: send_buffer_next = {current_colmn[3:0],4'h0};
               endcase
             2'd0: //1 line
               case(current_line)
-                2'd1: send_buffer_next = {4'h0,current_colmn};
-                2'd2: send_buffer_next = {current_colmn,4'h0};
+                2'd2: send_buffer_next = {4'h0,current_colmn[7:4]};
+                2'd1: send_buffer_next = {current_colmn[3:0],4'h0};
                 default: send_buffer_next = 8'h00;
               endcase
           endcase
@@ -873,7 +873,13 @@ module oled_decoder(
               stick90 = 8'h92,
              stick135 = 8'h93,
                anchor = 8'h94,
-             sailboat = 8'h95;
+             sailboat = 8'h95,
+                 play = 8'h96,
+                pause = 8'h97,
+          suit_hearth = 8'h98,
+         suit_diamond = 8'h99,
+             suit_cub = 8'h9a,
+           suit_spade = 8'h9b;
 
   always@*
     /* 
@@ -883,6 +889,12 @@ module oled_decoder(
      * where pix0 is the leftmost pixel and pix7 is the rightmost pixel
      */
     case(character_code)
+      suit_spade: decoded_bitmap = /* suit_spade */ {8'h0, 8'h8, 8'h1c, 8'h3e, 8'h7f, 8'h3e, 8'h8, 8'h1c};
+      suit_cub: decoded_bitmap = /* suit_cub */ {8'h0, 8'h8, 8'h1c, 8'h2a, 8'h7f, 8'h2a, 8'h8, 8'h1c};
+      suit_diamond: decoded_bitmap = /* suit_diamond */ {8'h0, 8'h0, 8'h8, 8'h1c, 8'h3e, 8'h1c, 8'h8, 8'h0};
+      suit_hearth: decoded_bitmap = /* suit_hearth */ {8'h0, 8'h22, 8'h77, 8'h7f, 8'h3e, 8'h1c, 8'h8, 8'h0};
+      pause: decoded_bitmap = /* pause */ {8'h0, 8'h66, 8'h66, 8'h66, 8'h66, 8'h66, 8'h66, 8'h0};
+      play: decoded_bitmap = /* play */ {8'h0, 8'h40, 8'h70, 8'h7c, 8'h7e, 8'h7c, 8'h70, 8'h40};
       sailboat: decoded_bitmap = /* sailboat / */ {8'h10, 8'h18, 8'h1c, 8'h1e, 8'h1f, 8'h10, 8'hff, 8'h7e};
       anchor: decoded_bitmap = /* anchor / */ {8'h10, 8'h28, 8'h10, 8'h38, 8'h10, 8'h92, 8'h54, 8'h38};
       stick135: decoded_bitmap = /* thick / */ {8'h3, 8'h7, 8'he, 8'h1c, 8'h38, 8'h70, 8'he0, 8'hc0};
