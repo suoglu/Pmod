@@ -28,6 +28,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  [HYGRO](Pmods/HYGRO)   |   I²C   | [HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) | Relative humidity and temperature sensor | - |
 |  [KYPD](Pmods/KYPD)   |   GPIO   | None | 4x4 Keypad | - |
 |  [MIC3](Pmods/MIC3)   |   SPI   | [ADCS7476](http://www.ti.com/lit/ds/symlink/adcs7476.pdf), [SPA2410LR5H-B](https://reference.digilentinc.com/_media/reference/pmod/pmodmic3/mic3microphone_datasheet.pdf) | Small microphone module | - |
+|  [OLED](Pmods/OLED)   |   SPI   | [Solomon Systech SSD1306](https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf), [OLED screen](https://cdn-shop.adafruit.com/datasheets/UG-2832HSWEG04.pdf) |  128x32 OLED Display  | - |
 |  [TC1](Pmods/TC1)   |   SPI   | [MAX31855](https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf) | K-Type Thermocouple Module | - |
 |  [TMP2](Pmods/TMP2)   |   I²C   | [ADT7420](https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf) |  Temperature Sensor  | - |
 |  [TMP3](Pmods/TMP3)   |   I²C   | [TCN75A](https://ww1.microchip.com/downloads/en/DeviceDoc/21935D.pdf) |  Temperature Sensor  | - |
