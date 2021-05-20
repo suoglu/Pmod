@@ -130,7 +130,7 @@ Mapping can be edited easily via localparameters of `oled_decoder`. New characte
 
 **(Synthesized) Utilization of `oled`:**
 
-- On Artix-7 XC7A35T-1CPG236C:
+- On Artix-7:
   - Slice LUTs: 316 (as Logic)
   - Slice Registers: 117 (as Flip Flop)
   - F7 Muxes: 72
@@ -138,7 +138,7 @@ Mapping can be edited easily via localparameters of `oled_decoder`. New characte
 
 **(Synthesized) Utilization of `oled_decoder`:**
 
-- On Artix-7 XC7A35T-1CPG236C:
+- On Artix-7:
   - Slice LUTs: 234 (as Logic)
 
 ### `oled_raw`
@@ -157,8 +157,14 @@ Module `oled` is tested on [Digilent Basys 3](https://reference.digilentinc.com/
 
 Testing module in [oled_test.v](Test/oled_test.v) handles the board connections. Display signals are connected to both JB and JC header. Leftmost switch is used as power on switch, second leftmost switch is used as display on switch. Switches 9 and 8 is used to determine line count. 8 right most switches are used to get data. Depending on which button is pressed, data handled diffrently. Up button configures the cursor. Left button changes contrast. Right button saves the current data and shifts it into the next position in display. Down button is used to reset display. Display signals are monitored with [Digital Discovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start).
 
+### `oled` Demo
+
+A demo module for `oled` and `oled_decoder` is on [oled_demo.v](Test/oled_demo.v). Demo module is tested on  [Digilent Arty 7](https://reference.digilentinc.com/programmable-logic/arty-a7/reference-manual) with [Arty-A7-100.xdc](Test/Arty-A7-100.xdc). TCL [design_oled_demo.tcl](Test/design_oled_demo.tcl) generates the demo hardware. The [Pmod OLED](https://reference.digilentinc.com/reference/pmod/pmodoled/start) can be connected either to JA or JD header.
+
+Demo module automatically displays all characters on display. In every half minute next character appears and other characters shift. Line can be changed with button 0. Contrast can be changed with button 1. Cursor position can be increased with button 2. And button 3 reset the display. Switch 3 enables cursor flash and switch 2 enables cursor itself. Switch 1 turns off the display and switch 0 power on the display module.
+
 ## Status Information
 
 **Last simulation:** 13 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
-**Last test:** 19 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+**Last test:** 20 May 2021, on [Digilent Arty A7](https://reference.digilentinc.com/programmable-logic/arty-a7/reference-manual).
