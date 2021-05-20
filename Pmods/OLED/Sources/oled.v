@@ -109,7 +109,8 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   wire send_buffer_write;
   wire send_buffer_shift;
   //Cursor control
-  wire cursor_update, cursor_in_pos, cursor_flash_on;
+  wire cursor_update, cursor_flash_on;
+  reg cursor_in_pos;
   localparam CURSOR_FLASH_PERIOD = 500_000_000 / CLK_PERIOD;
   localparam CURSOR_COUNTER_SIZE = $clog2(CURSOR_FLASH_PERIOD-1);
   reg [CURSOR_COUNTER_SIZE:0] cursor_counter;
@@ -556,7 +557,25 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
 
   //Cursor control
   assign current_colmn = (cursor_enable & cursor_flash_on & cursor_in_pos) ?  ~current_colmn_pre :  current_colmn_pre; //Default cursor inverts char, thus implemented by inverting column. For more advenced cursorsors current_bitmap can be edited
-  assign cursor_in_pos = (cursor_pos_reg == {current_line,position_in_line});
+  always@*
+    begin
+      case(line_count)
+         2'd3: //4 lines
+          begin
+           cursor_in_pos = (cursor_pos_reg == {current_line,position_in_line});
+          end
+        2'd2: //3 lines
+          case(current_line)
+            2'd0: cursor_in_pos = (cursor_pos_reg == {2'd0,position_in_line});
+            2'd3: cursor_in_pos = (cursor_pos_reg == {2'd2,position_in_line});
+            default: cursor_in_pos = (cursor_pos_reg == {2'b1,position_in_line});
+          endcase
+        2'd1: //2 lines
+          cursor_in_pos = (cursor_pos_reg[3:0] == position_in_line) & (current_line[1] == cursor_pos_reg[4]);
+        2'd0: //1 line
+           cursor_in_pos = (cursor_pos_reg[3:0] == position_in_line);
+      endcase
+    end
   assign cursor_flash_on = ~cursor_flash | cursor_counter[CURSOR_COUNTER_SIZE];
   always@(posedge clk or posedge rst) //Store cursor configs
     begin
