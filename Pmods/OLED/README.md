@@ -10,7 +10,7 @@
         2. Ports
         3. Character Mapping
         4. Utilization
-    2. `oled_raw`
+    2. `oled_bitmap`
         1. Description
         2. Ports
         3. Utilization
@@ -141,9 +141,50 @@ Mapping can be edited easily via localparameters of `oled_decoder`. New characte
 - On Artix-7:
   - Slice LUTs: 234 (as Logic)
 
-### `oled_raw`
+### `oled_bitmap`
 
-Work in progress...
+Module `oled_bitmap` provides a basic screen interface to display 128x32 bitmap on screen.
+
+**Ports of `oled_bitmap`**
+
+|   Port   | Type | Width |  Description |
+| :------: | :----: | :----: | ------ |
+|  `clk`   |   I   | 1 | System Clock |
+|  `rst`   |   I   | 1 | System Reset |
+|  `ext_spi_clk`   |   I   | 1 | External SPI Clock |
+|  `character_code`   |   O   | 1 | Character code to be decoded |
+|  `current_bitmap`   |   I   | 64 | Decoded 8x8 bitmap |
+|  `CS`   |   O   | 1 | SPI Chip Select |
+|  `MOSI`   |   O   | 1 | SPI Data |
+|  `SCK`   |   O   | 1 | SPI Clock |
+|  `data_command_cntr`   |   O   | 1 | Data/~Command for Data |
+|  `power_rst`   |   O   | 1 | Reset pin of the Display |
+|  `vbat_c`   |   O   | 1 | Active low VBAT control |
+|  `vdd_c`   |   O   | 1 | Active low VDD control |
+|  `power_on`   |   I   | 1 | Power on module |
+|  `display_reset`   |   I   | 1 | Reset display |
+|  `display_off`   |   I   | 1 | Turn off display |
+|  `update`   |   I   | 1 | Update display content |
+|  `contrast`   |   I   | 8 | Display Contrast |
+|  `bitmap`   |   I   | 4096 | Bitmap to display |
+
+I: Input  O: Output
+
+`ext_spi_clk` frequency should be the double of desired SPI clock frequency. During testing 5 MHz `ext_spi_clk` is used.
+
+| `bitmap` |  | |
+| ------: | :----: | :----: |
+| [4095] | ... | [3968] |
+| ... | ... | ... |
+| [127] | ... | [0] |
+
+**(Synthesized) Utilization of `oled_bitmap`:**
+
+- On Artix-7:
+  - Slice LUTs: 1252 (as Logic)
+  - Slice Registers: 99 (as Flip Flop)
+  - F7 Muxes: 546
+  - F8 Muxes: 268
 
 ## Simulation
 
@@ -162,6 +203,10 @@ Testing module in [oled_test.v](Test/oled_test.v) handles the board connections.
 A demo module for `oled` and `oled_decoder` is on [oled_demo.v](Test/oled_demo.v). Demo module is tested on  [Digilent Arty 7](https://reference.digilentinc.com/programmable-logic/arty-a7/reference-manual) with [Arty-A7-100.xdc](Test/Arty-A7-100.xdc). TCL [design_oled_demo.tcl](Test/design_oled_demo.tcl) generates the demo hardware. The [Pmod OLED](https://reference.digilentinc.com/reference/pmod/pmodoled/start) can be connected either to JA or JD header.
 
 Demo module automatically displays all characters on display. In every half minute next character appears and other characters shift. Line can be changed with button 0. Contrast can be changed with button 1. Cursor position can be increased with button 2. And button 3 reset the display. Switch 3 enables cursor flash and switch 2 enables cursor itself. Switch 1 turns off the display and switch 0 power on the display module.
+
+### `oled_bitmap` Test
+
+Module `oled_bitmap` is tested on [Digilent Arty 7](https://reference.digilentinc.com/programmable-logic/arty-a7/reference-manual) with [oled_bitmap_test.v](Test/oled_bitmap_test.v) and [Arty-A7-100.xdc](Test/Arty-A7-100.xdc). The [Pmod OLED](https://reference.digilentinc.com/reference/pmod/pmodoled/start) can be connected either to JA or JD header. Switch 3 power ups the module. Remainin switches control the display contrast. Four bitmaps are hardcoded to tester module. Displayed bitmap can be changed via push buttons.
 
 ## Status Information
 
