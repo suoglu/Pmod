@@ -913,7 +913,7 @@ module oled_decoder(
       arrow_rd: decoded_bitmap = /* ↘ */ {8'h80, 8'h40, 8'h20, 8'h10, 8'h9, 8'h5, 8'h3, 8'h1f};
       arrow_ld: decoded_bitmap = /* ↙ */ {8'h1, 8'h2, 8'h4, 8'h88, 8'h90, 8'ha0, 8'hc0, 8'hf0};
       arrow_ru: decoded_bitmap = /* ↗ */ {8'hf, 8'h3, 8'h5, 8'h9, 8'h11, 8'h20, 8'h40, 8'h80};
-      arrow_lu: decoded_bitmap = /* ↖ */ {8'h0, 8'h0, 8'h1c, 8'h2, 8'h1a, 8'h26, 8'h1a, 8'h0};
+      arrow_lu: decoded_bitmap = /* ↖ */ {8'hf8, 8'hc0, 8'ha0, 8'h90, 8'h8, 8'h4, 8'h2, 8'h1};
       arrow_ud: decoded_bitmap = /* ↕ */ {8'h10, 8'h38, 8'h54, 8'h10, 8'h10, 8'h54, 8'h38, 8'h10};
       arrow_lr: decoded_bitmap = /* ↔ */ {8'h0, 8'h0, 8'h24, 8'h42, 8'hff, 8'h42, 8'h24, 8'h0};
       pi: decoded_bitmap = /* π */ {8'h0, 8'h0, 8'h0, 8'h7e, 8'h24, 8'h24, 8'h22, 8'h0};
