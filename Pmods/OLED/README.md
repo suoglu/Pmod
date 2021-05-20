@@ -131,7 +131,7 @@ Mapping can be edited easily via localparameters of `oled_decoder`. New characte
 **(Synthesized) Utilization of `oled`:**
 
 - On Artix-7:
-  - Slice LUTs: 316 (as Logic)
+  - Slice LUTs: 301 (as Logic)
   - Slice Registers: 117 (as Flip Flop)
   - F7 Muxes: 72
   - F8 Muxes: 32
