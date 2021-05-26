@@ -36,3 +36,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 ## Information about Test Codes
 
 Test modules use utility modules such as button debouncers. Verilog code for these utility modules can be found in [Utils](Utils) directory of this repository, as well as their own [repository](https://gitlab.com/suoglu/verilog-utilty-modules).
+
+---
+
+<small>This repository is not sponsored or endorsed by any organization or anyone.</small>
