@@ -38,7 +38,11 @@ Clock divider to generate 25 MHz SCLK from 100 MHz system clock. It can be disab
 
 Generate `update` automatically when `value` and/or `chmod` changes.
 
-## Interface Description
+**`da2ClkEn`**
+
+Can be used to generate SCLK from external clock source. It does not change clock frequnecy but disables it when not in use.
+
+## Interface Ports
 
 ***Note:** Dual modules has two bit `SDATA` and two `chmod` and `value` ports, one for each channel.*
 
@@ -48,12 +52,12 @@ This interface can be used to gather data from Pmod [DA2](https://reference.digi
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: | ------ |
-|  `clk`   | I | 1 | System Clock (100 MHz) |
+|  `clk`   | I | 1 | System Clock |
 |  `rst`   | I | 1 | System Reset |
 |  `SCLK`   | I | 1 | Serial Clock |
 |  `SDATA`   | O | 1 | Serial Data |
 |  `SYNC`   | O | 1 | Sync signal |
-|  `SCLK_en`   | O | 1 | Enable Serial Clock |
+|  `working`   | O | 1 | Enable Serial Clock |
 |  `chmod`   | I | 2 | Channel Mode |
 |  `value`   | I | 12 | Channel Value |
 |  `update`   | I | 1 | Update the output values, keep high to update continuously |
@@ -84,12 +88,36 @@ These modules sets `update` when `value` or `chmod` changes, and resets when `SY
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: | ------ |
-|  `clk`   | I | 1 | System Clock (100 MHz) |
+|  `clk`   | I | 1 | System Clock |
 |  `rst`   | I | 1 | System Reset |
 |  `SYNC`   | I | 1 | Sync signal |
 |  `chmod`   | I | 2 | Channel Mode |
 |  `value`   | I | 12 | Channel Value |
 |  `update`   | O | 1 | Update the output values |
+
+**`da2ClkEn`**
+
+This module generates `SCLK` from `ext_spi_clk`.
+
+|   Port   | Type | Width |  Description |
+| :------: | :----: | :----: | ------ |
+|  `clk`   | I | 1 | System Clock |
+|  `en`   | I | 1 | Enable Serial Clock |
+|  `ext_spi_clk`   | I | 1 | SPI clock source |
+|  `SCLK`   | O | 1 | Serial Clock |
+
+## (Synthesized) Utilization
+
+### On Artix-7
+
+|   Module   | Slice LUTs as Logic | Slice Registers as FF | Slice Registers as Latch |
+| :------: | :----: | :----: | :----: |
+| `da2` | 63 | 37 | 14 |
+| `da2_dual` | 117  | 66 | 28 |
+| `clkDiv25en` | 3 | 2 | 0 |
+| `da2AutoUpdate` | 5 | 14 | 0 |
+| `da2AutoUpdate_dual` | 11 | 28 | 0 |
+|`da2ClkEn`  | 1 | 1 | 0 |
 
 ## Simulation
 
@@ -103,4 +131,4 @@ Interface module tested on [Digilent Basys 3](https://reference.digilentinc.com/
 
 **Last simulation:** 6 January 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
-**Last test:** 6 January 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+**Last test:** 27 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).

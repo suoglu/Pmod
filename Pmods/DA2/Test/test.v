@@ -26,14 +26,15 @@ module board(
   output SCLK,
   output SDATA,
   output SYNC);
-  wire updateS, update, SCLK_en;
+  wire updateS, update, SCLK_en, SCLK_gen;
   reg [11:0] R_sig;
   wire [11:0] val;
 
   debouncer btnbd(clk, rst, btnR, updateS);
   da2 uut(clk, rst, SCLK, SDATA, SYNC, SCLK_en, 2'd0, val, update);
-  clkDiv25en sclkGEN(clk, rst, SCLK_en, SCLK);
+  clkDiv25en sclkGEN(clk, rst, 1'b1, SCLK_gen);
   ssdController4 ssdCNTR(clk, rst, 4'b0111, , sw[11:8], sw[7:4], sw[3:0], seg, an);
+  da2ClkEn extClkContr(clk,SCLK_en,SCLK_gen,SCLK);
   
   assign update = updateS | updateC;
   assign val = (enR) ? R_sig : sw;

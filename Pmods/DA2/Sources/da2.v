@@ -1,10 +1,10 @@
 /* ------------------------------------------------ *
- * Title       : Pmod DA2 interface v1.1            *
+ * Title       : Pmod DA2 interface v1.2            *
  * Project     : Pmod DA2 interface                 *
  * ------------------------------------------------ *
  * File        : da2.v                              *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 07/01/2021                         *
+ * Last Edit   : 27/05/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod DA2                      *
@@ -14,6 +14,9 @@
  *     v1.1    : Module to generate update signal   *
  *               automatically with a change in     *
  *               value added                        *
+ *     v1.2    : Module to use an external clock    *
+ *               source and rename SCLK_en to       *
+ *               working                            *
  * ------------------------------------------------ */
 
 module da2(
@@ -24,7 +27,7 @@ module da2(
   output SDATA,
   output reg SYNC,
   //Enable clock
-  output reg SCLK_en,
+  output reg working,
   //Output value and mode
   input [1:0] chmode,
   //Channel modes: 00 Enabled, Power off modes: 01 1kOhm, 10 100kOhm, 11 High-Z 
@@ -83,28 +86,27 @@ module da2(
         end
       else
         begin
-          contCount <= SCLK_en & contCount & (counter != 4'd15);
+          contCount <= working & contCount & (counter != 4'd15);
         end
     end
   
-  
-  //SCLK_en
+  //working
   always@(posedge clk or posedge rst)
     begin
       if(rst)
         begin
-          SCLK_en <= 1'b0;
+          working <= 1'b0;
         end
       else
         begin
-          case(SCLK_en)
+          case(working)
             1'b0:
               begin
-                SCLK_en <= SYNC;
+                working <= SYNC;
               end
             1'b1:
               begin
-                SCLK_en <= (counter != 4'd0) | contCount;
+                working <= (counter != 4'd0) | contCount;
               end
           endcase
           
@@ -155,7 +157,7 @@ module da2_dual(
   output [1:0] SDATA,
   output reg SYNC,
   //Enable clock
-  output reg SCLK_en,
+  output reg working,
   //Output value and mode
   input [1:0] chmode0,
   input [1:0] chmode1,
@@ -219,28 +221,28 @@ module da2_dual(
         end
       else
         begin
-          contCount <= SCLK_en & contCount & (counter != 4'd15);
+          contCount <= working & contCount & (counter != 4'd15);
         end
     end
   
   
-  //SCLK_en
+  //working
   always@(posedge clk or posedge rst)
     begin
       if(rst)
         begin
-          SCLK_en <= 1'b0;
+          working <= 1'b0;
         end
       else
         begin
-          case(SCLK_en)
+          case(working)
             1'b0:
               begin
-                SCLK_en <= SYNC;
+                working <= SYNC;
               end
             1'b1:
               begin
-                SCLK_en <= (counter != 4'd0) | contCount;
+                working <= (counter != 4'd0) | contCount;
               end
           endcase
           
@@ -344,6 +346,24 @@ module da2AutoUpdate_dual(
         end
     end
 endmodule//da2AutoUpdate
+
+module da2ClkEn(
+  input clk,
+  input en,
+  input ext_spi_clk,
+  output SCLK);
+  reg enabled;
+
+  assign SCLK = (enabled) ? ext_spi_clk : 1'b0;
+
+  always@(posedge clk)
+    begin
+      if(~en)
+        enabled <= 1'b0;
+      else
+        enabled <= (enabled) ? 1'b1 : (~ext_spi_clk & en);
+    end
+endmodule
 
 module clkDiv25en(
   input clk,
