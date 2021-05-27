@@ -22,7 +22,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod OLED](https://reference.digilentinc.com/reference/pmod/pmodoled/start).
+Simple interface for the [Digilent Pmod OLED](https://reference.digilentinc.com/reference/pmod/pmodoled/start) or any other module with [Solomon Systech SSD1306](https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf).
 
 ## Brief information about Pmod OLED
 

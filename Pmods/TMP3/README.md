@@ -13,7 +13,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod TMP3](https://reference.digilentinc.com/reference/pmod/pmodtmp3/start).
+Simple interface for the [Digilent Pmod TMP3](https://reference.digilentinc.com/reference/pmod/pmodtmp3/start) or any other module with [TCN75A](https://ww1.microchip.com/downloads/en/DeviceDoc/21935D.pdf).
 
 ## Brief information about Pmod TMP3
 

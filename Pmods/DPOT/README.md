@@ -14,7 +14,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start). This interface uses SPI to communicate with [Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start).
+Simple interface for the [Digilent Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start). SPI protocol is used to communicate with [AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf).
 
 ## Brief information about Pmod DPOT
 

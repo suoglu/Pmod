@@ -13,7 +13,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod TMP2](https://reference.digilentinc.com/reference/pmod/pmodtmp2/start).
+Simple interface for the [Digilent Pmod TMP2](https://reference.digilentinc.com/reference/pmod/pmodtmp2/start) or any other module with [ADT7420](https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf).
 
 ## Brief information about Pmod TMP3
 

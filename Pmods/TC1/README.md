@@ -13,7 +13,7 @@
 
 ## About
 
-Simple interface for the [Digilent Pmod TC1](https://reference.digilentinc.com/reference/pmod/pmodtc1/start).
+Simple interface for the [Digilent Pmod TC1](https://reference.digilentinc.com/reference/pmod/pmodtc1/start) or any other module with [MAX31855](https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf).
 
 ## Brief information about Pmod TC1
 
