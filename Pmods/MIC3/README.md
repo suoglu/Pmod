@@ -25,9 +25,10 @@ This interface can be used to gather data from Pmod [MIC3](https://reference.dig
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: | ------ |
-|  `clk`   |   I   | 1 | System Clock (100 MHz) |
+|  `clk`   |   I   | 1 | System Clock |
 |  `rst`   |   I   | 1 | System Reset |
-|  `SPI_SCLK`   |   O   | 1 | SPI Clock (12,5 MHz) |
+|  `ext_spi_clk`   |   I   | 1 | SPI clock source |
+|  `SCLK`   |   O   | 1 | SPI Clock |
 |  `CS`   |   O   | 1 | SPI Chip (Slave) select |
 |  `MISO`   |   I   | 1 | SPI Master In Slave Out |
 |  `read`   |   I   | 1 | Initiate a new read, keep high for continuous reading |
@@ -36,7 +37,14 @@ This interface can be used to gather data from Pmod [MIC3](https://reference.dig
 
 I: Input  O: Output
 
-Frequency values are given for tested version. In continuous reading mode, a new data is avaible every 1,28µs (781,25 kS/s). Design should work with system clock frequencies up to 160 MHz (SPI clock 20 MHz).
+Maximum frequency for `ext_spi_clk` is 20 MHz. In continuous reading mode, a new data is avaible every 1,28µs (781,25 kS/s) with 12,5 MHz `ext_spi_clk`. Later, recording with certain bitrates will be implemented (#8).
+
+### (Synthesized) Utilization
+
+**On Artix-7:**
+
+- Slice LUTs: 9 (as Logic)
+- Slice Registers: 33 (as Flip Flop)
 
 ## Simulation
 
@@ -56,4 +64,4 @@ Second test utilizes pmod [DA2](Pmods/DA2) to output read audio data from pmod [
 
 **Last simulation:** 12 December 2020, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
-**Last test:** 31 March 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+**Last test:** 27 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).

@@ -1,20 +1,21 @@
 /* ------------------------------------------------ *
- * Title       : Pmod MIC3 interface v1.0           *
+ * Title       : Pmod MIC3 interface v2.0           *
  * Project     : Pmod Collection                    *
  * ------------------------------------------------ *
  * File        : mic3.v                             *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 12/12/2020                         *
+ * Last Edit   : 27/05/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod MIC3                     *
  * ------------------------------------------------ */
 
 module mic3(
-  input clk, //designed for 100 MHz, should work up to 160 MHz
+  input clk,
   input rst,
+  input ext_spi_clk,
   //SPI signals
-  output SPI_SCLK, //Pin 4
+  output SCLK, //Pin 4
   output CS, //Pin 1
   input MISO, //Pin 3
   //General Interface
@@ -67,28 +68,16 @@ module mic3(
       else
         begin
           case(state)
-            IDLE:
-              begin
-                state <= (read) ? PRE : state;
-              end
-            PRE:
-              begin
-                state <= (~clk_array[2]) ? WORKING : state;
-              end
-            WORKING:
-              begin
-                state <= (~|{transaction_counter, stopper}) ? POST : state;
-              end
-            POST:
-              begin
-                state <= IDLE;
-              end
+            IDLE: state <= (read) ? PRE : state;
+            PRE: state <= (ext_spi_clk) ? WORKING : state;
+            WORKING: state <= (~|{transaction_counter, stopper}) ? POST : state;
+            POST: state <= IDLE;
           endcase
         end
     end
 
   //SPI transaction counter
-  always@(posedge SPI_SCLK or posedge rst)
+  always@(posedge SCLK or posedge rst)
     begin
       if(rst)
         begin
@@ -101,7 +90,7 @@ module mic3(
     end
 
   //Receive buffer
-  always@(posedge SPI_SCLK or posedge rst)
+  always@(posedge SCLK or posedge rst)
     begin
       if(rst)
         begin
@@ -122,43 +111,5 @@ module mic3(
   assign CS = in_IDLE;
 
   //SPI clock should not work when not in use
-  assign SPI_SCLK = (in_WORKING) ? ~clk_array[2] : 1'b1;
-
-  //Clock dividers
-  //50 MHz
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_array[0] <= 0;
-        end
-      else
-        begin
-          clk_array[0] <= ~clk_array[0];
-        end
-    end
-  //25 MHz
-  always@(posedge clk_array[0] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_array[1] <= 0;
-        end
-      else
-        begin
-          clk_array[1] <= ~clk_array[1];
-        end
-    end
-  //12,5 MHz
-  always@(posedge clk_array[1] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_array[2] <= 0;
-        end
-      else
-        begin
-          clk_array[2] <= ~clk_array[2];
-        end
-    end
+  assign SCLK = (in_WORKING) ? ext_spi_clk : 1'b1;
 endmodule//mic3
