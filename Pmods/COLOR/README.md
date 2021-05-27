@@ -22,16 +22,17 @@ The [Digilent Pmod COLOR](https://reference.digilentinc.com/reference/pmod/pmodc
 
 ## Interface Description
 
-**`colorlite` Module:**
+### `colorlite`
 
 Module `colorlite` provides a simple interface for [TCS3472](https://ams.com/documents/20143/36005/TCS3472_DS000390_3-00.pdf/6fe47e15-e32f-7fa7-03cb-22935da44b26) with basic functionality. Module `colorlite` reads red, green and blue data, however not the clear one. Module does not do any calculations on the gathered data, and outputs raw data.
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: |  ------  |
-| `clk` | I | 1 | System Clock (100MHz) |
+| `clk` | I | 1 | System Clock |
 | `rst` | I | 1 | System Reset |
-| `SCL` | O | 1 | I²C Clock (390.625kHz) |
-| `SDA` | IO | 1 | System Reset |
+| `i2c_clk` | I | 1 | I²C Clock Source (Max. 800 kHz) |
+| `SCL` | O | 1 | I²C Clock (Max. 400 kHz) |
+| `SDA` | IO | 1 | I²C Data |
 | `LEDenable` | O | 1 | Enable sensor LED for reflective measurement |
 | `measure` | I | 1 | Get RGB data, keep high for getting continuously  |
 | `enable` | I | 1 | Low: Put sensor in sleep mode, High: Put sensor in RGBC mode  |
@@ -43,6 +44,28 @@ Module `colorlite` provides a simple interface for [TCS3472](https://ams.com/doc
 | `ready` | O | 1 | Ready for a new measurement |
 
 I: Input  O: Output
+
+**(Synthesized) Utilization of `colorlite` on Artix 7:**
+
+- Slice LUTs: 57 (as Logic)
+- Slice Registers: 136 (as Flip Flop)
+
+### `clockGen_i2c`
+
+Module `clockGen_i2c` can be used to generate I²C clock source, `i2c_clk`, with 781.25 kHz frequency. Whit this module, I²C clock will have 390.62 kHz frequency. This module requires 100 MHz `clk` to generate right frequencies.
+
+|   Port   | Type | Width |  Description |
+| :------: | :----: | :----: |  ------  |
+| `clk` | I | 1 | Input Clock |
+| `rst` | I | 1 | System Reset |
+| `i2c_clk` | O | 1 | Output Clock |
+
+I: Input  O: Output
+
+**(Synthesized) Utilization of `clockGen_i2c` on Artix 7:**
+
+- Slice LUTs: 7 (as Logic)
+- Slice Registers: 7 (as Flip Flop)
 
 ## Test
 

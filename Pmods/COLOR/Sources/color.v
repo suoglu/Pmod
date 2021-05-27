@@ -16,6 +16,7 @@
 module colorlite#(parameter CHIPADDRS = 7'h29)(
   input clk,
   input rst,
+  input i2c_clk, //2x390.625kHz
   //I2C interface
   output SCL/* synthesis keep = 1 */,
   inout SDA/* synthesis keep = 1 */,
@@ -414,22 +415,21 @@ module colorlite#(parameter CHIPADDRS = 7'h29)(
           i2c_clk_half <= ~i2c_clk_half;
         end
     end
-  clockGen_i2c i2cClock(clk, rst, i2c_clk);
 endmodule//color
 
 //output freq: 2x390.625kHz
 //Following module will generate correct frequency only for 100 MHz clk_i
 module clockGen_i2c(
-  input clk_i,
+  input clk,
   input rst,
-  output clk_o);
+  output i2c_clk);
 
   reg [6:0] clk_d;
 
-  assign clk_o = clk_d[6];
+  assign i2c_clk = clk_d[6];
 
   //50MHz
-  always@(posedge clk_i or posedge rst)
+  always@(posedge clk or posedge rst)
     begin
       if(rst)
         begin
