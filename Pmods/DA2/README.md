@@ -6,9 +6,10 @@
 2. Brief information about Pmod DA2
 3. Modules
 4. Interface Description
-5. Simulation
-6. Test
-7. Status Information
+5. Utilization
+6. Simulation
+7. Test
+8. Status Information
 
 ---
 

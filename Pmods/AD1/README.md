@@ -6,9 +6,10 @@
 2. Brief information about Pmod AD1
 3. Modules
 4. Interface Description
-5. Simulation
-6. Test
-7. Status Information
+5. Utilization
+6. Simulation
+7. Test
+8. Status Information
 
 ---
 
@@ -75,6 +76,18 @@ I: Input  O: Output
 I: Input  O: Output
 
 **Note:** `clk` should be faster than `SCLK_i`.
+
+## (Synthesized) Utilization
+
+### On Artix-7
+
+|   Module   | Slice LUTs as Logic | Slice Registers as FF |
+| :------: | :----: | :----: |
+| `ad1` | 6 | 19 |
+| `ad1_dual` | 7  | 31 |
+| `AD1clockGEN_16_67MHz` | 2 | 3 |
+| `AD1clockGEN_20MHz40` | 2 | 3 |
+| `AD1clockEN` | 1 | 1 |
 
 ## Simulation
 
