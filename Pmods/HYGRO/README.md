@@ -6,10 +6,11 @@
 2. Brief information about Pmod HYGRO
 3. Modules
 4. Interface Description
-5. Simulation
-6. Test
-7. Status Information
-8. Issues
+5. Utilization
+6. Simulation
+7. Test
+8. Status Information
+9. Issues
 
 ---
 
@@ -35,8 +36,9 @@ This interface can be used to gather data from Pmod [HYGRO](https://reference.di
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: | ------ |
-|  `clk`   | I | 1 | System Clock (100 MHz) |
+|  `clk`   | I | 1 | System Clock |
 |  `rst`   | I | 1 | System Reset |
+|  `i2c_2clk`   | I | 1 | I²C clock Source (max. 800 kHz) |
 | `measure` | I | 1 | Initiate a new measurement |
 |  `newData`   | O | 1 | Pulse to indicate new data available |
 |  `i2c_busy`   | O | 1 | I²C Bus is busy |
@@ -44,7 +46,7 @@ This interface can be used to gather data from Pmod [HYGRO](https://reference.di
 |  `sensNR`   | O | 1 | Sensor is not responding |
 |  `tem`   | O | 14 | Most recent temperature reading |
 |  `hum`   | O | 14 | Most recent humidity reading |
-|  `SCL`   | O | 1 | I²C clock (390.625kHz) |
+|  `SCL`   | O | 1 | I²C clock |
 |  `SDA`   | IO | 1 | I²C data |
 
 I: Input  O: Output
@@ -53,8 +55,9 @@ I: Input  O: Output
 
 |   Port   | Type | Width |  Description |
 | :------: | :----: | :----: | ------ |
-|  `clk`   | I | 1 | System Clock (100 MHz) |
+|  `clk`   | I | 1 | System Clock |
 |  `rst`   | I | 1 | System Reset |
+|  `i2c_2clk`   | I | 1 | I²C clock Source (max. 800 kHz) |
 | `measureT` | I | 1 | Initiate a new Temperature measurement |
 | `measureH` | I | 1 | Initiate a new Humidity measurement |
 |  `newData`   | O | 1 | Pulse to indicate new data available |
@@ -62,7 +65,7 @@ I: Input  O: Output
 |  `sensNR`   | O | 1 | Sensor is not responding |
 |  `tem`   | O | 14 | Most recent temperature reading |
 |  `hum`   | O | 14 | Most recent humidity reading |
-|  `SCL`   | IO | 1 | I²C clock (390.625kHz) |
+|  `SCL`   | IO | 1 | I²C clock |
 |  `SDA`   | IO | 1 | I²C data |
 |  `heater`   | I | 1 | Heater |
 |  `acMode`   | I | 1 | Acquisition Mode  |
@@ -71,6 +74,18 @@ I: Input  O: Output
 |  `swRst`   | I | 1 | Software Reset |
 
 I: Input O: Output
+
+I²C clock source, `i2c_2clk`, should be generated externally. Module `clockGen_i2c` can be used to generate 781,25 kHz I²C clock source (390,62 kHz I²C clock).
+
+## (Synthesized) Utilization
+
+### On Artix-7
+
+|   Module   | Slice LUTs as Logic | Slice Registers as FF | Slice Registers as Latch |
+| :------: | :----: | :----: | :----: |
+| `hygro_lite` | 50 | 55 | 1 |
+| `hygro` | 62 | 69 | 0 |
+| `clockGen_i2c` | 7 | 7 | 0 |
 
 ## Simulation
 

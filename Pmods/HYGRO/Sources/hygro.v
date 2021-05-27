@@ -17,6 +17,7 @@
 module hygro(
   input clk,
   input rst,
+  input i2c_2clk, //Used to shifting and sampling, max 800kHz
   //Control signals
   input measureT,
   input measureH,
@@ -40,8 +41,7 @@ module hygro(
            HUMREGADDRS = 8'h01,
         CONFIGREGADDRS = 8'h02,
         CONFIGRSTVALUE = 8'h90;
-  wire i2c_2clk; //Used to shifting and sampling, 781.25kHz
-  wire i2c_clk; //390.625kHz
+  reg i2c_clk; //390.625kHz
   wire SDA_Claim;
   wire SDA_Write;
   reg SCL_d;
@@ -434,13 +434,21 @@ module hygro(
         end
     end
   
-  clockGen_i2c clkGEN(clk, rst, i2c_2clk, i2c_clk);
+  always@(posedge i2c_2clk or posedge rst)
+    begin
+      if(rst) begin
+          i2c_clk <= 1'b0;
+      end else begin
+          i2c_clk <= ~i2c_clk;
+      end
+    end
 endmodule
 
 //Lite module uses default settings of sensor
 module hygro_lite(
   input clk,
   input rst,
+  input i2c_2clk,//Used to shifting and sampling, max 800kHz
   //Control signals
   input measure,
   output newData,
@@ -453,8 +461,7 @@ module hygro_lite(
   //I2C pins
   output SCL/* synthesis keep = 1 */, 
   inout SDA/* synthesis keep = 1 */);
-  wire i2c_2clk; //Used to shifting and sampling, 781.25kHz
-  wire i2c_clk; //390.625kHz
+  reg i2c_clk; //390.625kHz
   wire SDA_Claim;
   wire SDA_Write;
   //I2C flow control
@@ -712,19 +719,24 @@ module hygro_lite(
         end
     end
 
-  clockGen_i2c clkGEN(clk, rst, i2c_2clk, i2c_clk);
+  always@(posedge i2c_2clk or posedge rst)
+    begin
+      if(rst) begin
+          i2c_clk <= 1'b0;
+      end else begin
+          i2c_clk <= ~i2c_clk;
+      end
+    end
 endmodule//hygro_lite
 
-//Generate 781.25kHz and 390.625kHz clock signals for i2c
+//Generate 781.25kHz clock signal for i2c
 module clockGen_i2c(
   input clk_i,
   input rst,
-  output clk_781k,
-  output clk_390k);
+  output clk_781k);
 
-  reg [7:0] clk_d;
+  reg [6:0] clk_d;
 
-  assign clk_390k = clk_d[7];
   assign clk_781k = clk_d[6];
 
   //50MHz
@@ -809,18 +821,6 @@ module clockGen_i2c(
       else
         begin
           clk_d[6] <= ~clk_d[6];
-        end
-    end
-  //390.625kHz
-  always@(posedge clk_d[6] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[7] <= 0;
-        end
-      else
-        begin
-          clk_d[7] <= ~clk_d[7];
         end
     end
 endmodule
