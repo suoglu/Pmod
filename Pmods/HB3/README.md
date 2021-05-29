@@ -49,7 +49,7 @@ Simulation testbench can be found in [sim_hb3.v](Simulation/sim_hb3.v). Testbenc
 
 ## Test
 
-Module `hb3` direcly with [Basys3.xdc](Test/Basys3.xdc). First `motor_direction` and `motor_enable` pins are monitored with [DDiscovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start). After that an actual DC motor with small fan attached to it is tested. 7,5 V power source is attached to motor power pins of the [Pmod HB3](https://reference.digilentinc.com/pmod/pmodhb3/start) Fan attached DC motor begin turning (very slow) when speed was *0x31* (~1.43 V), and was power full enough at *0xFF* to move FPGA, breadboard and DC motor.
+Module `hb3` direcly with [Basys3.xdc](Test/Basys3.xdc). First `motor_direction` and `motor_enable` pins are monitored with [DDiscovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start). After that an actual DC motor with small fan attached to it is tested. 7,5 V power source is attached to motor power pins of the [Pmod HB3](https://reference.digilentinc.com/pmod/pmodhb3/start) Fan attached DC motor begin turning (very slow) when speed was *0x31* (~1.43 V), and was power full enough at *0xFF* to move the FPGA, the breadboard and the DC motor itself.
 
 ## Status Information
 
