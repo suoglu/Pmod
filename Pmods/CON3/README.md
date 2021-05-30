@@ -71,7 +71,7 @@ Modules `con3` and `con3_clk_gen` is simulated in [con3_sim.v](Simulation/con3_s
 
 ## Test
 
-Modules `con3` and `con3_clk_gen` is tested with [con3_tester.v](Test/con3_tester.v) and [Arty-A7-100.xdc](Test/Arty-A7-100.xdc). TCL script [design_con3.tcl](Test/design_con3.tcl) generate test block diagram automatically. Test block diagram includes  four `con3` modules with diffrent parameter values. All connected to same inputs, each driving diffrent servo pins of [Pmod CON3](https://reference.digilentinc.com/pmod/pmodcon3/start). [Tester module](Test/con3_tester.v) includes an uart interface, which sets `angle` to incoming byte and then echos incoming byte back. Switch 3 is used to enable `con3` modules.
+Modules `con3` and `con3_clk_gen` is tested with [con3_tester.v](Test/con3_tester.v) and [Arty-A7-100.xdc](Test/Arty-A7-100.xdc). TCL script [design_con3.tcl](Test/design_con3.tcl) generate test block diagram automatically. Test block diagram includes  four `con3` modules with diffrent parameter values. All connected to same inputs, each driving diffrent servo pins of [Pmod CON3](https://reference.digilentinc.com/pmod/pmodcon3/start). [Tester module](Test/con3_tester.v) includes an uart interface, which sets `angle` to incoming byte and then echos incoming byte back. Switch 3 is used to enable `con3` modules. Uart configurations are 8 bit data, 1 bit stop bit, no parity with 115200 baud rate.
 
 Initially `servo` pins are monitored with [DDiscovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start). After that, they were connected to a Tower Pro SG90 RC Mini Servo Motor to verify further.
 
