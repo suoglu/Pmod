@@ -128,6 +128,10 @@ Unused codes will be displayed as empty.
 
 Mapping can be edited easily via localparameters of `oled_decoder`. New characters can be appended by adding a new code as localparameter and bitmap to following case statement. Or compeletly new decoder module can be used.
 
+**Character Mapping for `oled_decoder_ascii`:**
+
+Decoder `oled_decoder_ascii` uses extended ASCII table for character mapping. Non printable characters and unimplemented chracters are displayed as a square, &#9633; .
+
 **(Synthesized) Utilization of `oled`:**
 
 - On Artix-7:
