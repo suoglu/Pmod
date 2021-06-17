@@ -21,6 +21,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 | :------: | :----: | :----: | ------ | ------ |
 |  [AD1](Pmods/AD1)   |   SPI   | [AD7476A](https://www.analog.com/media/cn/technical-documentation/evaluation-documentation/AD7476A_7477A_7478A.pdf) | Analog-to-digital converter | - |
 |  [AMP3](Pmods/AMP3)   |  GPIO/I²C/I²S  | [SSM2518](https://www.analog.com/media/en/technical-documentation/data-sheets/SSM2518.pdf) | Stereo Power Amplifier  | Not working |
+|  [CMPS2](Pmods/CMPS2)   |   I²C   | [MMC3416xPJ](http://www.memsic.com/uploadfiles/2020/08/20200827165224614.pdf) |  3-Axis Magnetometer   | - |
 |  [COLOR](Pmods/COLOR)   |   I²C   | [TCS3472](https://ams.com/documents/20143/36005/TCS3472_DS000390_3-00.pdf/6fe47e15-e32f-7fa7-03cb-22935da44b26) | Color Sensor Module | - |
 |  [CON3](Pmods/CON3)   |   GPIO   | None |  R/C Servo Connectors  | - |
 |  [DA2](Pmods/DA2)   |   GPIO   | [DAC121S101-Q1](https://www.ti.com/lit/ds/symlink/dac121s101.pdf) | Digital-to-analog converter | - |
