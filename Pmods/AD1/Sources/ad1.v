@@ -34,49 +34,35 @@ module ad1(
   assign updatingData = sdataValid;
 
   //CS
-  always@(posedge clk)
-    begin
-      if(rst)
-        begin
-          CS <= 1'b1;
-        end
-      else
-        case(CS)
-          1'b1:
-            begin
-              CS <= (~getData) | (~CS_d);
-            end
-          1'b0:
-            begin
-              CS <= SCLK & (counter == 4'd0) & sdataValid;
-            end
-        endcase
-    end
-  always@(posedge clk)
-    begin
-      CS_d <= CS; //Delay CS
-    end
+  always@(posedge clk) begin
+    if(rst) begin
+      CS <= 1'b1;
+    end else case(CS)
+      1'b1: CS <= (~getData) | (~CS_d);
+      1'b0: CS <= SCLK & (counter == 4'd0) & sdataValid;
+    endcase
+  end
+  always@(posedge clk) begin
+    CS_d <= CS; //Delay CS
+  end
   
   //Output data
-  always@(posedge SCLK)
-    begin
-      data <= (sdataValid & (counter != 4'd0)) ? {data[10:0], SDATA} : data;
-    end
+  always@(posedge SCLK) begin
+    data <= (sdataValid & (counter != 4'd0)) ? {data[10:0], SDATA} : data;
+  end
   
   //Data valid
-  always@(posedge clk)
-    begin
-      sdataValid <= (sdataValid | (counter == 4'd4)) & ~CS;
-    end
+  always@(posedge clk) begin
+    sdataValid <= (sdataValid | (counter == 4'd4)) & ~CS;
+  end
   
   //count SCLK Edges
-  always@(negedge SCLK or posedge rst)
-    begin
-      if(rst)
-        counter <= 4'd0;
-      else
-        counter <= counter + 4'd1;
-    end
+  always@(negedge SCLK or posedge rst)begin
+    if(rst)
+      counter <= 4'd0;
+    else
+      counter <= counter + 4'd1;
+  end
 endmodule
 
 module ad1_dual(
@@ -100,50 +86,36 @@ module ad1_dual(
   assign updatingData = sdataValid;
 
   //CS
-  always@(posedge clk)
-    begin
-      if(rst)
-        begin
-          CS <= 1'b1;
-        end
-      else
-        case(CS)
-          1'b1:
-            begin
-              CS <= (~getData) | (~CS_d);
-            end
-          1'b0:
-            begin
-              CS <= SCLK & (counter == 4'd0) & sdataValid;
-            end
-        endcase
-    end
-  always@(posedge clk)
-    begin
-      CS_d <= CS; //Delay CS
-    end
+  always@(posedge clk) begin
+    if(rst) begin
+      CS <= 1'b1;
+    end else case(CS)
+      1'b1: CS <= (~getData) | (~CS_d);
+      1'b0: CS <= SCLK & (counter == 4'd0) & sdataValid;
+    endcase
+  end
+  always@(posedge clk) begin
+    CS_d <= CS; //Delay CS
+  end
   
   //Output data
-  always@(posedge SCLK)
-    begin
-      data0 <= (sdataValid & (counter != 4'd0) & activeCH[0]) ? {data0[10:0], SDATA[0]} : data0;
-      data1 <= (sdataValid & (counter != 4'd0) & activeCH[1]) ? {data1[10:0], SDATA[1]} : data1;
-    end
+  always@(posedge SCLK) begin
+    data0 <= (sdataValid & (counter != 4'd0) & activeCH[0]) ? {data0[10:0], SDATA[0]} : data0;
+    data1 <= (sdataValid & (counter != 4'd0) & activeCH[1]) ? {data1[10:0], SDATA[1]} : data1;
+  end
   
   //Data valid
-  always@(posedge clk)
-    begin
-      sdataValid <= (sdataValid | (counter == 4'd4)) & ~CS;
-    end
+  always@(posedge clk) begin
+    sdataValid <= (sdataValid | (counter == 4'd4)) & ~CS;
+  end
   
   //count SCLK Edges
-  always@(negedge SCLK or posedge rst)
-    begin
-      if(rst)
-        counter <= 4'd0;
-      else
-        counter <= counter + 4'd1;
-    end
+  always@(negedge SCLK or posedge rst) begin
+    if(rst)
+      counter <= 4'd0;
+    else
+      counter <= counter + 4'd1;
+  end
 endmodule
 
 //Generate 16,67 MHz sclk for AD1
@@ -154,30 +126,22 @@ module AD1clockGEN_16_67MHz(
   reg [1:0] counter;
   
   //SCLK
-  always@(posedge clk)
-    begin
-      if(CS)
-        begin
-          SCLK <= 1'b1;
-        end
-      else
-        begin
-          SCLK <= (counter == 2'd2) ^ SCLK ;
-        end
+  always@(posedge clk) begin
+    if(CS) begin
+      SCLK <= 1'b1;
+    end else begin
+      SCLK <= (counter == 2'd2) ^ SCLK ;
     end
+  end
   
   //Counter
-  always@(posedge clk)
-    begin
-      if(CS)
-        begin
-          counter <= 2'd1;
-        end
-      else
-        begin
-          counter <= (counter == 2'd2) ? 2'd0 : (counter + 2'd1);
-        end
-    end 
+  always@(posedge clk) begin
+    if(CS) begin
+      counter <= 2'd1;
+    end else begin
+      counter <= (counter == 2'd2) ? 2'd0 : (counter + 2'd1);
+    end
+  end 
 endmodule//clockGEN
 
 //Generate 20 MHz sclk with 40% duty cycle for AD1
@@ -188,40 +152,24 @@ module AD1clockGEN_20MHz40(
   reg [1:0] counter;
 
   //SCLK
-  always@(posedge clk)
-    begin
-      if(CS)
-        SCLK <= 1'b1;
-      else
-        case(SCLK)
-          1'b1:
-            begin
-              SCLK <= (counter == 2'd1) ? ~SCLK : SCLK;
-            end
-          1'b0:
-            begin
-              SCLK <= (counter == 2'd2) ? ~SCLK : SCLK;
-            end
-        endcase    
-    end
+  always@(posedge clk) begin
+    if(CS)
+      SCLK <= 1'b1;
+    else case(SCLK)
+      1'b1: SCLK <= (counter == 2'd1) ? ~SCLK : SCLK;
+      1'b0: SCLK <= (counter == 2'd2) ? ~SCLK : SCLK;
+    endcase    
+  end
 
   //Counter
-  always@(posedge clk)
-    begin
-      if(CS)
-        counter <= 2'd0;
-      else
-        case(SCLK)
-          1'b1:
-            begin
-              counter <= (counter == 2'd1) ? 2'd0 : (counter + 2'd1);
-            end
-          1'b0:
-            begin
-              counter <= (counter == 2'd2) ? 2'd0 : (counter + 2'd1);
-            end
-        endcase    
-    end
+  always@(posedge clk) begin
+    if(CS)
+      counter <= 2'd0;
+    else case(SCLK)
+      1'b1: counter <= (counter == 2'd1) ? 2'd0 : (counter + 2'd1);
+      1'b0: counter <= (counter == 2'd2) ? 2'd0 : (counter + 2'd1);
+    endcase    
+  end
 endmodule
 
 //Disable external clock when not in use 
@@ -234,15 +182,11 @@ module AD1clockEN(
 
   assign SCLK_o = SCLK_i | hold;
 
-  always@(posedge clk)
-    begin
-      if(CS | (~SCLK_i & hold))
-        begin
-          hold <= 1'b1;
-        end
-      else
-        begin
-          hold <= 1'b0;
-        end
+  always@(posedge clk) begin
+    if(CS | (~SCLK_i & hold)) begin
+      hold <= 1'b1;
+    end else begin
+      hold <= 1'b0;
     end
+  end
 endmodule

@@ -175,262 +175,178 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   assign     inSPIState = inUpdate | inChContrast | inPOnSDisOff | inPOnSInitDis | inChDisplay | inWriteAddrs;
 
   //SPI flags
-  always@(negedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          spi_done <= 1'b0;
-        end
-      else
-        case(spi_done)
-          1'b0: spi_done <= spi_working & last_byte & bit_counter_done;
-          1'b1: spi_done <= 1'b0;
-        endcase
-    end
-  always@(negedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          spi_working <= 1'b0;
-        end
-      else
-        case(spi_working)
-          1'b0: spi_working <= ~spi_done & inSPIState & spi_clk;
-          1'b1: spi_working <= ~spi_done;
-        endcase
-    end
+  always@(negedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      spi_done <= 1'b0;
+    end else case(spi_done)
+      1'b0: spi_done <= spi_working & last_byte & bit_counter_done;
+      1'b1: spi_done <= 1'b0;
+    endcase
+  end
+  always@(negedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      spi_working <= 1'b0;
+    end else case(spi_working)
+      1'b0: spi_working <= ~spi_done & inSPIState & spi_clk;
+      1'b1: spi_working <= ~spi_done;
+    endcase
+  end
 
   //State transactions
-  always@(posedge spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          state <= POWER_OFF;
+  always@(posedge spi_clk or posedge rst) begin
+    if(rst) begin
+      state <= POWER_OFF;
+    end else case(state)
+      POWER_OFF      : state <= (power_on) ? PONS_DELAY : state;
+      PONS_DELAY     : state <= (delay_done) ? RESET : state;
+      RESET          : state <= (delay_done) ?  POST_RESET : state;
+      POST_RESET     : state <= (delay_done) ?  PONS_DIS_OFF : state;
+      PONS_DIS_OFF   : state <= (spi_done) ? PONS_DIS_WAIT : state;
+      PONS_DIS_WAIT  : state <= (delay_done) ? PONS_INIT_DIS : state;
+      PONS_INIT_DIS  : state <= (spi_done) ? PONS_INIT_WAIT : state;
+      PONS_INIT_WAIT : state <= (delay_done) ? DISPLAY_OFF : state;
+      CH_DISPLAY     : state <= (spi_done) ? ((~power_on | display_off_reg) ? DISPLAY_OFF : IDLE): state;
+      CH_CONTRAST    : state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
+      UPDATE         : state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
+      POFFS_DELAY    : state <= (delay_done) ?  POWER_OFF : state;
+      WRITE_ADDRS    : state <= (spi_done) ?  UPDATE : state;
+      IDLE: begin
+        if(display_reset_reg) begin
+          state <= RESET;
+        end else if(~power_on | display_off) begin
+          state <= CH_DISPLAY;
+        end else if(ch_contrast) begin
+          state <= CH_CONTRAST;
+        end else if(update_reg | cursor_update) begin
+          state <= WRITE_ADDRS;
         end
-      else
-        begin
-          case(state)
-            POWER_OFF:
-              begin
-                state <= (power_on) ? PONS_DELAY : state;
-              end
-            PONS_DELAY:
-              begin
-                state <= (delay_done) ? RESET : state;
-              end
-            RESET:
-              begin
-                state <= (delay_done) ?  POST_RESET : state;
-              end
-            POST_RESET:
-              begin
-                state <= (delay_done) ?  PONS_DIS_OFF : state;
-              end
-            PONS_DIS_OFF:
-              begin
-                state <= (spi_done) ? PONS_DIS_WAIT : state;
-              end
-            PONS_DIS_WAIT:
-              begin
-                state <= (delay_done) ? PONS_INIT_DIS : state;
-              end
-            PONS_INIT_DIS:
-              begin
-                state <= (spi_done) ? PONS_INIT_WAIT : state;
-              end
-            PONS_INIT_WAIT:
-              begin
-                state <= (delay_done) ? DISPLAY_OFF : state;
-              end
-            CH_DISPLAY:
-              begin
-                state <= (spi_done) ? ((~power_on | display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            CH_CONTRAST:
-              begin
-                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            UPDATE:
-              begin
-                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            POFFS_DELAY:
-              begin
-                state <= (delay_done) ?  POWER_OFF : state;
-              end
-            WRITE_ADDRS:
-              begin
-                state <= (spi_done) ?  UPDATE : state;
-              end
-            IDLE:
-              begin
-                if(display_reset_reg)
-                  begin
-                    state <= RESET;
-                  end
-                else if(~power_on | display_off)
-                  begin
-                    state <= CH_DISPLAY;
-                  end
-                else if(ch_contrast)
-                  begin
-                    state <= CH_CONTRAST;
-                  end
-                else if(update_reg | cursor_update)
-                  begin
-                    state <= WRITE_ADDRS;
-                  end
-              end
-            DISPLAY_OFF:
-              begin
-                if(display_reset_reg)
-                  begin
-                    state <= RESET;
-                  end
-                else if(~power_on)
-                  begin
-                    state <= POFFS_DELAY;
-                  end
-                else if(~display_off)
-                  begin
-                    state <= CH_DISPLAY;
-                  end
-                else if(ch_contrast)
-                  begin
-                    state <= CH_CONTRAST;
-                  end
-                else if(update_reg)
-                  begin
-                    state <= WRITE_ADDRS;
-                  end
-              end
-          endcase
+      end
+      DISPLAY_OFF: begin
+        if(display_reset_reg) begin
+          state <= RESET;
+        end else if(~power_on) begin
+          state <= POFFS_DELAY;
+        end else if(~display_off) begin
+          state <= CH_DISPLAY;
+        end else if(ch_contrast) begin
+          state <= CH_CONTRAST;
+        end else if(update_reg) begin
+          state <= WRITE_ADDRS;
         end
-    end
+      end
+    endcase
+  end
   
   //Clk domain change for inputs
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          display_reset_reg <= 1'b0;
-          update_reg <= 1'b0;
-        end
-      else
-        begin
-          case(update_reg)
-            1'b0: update_reg <= update;
-            1'b1: update_reg <= ~inUpdate;
-          endcase
-          case(display_reset_reg)
-            1'b0: display_reset_reg <= display_reset;
-            1'b1: display_reset_reg <= ~inReset;
-          endcase
-        end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      display_reset_reg <= 1'b0;
+      update_reg <= 1'b0;
+    end else begin
+      case(update_reg)
+        1'b0: update_reg <= update;
+        1'b1: update_reg <= ~inUpdate;
+      endcase
+      case(display_reset_reg)
+        1'b0: display_reset_reg <= display_reset;
+        1'b1: display_reset_reg <= ~inReset;
+      endcase
     end
+  end
 
   //Send buffer control
   assign send_buffer_shift = ~send_buffer_write;
   assign send_buffer_write = ~|bit_counter;
 
   //Determine send_buffer_next
-  always@*
-    begin
-      case(state)
-        WRITE_ADDRS:
-          case(byte_counter)
-            //Set colmn limits
-            9'h00:  send_buffer_next = CMD_SET_CLMN_ADDRS;
-            9'h01:  send_buffer_next = 8'd0;
-            9'h02:  send_buffer_next = 8'd127;
-            //Set page limits
-            9'h03:  send_buffer_next = CMD_SET_PAGE_ADDRS;
-            9'h04:  send_buffer_next = 8'd0;
-            9'h05:  send_buffer_next = 8'd3;
-            9'h06:  send_buffer_next = CMD_SET_HIGH_CLMN_0;
-            default: send_buffer_next = CMD_NOP;
-          endcase
-        PONS_INIT_DIS:
-          case(byte_counter)
-            //Charge pump enable 
-            9'h00:  send_buffer_next = CMD_CHRG_PMP_CONF;
-            9'h01:  send_buffer_next = CONFIG_CHRG_PMP_CONF;
-            //Set pre-charge period 
-            9'h02:  send_buffer_next = CMD_PRE_CHR_P;
-            9'h03:  send_buffer_next = CONFIG_PRE_CHR_P;
-            //Column inversion enable 
-            9'h04:  send_buffer_next = CMD_SEG_INV_ENABLE;
-            //COM Output Scan Direction
-            9'h05:  send_buffer_next = CMD_SCAN_DIR_INVRT;
-            //COM pins configuration 
-            9'h06:  send_buffer_next = CMD_COM_CONFIG;
-            9'h07:  send_buffer_next = CONFIG_COM_CONFIG;
-            //Set addressing mode
-            9'h08:  send_buffer_next = CMD_SET_ADDRS_MODE;
-            9'h09:  send_buffer_next = {6'h0,ADDRS_MODE_HOR};
-            default: send_buffer_next = CMD_NOP;
-          endcase
-        PONS_DIS_OFF: send_buffer_next = CMD_DISPLAY_OFF;
-        CH_CONTRAST:
-          case(byte_counter)
-            9'h0: send_buffer_next = CMD_SET_CONSTRAST;
-            9'h1: send_buffer_next = contrast_reg;
-            default: send_buffer_next = CMD_NOP;
-          endcase
-        CH_DISPLAY: send_buffer_next = (display_off_reg) ? CMD_DISPLAY_OFF : CMD_DISPLAY_ON;
-        UPDATE:
-          case(line_count)
-            2'd3: //4 lines
-              begin
-                send_buffer_next = current_colmn;
-              end
-            2'd2: //3 lines
-              case(current_line)
-                2'd2: send_buffer_next = {4'h0,current_colmn[7:4]};
-                2'd1: send_buffer_next = {current_colmn[3:0],4'h0};
-                default: send_buffer_next = current_colmn;
-              endcase
-            2'd1: //2 lines
-              case(current_line[0])
-                1'b1: send_buffer_next = {4'h0,current_colmn[7:4]};
-                1'b0: send_buffer_next = {current_colmn[3:0],4'h0};
-              endcase
-            2'd0: //1 line
-              case(current_line)
-                2'd2: send_buffer_next = {4'h0,current_colmn[7:4]};
-                2'd1: send_buffer_next = {current_colmn[3:0],4'h0};
-                default: send_buffer_next = 8'h00;
-              endcase
-          endcase
-        default: send_buffer_next = CMD_NOP;
-      endcase
-    end
+  always@* begin
+    case(state)
+      WRITE_ADDRS:
+        case(byte_counter)
+          //Set colmn limits
+          9'h00:  send_buffer_next = CMD_SET_CLMN_ADDRS;
+          9'h01:  send_buffer_next = 8'd0;
+          9'h02:  send_buffer_next = 8'd127;
+          //Set page limits
+          9'h03:  send_buffer_next = CMD_SET_PAGE_ADDRS;
+          9'h04:  send_buffer_next = 8'd0;
+          9'h05:  send_buffer_next = 8'd3;
+          9'h06:  send_buffer_next = CMD_SET_HIGH_CLMN_0;
+          default: send_buffer_next = CMD_NOP;
+        endcase
+      PONS_INIT_DIS:
+        case(byte_counter)
+          //Charge pump enable 
+          9'h00:  send_buffer_next = CMD_CHRG_PMP_CONF;
+          9'h01:  send_buffer_next = CONFIG_CHRG_PMP_CONF;
+          //Set pre-charge period 
+          9'h02:  send_buffer_next = CMD_PRE_CHR_P;
+          9'h03:  send_buffer_next = CONFIG_PRE_CHR_P;
+          //Column inversion enable 
+          9'h04:  send_buffer_next = CMD_SEG_INV_ENABLE;
+          //COM Output Scan Direction
+          9'h05:  send_buffer_next = CMD_SCAN_DIR_INVRT;
+          //COM pins configuration 
+          9'h06:  send_buffer_next = CMD_COM_CONFIG;
+          9'h07:  send_buffer_next = CONFIG_COM_CONFIG;
+          //Set addressing mode
+          9'h08:  send_buffer_next = CMD_SET_ADDRS_MODE;
+          9'h09:  send_buffer_next = {6'h0,ADDRS_MODE_HOR};
+          default: send_buffer_next = CMD_NOP;
+        endcase
+      PONS_DIS_OFF: send_buffer_next = CMD_DISPLAY_OFF;
+      CH_CONTRAST:
+        case(byte_counter)
+          9'h0: send_buffer_next = CMD_SET_CONSTRAST;
+          9'h1: send_buffer_next = contrast_reg;
+          default: send_buffer_next = CMD_NOP;
+        endcase
+      CH_DISPLAY: send_buffer_next = (display_off_reg) ? CMD_DISPLAY_OFF : CMD_DISPLAY_ON;
+      UPDATE:
+        case(line_count)
+          2'd3: //4 lines
+            begin
+              send_buffer_next = current_colmn;
+            end
+          2'd2: //3 lines
+            case(current_line)
+              2'd2: send_buffer_next = {4'h0,current_colmn[7:4]};
+              2'd1: send_buffer_next = {current_colmn[3:0],4'h0};
+              default: send_buffer_next = current_colmn;
+            endcase
+          2'd1: //2 lines
+            case(current_line[0])
+              1'b1: send_buffer_next = {4'h0,current_colmn[7:4]};
+              1'b0: send_buffer_next = {current_colmn[3:0],4'h0};
+            endcase
+          2'd0: //1 line
+            case(current_line)
+              2'd2: send_buffer_next = {4'h0,current_colmn[7:4]};
+              2'd1: send_buffer_next = {current_colmn[3:0],4'h0};
+              default: send_buffer_next = 8'h00;
+            endcase
+        endcase
+      default: send_buffer_next = CMD_NOP;
+    endcase
+  end
 
-  always@(negedge spi_clk)
-    begin
-      if(send_buffer_write)
-        begin
-          send_buffer <= send_buffer_next;
-        end
-      else
-        begin
-          send_buffer <= (send_buffer_shift) ? {send_buffer[6:0],send_buffer[0]} : send_buffer;
-        end
+  always@(negedge spi_clk) begin
+    if(send_buffer_write) begin
+      send_buffer <= send_buffer_next;
+    end else begin
+      send_buffer <= (send_buffer_shift) ? {send_buffer[6:0],send_buffer[0]} : send_buffer;
     end
+  end
 
   //Byte counter
   assign {current_line, position_in_line} = byte_counter[8:3];
-  always@(negedge ext_spi_clk)
-    begin
-      if(~spi_working)
-        begin
-          byte_counter <= 9'h0;
-        end
-      else
-        begin
-          byte_counter <= byte_counter + {8'h0, (~last_byte & bit_counter_done & spi_clk)};
-        end
+  always@(negedge ext_spi_clk) begin
+    if(~spi_working) begin
+      byte_counter <= 9'h0;
+    end else begin
+      byte_counter <= byte_counter + {8'h0, (~last_byte & bit_counter_done & spi_clk)};
     end
+  end
   
   //last byte
   always@*
@@ -445,78 +361,58 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
   //Bit counter
   always@* bit_counter_done = &bit_counter;
   
-  always@(negedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          bit_counter <= 3'd0;
-        end
-      else
-        begin
-          bit_counter <= bit_counter + {2'd0, spi_working & spi_clk};
-        end
+  always@(negedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      bit_counter <= 3'd0;
+    end else begin
+      bit_counter <= bit_counter + {2'd0, spi_working & spi_clk};
     end
+  end
 
   //Delay Signals and edge detect
   assign inChContrast_posedge = ~inChContrast_d & inChContrast;
-  always@(posedge clk)
-    begin
-      inChContrast_d <= inChContrast;
-      state_d <= state;
-    end
+  always@(posedge clk) begin
+    inChContrast_d <= inChContrast;
+    state_d <= state;
+  end
   
   //Store Signals & Configs
-  always@(posedge clk)
-    begin
-      if(rst | inReset) begin
-          contrast_reg <= 8'h7F;
-      end else begin
-          contrast_reg <= (inChContrast_posedge) ? contrast : contrast_reg;
-      end
+  always@(posedge clk) begin
+    if(rst | inReset) begin
+        contrast_reg <= 8'h7F;
+    end else begin
+        contrast_reg <= (inChContrast_posedge) ? contrast : contrast_reg;
     end
-  always@(posedge clk)
-    begin
-      display_off_reg <= (inIdle | inPowerOff | inDisplayOff) ? display_off : display_off_reg;
-    end
+  end
+  always@(posedge clk) begin
+    display_off_reg <= (inIdle | inPowerOff | inDisplayOff) ? display_off : display_off_reg;
+  end
   
   //Determine data index
   always@*
     case(line_count)
-      2'd3:
-        begin
-          data_index = {current_line,position_in_line};
-        end
+      2'd3: data_index = {current_line,position_in_line};
       2'd2:
         case(current_line)
           2'd3: data_index = {2'd2,position_in_line};
           2'd0: data_index = {2'd0,position_in_line};
           default: data_index = {2'd1,position_in_line};
         endcase
-      2'd1:
-        begin
-          data_index = {1'b0, current_line[1],position_in_line};
-        end
-      2'd0:
-        begin
-          data_index = {2'd0,position_in_line};
-        end
+      2'd1: data_index = {1'b0, current_line[1],position_in_line};
+      2'd0: data_index = {2'd0,position_in_line};
     endcase
 
   //Change flags
   assign ch_contrast = (contrast_reg != contrast);
 
   //Generate spi clock
-  always@(posedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          spi_clk <= 1'b1;
-        end
-      else
-        begin
-          spi_clk <= ~spi_clk;
-        end
+  always@(posedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      spi_clk <= 1'b1;
+    end else begin
+      spi_clk <= ~spi_clk;
     end
+  end
   
   //Delay wait
   assign delaying = ~delay_done & inDelayState;
@@ -531,80 +427,62 @@ module oled#(parameter CLK_PERIOD = 10/*Needed for waits*/)(
       default: delay_count_done = 1'b1;
     endcase
   
-  always@(posedge clk)
-    begin
-      if(delay_done | rst)
-        begin
-          delay_counter <= {COUNTER_SIZE+1{1'b0}};
-        end
-      else
-        begin
-          delay_counter <= delay_counter + {{COUNTER_SIZE{1'b0}},delaying};
-        end
+  always@(posedge clk) begin
+    if(delay_done | rst) begin
+      delay_counter <= {COUNTER_SIZE+1{1'b0}};
+    end else begin
+      delay_counter <= delay_counter + {{COUNTER_SIZE{1'b0}},delaying};
     end
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          delay_done <= 1'b0;
-        end
-      else
-        begin
-          case(delay_done)
-            1'b0: delay_done <= delay_count_done;
-            1'b1: delay_done <= (state_d == state); //Delay done when we change state
-          endcase
-        end
-    end
+  end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      delay_done <= 1'b0;
+    end else case(delay_done)
+      1'b0: delay_done <= delay_count_done;
+      1'b1: delay_done <= (state_d == state); //Delay done when we change state
+    endcase
+  end
 
   //Cursor control
   assign current_colmn = (cursor_enable & cursor_flash_on & cursor_in_pos) ?  ~current_colmn_pre :  current_colmn_pre; //Default cursor inverts char, thus implemented by inverting column. For more advenced cursorsors current_bitmap can be edited
   always@*
-    begin
-      case(line_count)
-         2'd3: //4 lines
-          begin
-           cursor_in_pos = (cursor_pos_reg == {current_line,position_in_line});
-          end
-        2'd2: //3 lines
-          case(current_line)
-            2'd0: cursor_in_pos = (cursor_pos_reg == {2'd0,position_in_line});
-            2'd3: cursor_in_pos = (cursor_pos_reg == {2'd2,position_in_line});
-            default: cursor_in_pos = (cursor_pos_reg == {2'b1,position_in_line});
-          endcase
-        2'd1: //2 lines
-          cursor_in_pos = (cursor_pos_reg[3:0] == position_in_line) & (current_line[1] == cursor_pos_reg[4]);
-        2'd0: //1 line
-           cursor_in_pos = (cursor_pos_reg[3:0] == position_in_line);
-      endcase
-    end
+    case(line_count)
+      2'd3: //4 lines
+         cursor_in_pos = (cursor_pos_reg == {current_line,position_in_line});
+      2'd2: //3 lines
+        case(current_line)
+          2'd0: cursor_in_pos = (cursor_pos_reg == {2'd0,position_in_line});
+          2'd3: cursor_in_pos = (cursor_pos_reg == {2'd2,position_in_line});
+          default: cursor_in_pos = (cursor_pos_reg == {2'b1,position_in_line});
+        endcase
+      2'd1: //2 lines
+        cursor_in_pos = (cursor_pos_reg[3:0] == position_in_line) & (current_line[1] == cursor_pos_reg[4]);
+      2'd0: //1 line
+         cursor_in_pos = (cursor_pos_reg[3:0] == position_in_line);
+    endcase
+
   assign cursor_flash_on = ~cursor_flash | cursor_counter[CURSOR_COUNTER_SIZE];
-  always@(posedge clk or posedge rst) //Store cursor configs
-    begin
-      if(rst)
-        begin
-          cursor_pos_reg <= 6'd0;
-          cursor_flash_mode  <= 1'd0;
-          cursor_enable_reg  <= 1'd0;
-        end
-      else
-        begin
-          cursor_pos_reg <= (cursor_update & inUpdate) ? cursor_pos : cursor_pos_reg;
-          cursor_flash_mode <= (cursor_update & inUpdate) ? cursor_counter[CURSOR_COUNTER_SIZE] : cursor_flash_mode;
-          cursor_enable_reg <= (cursor_update & inUpdate) ? cursor_enable : cursor_enable_reg;
-        end
+
+  always@(posedge clk or posedge rst) begin //Store cursor configs  
+    if(rst) begin
+      cursor_pos_reg <= 6'd0;
+      cursor_flash_mode  <= 1'd0;
+      cursor_enable_reg  <= 1'd0;
+    end else begin
+      cursor_pos_reg <= (cursor_update & inUpdate) ? cursor_pos : cursor_pos_reg;
+      cursor_flash_mode <= (cursor_update & inUpdate) ? cursor_counter[CURSOR_COUNTER_SIZE] : cursor_flash_mode;
+      cursor_enable_reg <= (cursor_update & inUpdate) ? cursor_enable : cursor_enable_reg;
     end
-  always@(posedge clk or posedge rst) //Cursor counter
-    begin
-      if(rst)
-        begin
-          cursor_counter <= {(CURSOR_COUNTER_SIZE+1){1'b0}}; 
-        end
-      else
-        begin
-          cursor_counter <= cursor_counter + {{CURSOR_COUNTER_SIZE{1'b0}},(cursor_enable & cursor_flash)}; 
-        end
+  end
+
+  always@(posedge clk or posedge rst) begin //Cursor counter
+    if(rst) begin
+      cursor_counter <= {(CURSOR_COUNTER_SIZE+1){1'b0}}; 
+    end else begin
+      cursor_counter <= cursor_counter + {{CURSOR_COUNTER_SIZE{1'b0}},(cursor_enable & cursor_flash)}; 
     end
+  end
+
   assign cursor_update = (cursor_pos != cursor_pos_reg) | (cursor_enable != cursor_enable_reg) | (cursor_flash_mode != cursor_counter[CURSOR_COUNTER_SIZE]); 
 
   //Helper modules for decoding
@@ -806,11 +684,10 @@ module oled_bitmap#(parameter CLK_PERIOD = 10)(
   assign vbat_c = vbat_reg;
 
   //Use registers for stable power control
-  always@(posedge ext_spi_clk)
-    begin
-      vdd_reg <= inPowerOff;
-      vbat_reg <= inPowerOff | inPOnSDelay | inPOffDelay;
-    end
+  always@(posedge ext_spi_clk) begin
+    vdd_reg <= inPowerOff;
+    vbat_reg <= inPowerOff | inPOnSDelay | inPOffDelay;
+  end
   
   //State decoding
   assign         inIdle = (state == IDLE);
@@ -832,159 +709,85 @@ module oled_bitmap#(parameter CLK_PERIOD = 10)(
   assign     inSPIState = inUpdate | inChContrast | inPOnSDisOff | inPOnSInitDis | inChDisplay | inWriteAddrs;
 
   //SPI flags
-  always@(negedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          spi_done <= 1'b0;
-        end
-      else
-        case(spi_done)
-          1'b0: spi_done <= spi_working & last_byte & bit_counter_done;
-          1'b1: spi_done <= 1'b0;
-        endcase
-    end
-  always@(negedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          spi_working <= 1'b0;
-        end
-      else
-        case(spi_working)
-          1'b0: spi_working <= ~spi_done & inSPIState & spi_clk;
-          1'b1: spi_working <= ~spi_done;
-        endcase
-    end
+  always@(negedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      spi_done <= 1'b0;
+    end else case(spi_done)
+      1'b0: spi_done <= spi_working & last_byte & bit_counter_done;
+      1'b1: spi_done <= 1'b0;
+    endcase
+  end
+
+  always@(negedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      spi_working <= 1'b0;
+    end else case(spi_working)
+      1'b0: spi_working <= ~spi_done & inSPIState & spi_clk;
+      1'b1: spi_working <= ~spi_done;
+    endcase
+  end
 
   //State transactions
-  always@(posedge spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          state <= POWER_OFF;
+  always@(posedge spi_clk or posedge rst) begin
+    if(rst) begin
+      state <= POWER_OFF;
+    end else case(state)
+      POWER_OFF      : state <= (power_on) ? PONS_DELAY : state;
+      PONS_DELAY     : state <= (delay_done) ? RESET : state;
+      RESET          : state <= (delay_done) ?  POST_RESET : state;
+      POST_RESET     : state <= (delay_done) ?  PONS_DIS_OFF : state;
+      PONS_DIS_OFF   : state <= (spi_done) ? PONS_DIS_WAIT : state;
+      PONS_DIS_WAIT  : state <= (delay_done) ? PONS_INIT_DIS : state;
+      PONS_INIT_DIS  : state <= (spi_done) ? PONS_INIT_WAIT : state;
+      PONS_INIT_WAIT : state <= (delay_done) ? DISPLAY_OFF : state;
+      CH_DISPLAY     : state <= (spi_done) ? ((~power_on | display_off_reg) ? DISPLAY_OFF : IDLE): state;
+      CH_CONTRAST    : state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
+      UPDATE         : state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
+      POFFS_DELAY    : state <= (delay_done) ?  POWER_OFF : state;
+      WRITE_ADDRS    : state <= (spi_done) ?  UPDATE : state;
+      IDLE: begin
+        if(display_reset_reg) begin
+          state <= RESET;
+        end else if(~power_on | display_off) begin
+          state <= CH_DISPLAY;
+        end else if(ch_contrast) begin
+          state <= CH_CONTRAST;
+        end else if(update_reg) begin
+          state <= WRITE_ADDRS;
         end
-      else
-        begin
-          case(state)
-            POWER_OFF:
-              begin
-                state <= (power_on) ? PONS_DELAY : state;
-              end
-            PONS_DELAY:
-              begin
-                state <= (delay_done) ? RESET : state;
-              end
-            RESET:
-              begin
-                state <= (delay_done) ?  POST_RESET : state;
-              end
-            POST_RESET:
-              begin
-                state <= (delay_done) ?  PONS_DIS_OFF : state;
-              end
-            PONS_DIS_OFF:
-              begin
-                state <= (spi_done) ? PONS_DIS_WAIT : state;
-              end
-            PONS_DIS_WAIT:
-              begin
-                state <= (delay_done) ? PONS_INIT_DIS : state;
-              end
-            PONS_INIT_DIS:
-              begin
-                state <= (spi_done) ? PONS_INIT_WAIT : state;
-              end
-            PONS_INIT_WAIT:
-              begin
-                state <= (delay_done) ? DISPLAY_OFF : state;
-              end
-            CH_DISPLAY:
-              begin
-                state <= (spi_done) ? ((~power_on | display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            CH_CONTRAST:
-              begin
-                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            UPDATE:
-              begin
-                state <= (spi_done) ? ((display_off_reg) ? DISPLAY_OFF : IDLE): state;
-              end
-            POFFS_DELAY:
-              begin
-                state <= (delay_done) ?  POWER_OFF : state;
-              end
-            WRITE_ADDRS:
-              begin
-                state <= (spi_done) ?  UPDATE : state;
-              end
-            IDLE:
-              begin
-                if(display_reset_reg)
-                  begin
-                    state <= RESET;
-                  end
-                else if(~power_on | display_off)
-                  begin
-                    state <= CH_DISPLAY;
-                  end
-                else if(ch_contrast)
-                  begin
-                    state <= CH_CONTRAST;
-                  end
-                else if(update_reg)
-                  begin
-                    state <= WRITE_ADDRS;
-                  end
-              end
-            DISPLAY_OFF:
-              begin
-                if(display_reset_reg)
-                  begin
-                    state <= RESET;
-                  end
-                else if(~power_on)
-                  begin
-                    state <= POFFS_DELAY;
-                  end
-                else if(~display_off)
-                  begin
-                    state <= CH_DISPLAY;
-                  end
-                else if(ch_contrast)
-                  begin
-                    state <= CH_CONTRAST;
-                  end
-                else if(update_reg)
-                  begin
-                    state <= WRITE_ADDRS;
-                  end
-              end
-          endcase
+      end
+      DISPLAY_OFF: begin
+        if(display_reset_reg) begin
+          state <= RESET;
+        end else if(~power_on) begin
+          state <= POFFS_DELAY;
+        end else if(~display_off) begin
+          state <= CH_DISPLAY;
+        end else if(ch_contrast) begin
+          state <= CH_CONTRAST;
+        end else if(update_reg) begin
+          state <= WRITE_ADDRS;
         end
-    end
+      end
+    endcase
+  end
   
   //Clk domain change for inputs
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          display_reset_reg <= 1'b0;
-          update_reg <= 1'b0;
-        end
-      else
-        begin
-          case(update_reg)
-            1'b0: update_reg <= update;
-            1'b1: update_reg <= ~inUpdate;
-          endcase
-          case(display_reset_reg)
-            1'b0: display_reset_reg <= display_reset;
-            1'b1: display_reset_reg <= ~inReset;
-          endcase
-        end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      display_reset_reg <= 1'b0;
+      update_reg <= 1'b0;
+    end else begin
+      case(update_reg)
+        1'b0: update_reg <= update;
+        1'b1: update_reg <= ~inUpdate;
+      endcase
+      case(display_reset_reg)
+        1'b0: display_reset_reg <= display_reset;
+        1'b1: display_reset_reg <= ~inReset;
+      endcase
     end
+  end
 
   //Send buffer control
   assign send_buffer_shift = ~send_buffer_write;
@@ -992,80 +795,71 @@ module oled_bitmap#(parameter CLK_PERIOD = 10)(
 
   //Determine send_buffer_next
   always@*
-    begin
-      case(state)
-        WRITE_ADDRS:
-          case(byte_counter)
-            //Set colmn limits
-            9'h00:  send_buffer_next = CMD_SET_CLMN_ADDRS;
-            9'h01:  send_buffer_next = 8'd0;
-            9'h02:  send_buffer_next = 8'd127;
-            //Set page limits
-            9'h03:  send_buffer_next = CMD_SET_PAGE_ADDRS;
-            9'h04:  send_buffer_next = 8'd0;
-            9'h05:  send_buffer_next = 8'd3;
-            9'h06:  send_buffer_next = CMD_SET_HIGH_CLMN_0;
-            default: send_buffer_next = CMD_NOP;
-          endcase
-        PONS_INIT_DIS:
-          case(byte_counter)
-            //Charge pump enable 
-            9'h00:  send_buffer_next = CMD_CHRG_PMP_CONF;
-            9'h01:  send_buffer_next = CONFIG_CHRG_PMP_CONF;
-            //Set pre-charge period 
-            9'h02:  send_buffer_next = CMD_PRE_CHR_P;
-            9'h03:  send_buffer_next = CONFIG_PRE_CHR_P;
-            //Column inversion enable 
-            9'h04:  send_buffer_next = CMD_SEG_INV_ENABLE;
-            //COM Output Scan Direction
-            9'h05:  send_buffer_next = CMD_SCAN_DIR_INVRT;
-            //COM pins configuration 
-            9'h06:  send_buffer_next = CMD_COM_CONFIG;
-            9'h07:  send_buffer_next = CONFIG_COM_CONFIG;
-            //Set addressing mode
-            9'h08:  send_buffer_next = CMD_SET_ADDRS_MODE;
-            9'h09:  send_buffer_next = {6'h0,ADDRS_MODE_HOR};
-            default: send_buffer_next = CMD_NOP;
-          endcase
-        PONS_DIS_OFF: send_buffer_next = CMD_DISPLAY_OFF;
-        CH_CONTRAST:
-          case(byte_counter)
-            9'h0: send_buffer_next = CMD_SET_CONSTRAST;
-            9'h1: send_buffer_next = contrast_reg;
-            default: send_buffer_next = CMD_NOP;
-          endcase
-        CH_DISPLAY: send_buffer_next = (display_off_reg) ? CMD_DISPLAY_OFF : CMD_DISPLAY_ON;
-        UPDATE:
-          send_buffer_next = column_array[byte_counter];
-        default: send_buffer_next = CMD_NOP;
-      endcase
-    end
+    case(state)
+      WRITE_ADDRS:
+        case(byte_counter)
+          //Set colmn limits
+          9'h00:  send_buffer_next = CMD_SET_CLMN_ADDRS;
+          9'h01:  send_buffer_next = 8'd0;
+          9'h02:  send_buffer_next = 8'd127;
+          //Set page limits
+          9'h03:  send_buffer_next = CMD_SET_PAGE_ADDRS;
+          9'h04:  send_buffer_next = 8'd0;
+          9'h05:  send_buffer_next = 8'd3;
+          9'h06:  send_buffer_next = CMD_SET_HIGH_CLMN_0;
+          default: send_buffer_next = CMD_NOP;
+        endcase
+      PONS_INIT_DIS:
+        case(byte_counter)
+          //Charge pump enable 
+          9'h00:  send_buffer_next = CMD_CHRG_PMP_CONF;
+          9'h01:  send_buffer_next = CONFIG_CHRG_PMP_CONF;
+          //Set pre-charge period 
+          9'h02:  send_buffer_next = CMD_PRE_CHR_P;
+          9'h03:  send_buffer_next = CONFIG_PRE_CHR_P;
+          //Column inversion enable 
+          9'h04:  send_buffer_next = CMD_SEG_INV_ENABLE;
+          //COM Output Scan Direction
+          9'h05:  send_buffer_next = CMD_SCAN_DIR_INVRT;
+          //COM pins configuration 
+          9'h06:  send_buffer_next = CMD_COM_CONFIG;
+          9'h07:  send_buffer_next = CONFIG_COM_CONFIG;
+          //Set addressing mode
+          9'h08:  send_buffer_next = CMD_SET_ADDRS_MODE;
+          9'h09:  send_buffer_next = {6'h0,ADDRS_MODE_HOR};
+          default: send_buffer_next = CMD_NOP;
+        endcase
+      PONS_DIS_OFF: send_buffer_next = CMD_DISPLAY_OFF;
+      CH_CONTRAST:
+        case(byte_counter)
+          9'h0: send_buffer_next = CMD_SET_CONSTRAST;
+          9'h1: send_buffer_next = contrast_reg;
+          default: send_buffer_next = CMD_NOP;
+        endcase
+      CH_DISPLAY: 
+        send_buffer_next = (display_off_reg) ? CMD_DISPLAY_OFF : CMD_DISPLAY_ON;
+      UPDATE:
+        send_buffer_next = column_array[byte_counter];
+      default: send_buffer_next = CMD_NOP;
+    endcase
   
-  always@(negedge spi_clk)
-    begin
-      if(send_buffer_write)
-        begin
-          send_buffer <= send_buffer_next;
-        end
-      else
-        begin
-          send_buffer <= (send_buffer_shift) ? {send_buffer[6:0],send_buffer[0]} : send_buffer;
-        end
+  always@(negedge spi_clk) begin
+    if(send_buffer_write) begin
+      send_buffer <= send_buffer_next;
+    end else begin
+      send_buffer <= (send_buffer_shift) ? {send_buffer[6:0],send_buffer[0]} : send_buffer;
     end
+  end
 
   //Byte counter
   assign {current_line, position_in_line} = byte_counter[8:3];
-  always@(negedge ext_spi_clk)
-    begin
-      if(~spi_working)
-        begin
-          byte_counter <= 9'h0;
-        end
-      else
-        begin
-          byte_counter <= byte_counter + {8'h0, (~last_byte & bit_counter_done & spi_clk)};
-        end
+  always@(negedge ext_spi_clk) begin
+    if(~spi_working) begin
+      byte_counter <= 9'h0;
+    end else begin
+      byte_counter <= byte_counter + {8'h0, (~last_byte & bit_counter_done & spi_clk)};
     end
+  end
   
   //last byte
   always@*
@@ -1080,55 +874,44 @@ module oled_bitmap#(parameter CLK_PERIOD = 10)(
   //Bit counter
   always@* bit_counter_done = &bit_counter;
   
-  always@(negedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          bit_counter <= 3'd0;
-        end
-      else
-        begin
-          bit_counter <= bit_counter + {2'd0, spi_working & spi_clk};
-        end
+  always@(negedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      bit_counter <= 3'd0;
+    end else begin
+      bit_counter <= bit_counter + {2'd0, spi_working & spi_clk};
     end
+  end
 
   //Delay Signals and edge detect
   assign inChContrast_posedge = ~inChContrast_d & inChContrast;
-  always@(posedge clk)
-    begin
-      inChContrast_d <= inChContrast;
-      state_d <= state;
-    end
+  always@(posedge clk) begin
+    inChContrast_d <= inChContrast;
+    state_d <= state;
+  end
   
   //Store Signals & Configs
-  always@(posedge clk)
-    begin
-      if(rst | inReset) begin
-          contrast_reg <= 8'h7F;
-      end else begin
-          contrast_reg <= (inChContrast_posedge) ? contrast : contrast_reg;
-      end
+  always@(posedge clk) begin
+    if(rst | inReset) begin
+        contrast_reg <= 8'h7F;
+    end else begin
+        contrast_reg <= (inChContrast_posedge) ? contrast : contrast_reg;
     end
-  always@(posedge clk)
-    begin
-      display_off_reg <= (inIdle | inPowerOff | inDisplayOff) ? display_off : display_off_reg;
-    end
+  end
+  always@(posedge clk) begin
+    display_off_reg <= (inIdle | inPowerOff | inDisplayOff) ? display_off : display_off_reg;
+  end
 
   //Change flags
   assign ch_contrast = (contrast_reg != contrast);
 
   //Generate spi clock
-  always@(posedge ext_spi_clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          spi_clk <= 1'b1;
-        end
-      else
-        begin
-          spi_clk <= ~spi_clk;
-        end
+  always@(posedge ext_spi_clk or posedge rst) begin
+    if(rst) begin
+      spi_clk <= 1'b1;
+    end else begin
+      spi_clk <= ~spi_clk;
     end
+  end
   
   //Delay wait
   assign delaying = ~delay_done & inDelayState;
@@ -1143,31 +926,23 @@ module oled_bitmap#(parameter CLK_PERIOD = 10)(
       default: delay_count_done = 1'b1;
     endcase
   
-  always@(posedge clk)
-    begin
-      if(delay_done | rst)
-        begin
-          delay_counter <= {COUNTER_SIZE+1{1'b0}};
-        end
-      else
-        begin
-          delay_counter <= delay_counter + {{COUNTER_SIZE{1'b0}},delaying};
-        end
+  always@(posedge clk) begin
+    if(delay_done | rst) begin
+      delay_counter <= {COUNTER_SIZE+1{1'b0}};
+    end else begin
+      delay_counter <= delay_counter + {{COUNTER_SIZE{1'b0}},delaying};
     end
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          delay_done <= 1'b0;
-        end
-      else
-        begin
-          case(delay_done)
-            1'b0: delay_done <= delay_count_done;
-            1'b1: delay_done <= (state_d == state); //Delay done when we change state
-          endcase
-        end
+  end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      delay_done <= 1'b0;
+    end else begin
+      case(delay_done)
+        1'b0: delay_done <= delay_count_done;
+        1'b1: delay_done <= (state_d == state); //Delay done when we change state
+      endcase
     end
+  end
 
   //Map bitmap into column_array
   always@* //Inside of this always generated automatically

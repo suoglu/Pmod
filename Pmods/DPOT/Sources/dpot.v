@@ -38,73 +38,42 @@ module dpot(
 
   //Shift and load buffer
   assign MOSI = buffer[7];
-  always@(negedge SCLK)
-    begin
-      if(~inTx)
-        begin
-          buffer <= value;
-        end
-      else
-        begin
-          buffer <= (buffer << 1);
-        end
+  always@(negedge SCLK) begin
+    if(~inTx) begin
+      buffer <= value;
+    end else begin
+      buffer <= (buffer << 1);
     end
+  end
   
   //Transmisson counter
-  always@(negedge SCLK or posedge rst)
-    begin
-      if(rst)
-        begin
-          txCounter <= 3'd0;
-        end
-      else
-        begin
-          txCounter <= txCounter + {2'd0, inTx};
-        end
+  always@(negedge SCLK or posedge rst) begin
+    if(rst) begin
+      txCounter <= 3'd0;
+    end else begin
+      txCounter <= txCounter + {2'd0, inTx};
     end
+  end
   
   //chip select
-  always@(negedge SCLK or posedge rst)
-    begin
-      if(rst)
-        begin
-          nCS <= 1'b1;
-        end
-      else
-        begin
-          case(nCS)
-            1'b1:
-              begin
-                nCS <= ready;
-              end
-            1'b0:
-              begin
-                nCS <= countDone;
-              end
-          endcase
-        end
-    end
+  always@(negedge SCLK or posedge rst) begin
+    if(rst) begin
+      nCS <= 1'b1;
+    end else case(nCS)
+      1'b1: nCS <= ready;
+      1'b0: nCS <= countDone;
+    endcase
+  end
+
   //ready
-  always@(posedge SCLK or posedge rst)
-    begin
-      if(rst)
-        begin
-          ready <= 1'b1;
-        end
-      else
-        begin
-          case(ready)
-            1'b1:
-              begin
-                ready <= ~update;
-              end
-            1'b0:
-              begin
-                ready <= nCS;
-              end
-          endcase
-        end
-    end
+  always@(posedge SCLK or posedge rst) begin
+    if(rst) begin
+      ready <= 1'b1;
+    end else case(ready)
+      1'b1: ready <= ~update;
+      1'b0: ready <= nCS;
+    endcase
+  end
 endmodule
 
 module clkDiv4(
@@ -114,29 +83,21 @@ module clkDiv4(
 
   reg clk_m;
 
-  always@(posedge clk_i or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_m <= 1'b0;
-        end
-      else
-        begin
-          clk_m <= ~clk_m;
-        end
+  always@(posedge clk_i or posedge rst) begin
+    if(rst) begin
+      clk_m <= 1'b0;
+    end else begin
+      clk_m <= ~clk_m;
     end
-  
-  always@(posedge clk_m or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_o <= 1'b0;
-        end
-      else
-        begin
-          clk_o <= ~clk_o;
-        end
+  end
+
+  always@(posedge clk_m or posedge rst) begin
+    if(rst) begin
+      clk_o <= 1'b0;
+    end else begin
+      clk_o <= ~clk_o;
     end
+  end
 endmodule
 
 module autoUpdate(
@@ -152,36 +113,20 @@ module autoUpdate(
 
   assign notEqual = ~(value == valueStore);
 
-  always@(posedge update or posedge rst)
-    begin
-      if(rst)
-        begin
-          valueStore <= value;
-        end
-      else
-        begin
-          valueStore <= value;
-        end
+  always@(posedge update or posedge rst) begin
+    if(rst) begin
+      valueStore <= value;
+    end else begin
+      valueStore <= value;
     end
+  end
 
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          update <= 1'd0;
-        end
-      else
-        begin
-          case(update)
-            1'd0:
-              begin
-                update <= notEqual & ready;
-              end
-            1'd1:
-              begin
-                update <= ready;
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      update <= 1'd0;
+    end else case(update)
+      1'd0:update <= notEqual & ready;
+      1'd1: update <= ready;
+    endcase
+  end
 endmodule

@@ -46,106 +46,56 @@ module tc1(
   assign inALL  = (state == UP_ALL);
 
   //Capture update signals
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          update_reg       <= 1'b0;
-          update_all_reg   <= 1'b0;
-          update_fault_reg <= 1'b0;
-        end
-      else
-        begin
-          case(update_reg)
-            1'b0:
-              begin
-                update_reg <= ~bitCountDone_reg & inIDLE & update;
-              end
-            1'b1:
-              begin
-                update_reg <= inIDLE;
-              end
-          endcase
-          case(update_fault_reg)
-            1'b0:
-              begin
-                update_fault_reg <= ~bitCountDone_reg & inIDLE & update_fault;
-              end
-            1'b1:
-              begin
-                update_fault_reg <= inIDLE;
-              end
-          endcase
-          case(update_all_reg)
-            1'b0:
-              begin
-                update_all_reg <= ~bitCountDone_reg & inIDLE & update_all;
-              end
-            1'b1:
-              begin
-                update_all_reg <= inIDLE;
-              end
-          endcase
-        end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      update_reg       <= 1'b0;
+      update_all_reg   <= 1'b0;
+      update_fault_reg <= 1'b0;
+    end else begin
+      case(update_reg)
+        1'b0: update_reg <= ~bitCountDone_reg & inIDLE & update;
+        1'b1: update_reg <= inIDLE;
+      endcase
+      case(update_fault_reg)
+        1'b0: update_fault_reg <= ~bitCountDone_reg & inIDLE & update_fault;
+        1'b1: update_fault_reg <= inIDLE;
+      endcase
+      case(update_all_reg)
+        1'b0: update_all_reg <= ~bitCountDone_reg & inIDLE & update_all;
+        1'b1: update_all_reg <= inIDLE;
+      endcase
     end
+  end
   
   //Capture bitCountDone
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          bitCountDone_reg <= bitCountDone;
-        end
-      else
-        begin
-          case(bitCountDone_reg)
-            1'b0:
-              begin
-                bitCountDone_reg <= bitCountDone & |bitCounter;
-              end
-            1'b1:
-              begin
-                bitCountDone_reg <= |bitCounter;
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      bitCountDone_reg <= bitCountDone;
+    end else case(bitCountDone_reg)
+      1'b0: bitCountDone_reg <= bitCountDone & |bitCounter;
+      1'b1: bitCountDone_reg <= |bitCounter;
+    endcase
+  end
 
   //State transactions
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          state <= IDLE;
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      state <= IDLE;
+    end else case(state)
+      IDLE: begin
+          if(clk_spi) begin//We switch when clk_spi high to met timing
+            if(update_all_reg) begin
+              state <= UP_ALL;
+            end else if(update_fault_reg) begin
+              state <= UP_FLT;
+            end else if(update_reg) begin
+              state <= UP_STD;
+            end
+          end
         end
-      else
-        begin
-          case(state)
-            IDLE:
-              begin
-                if(clk_spi) 
-                  begin//We switch when clk_spi high to met timing
-                    if(update_all_reg)
-                      begin
-                        state <= UP_ALL;
-                      end
-                    else if(update_fault_reg)
-                      begin
-                        state <= UP_FLT;
-                      end
-                    else if(update_reg)
-                      begin
-                        state <= UP_STD;
-                      end
-                  end
-              end
-            default:
-              begin
-                state <= (bitCountDone & SCLK) ? IDLE : state;
-              end
-          endcase
-        end
-    end
+      default: state <= (bitCountDone & SCLK) ? IDLE : state;
+    endcase
+  end
 
   //State derived signals
   assign CS = ~SCLK_mask & inIDLE;
@@ -161,91 +111,53 @@ module tc1(
     end
   
   //Buffer to output ports
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          temperature_termoc <= 14'd0;
-          temperature_internal <= 12'd0;
-          status <= 2'd0;
-          fault <= 1'd0;
-        end
-      else
-        case(state)
-          UP_STD:
-            begin
-              temperature_termoc <= buffer[13:0];
-            end
-          UP_FLT:
-            begin
-              temperature_termoc <= buffer[15:2];
-              fault <= buffer[0];
-            end
-          UP_ALL:
-            begin
-              temperature_termoc <= buffer[31:18];
-              fault <= buffer[16];
-              temperature_internal <= buffer[15:4];
-              status <= buffer[2:0];
-            end
-        endcase
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      temperature_termoc <= 14'd0;
+      temperature_internal <= 12'd0;
+      status <= 2'd0;
+      fault <= 1'd0;
+    end else case(state)
+      UP_STD: temperature_termoc <= buffer[13:0];
+      UP_FLT: begin
+        temperature_termoc <= buffer[15:2];
+        fault <= buffer[0];
+      end
+      UP_ALL: begin
+        temperature_termoc <= buffer[31:18];
+        fault <= buffer[16];
+        temperature_internal <= buffer[15:4];
+        status <= buffer[2:0];
+      end
+    endcase
+  end
   
   //Determine bitCountDone
-  always@*
-    begin
+  always@* begin
       case(state)
-        UP_STD:
-          begin
-            bitCountDone = (bitCounter == 6'd13);
-          end
-        UP_FLT:
-          begin
-            bitCountDone = (bitCounter == 6'd15);
-          end
-        UP_ALL:
-          begin
-            bitCountDone = (bitCounter == 6'd31);
-          end
-        default:
-          begin
-            bitCountDone = (bitCounter == 6'h0);
-          end
+        UP_STD : bitCountDone = (bitCounter == 6'd13);
+        UP_FLT : bitCountDone = (bitCounter == 6'd15);
+        UP_ALL : bitCountDone = (bitCounter == 6'd31);
+        default: bitCountDone = (bitCounter == 6'h0);
       endcase
     end
   
   //Count negative edges of clock
-  always@(negedge SCLK or posedge rst)
-    begin
-      if(rst)
-        begin
-          bitCounter <= 6'd0;
-        end
-      else
-        begin
-          bitCounter <= (bitCountDone_reg) ? 6'h0 : bitCounter + 6'h1;
-        end
+  always@(negedge SCLK or posedge rst) begin
+    if(rst) begin
+      bitCounter <= 6'd0;
+    end else begin
+      bitCounter <= (bitCountDone_reg) ? 6'h0 : bitCounter + 6'h1;
     end
+  end
   
   //Clock mask
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          SCLK_mask <= 1'b0;
-        end
-      else
-        begin
-          case(SCLK_mask)
-            1'b0:
-              begin
-                SCLK_mask <= ~clk_spi & ~inIDLE;
-              end
-            1'b1:
-              begin
-                SCLK_mask <= ~(~clk_spi & inIDLE);
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      SCLK_mask <= 1'b0;
+    end else case(SCLK_mask)
+      1'b0: SCLK_mask <= ~clk_spi & ~inIDLE;
+      1'b1: SCLK_mask <= ~(~clk_spi & inIDLE);
+    endcase
+  end
 endmodule

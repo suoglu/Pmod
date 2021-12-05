@@ -35,40 +35,31 @@ module enc#(
 
   //Internal clock divider
   assign clk = (DIVIDER_EN) ? clockCounter[CLOCKDIVISION-1] : clkSys;
-  always@(posedge clkSys or posedge rst)
-    begin
-      if(rst)
-        begin
-          clockCounter <= 0;
-        end
-      else
-        begin
-          clockCounter <= clockCounter + 1;
-        end
+  always@(posedge clkSys or posedge rst) begin
+    if(rst) begin
+      clockCounter <= 0;
+    end else begin
+      clockCounter <= clockCounter + 1;
     end
+  end
   
   //Clean glitches
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin 
-          A_buffer <= 16'hFFFF;
-          B_buffer <= 16'hFFFF;
-        end
-      else
-        begin
-          A_buffer <= {A_buffer[14:0], A};
-          B_buffer <= {B_buffer[14:0], B};
-        end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin 
+      A_buffer <= 16'hFFFF;
+      B_buffer <= 16'hFFFF;
+    end else begin
+      A_buffer <= {A_buffer[14:0], A};
+      B_buffer <= {B_buffer[14:0], B};
     end
+  end
   
-  always@(posedge clk)
-    begin
-      A_d <= &A_buffer;
-      B_d <= &B_buffer;
-      A_dd <= A_d;
-      B_dd <= B_d;
-    end
+  always@(posedge clk) begin
+    A_d <= &A_buffer;
+    B_d <= &B_buffer;
+    A_dd <= A_d;
+    B_dd <= B_d;
+  end
 
   assign A_negedge = ~A_d & A_dd;
   assign B_negedge = ~B_d & B_dd;

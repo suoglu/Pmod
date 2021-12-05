@@ -24,33 +24,29 @@ module hb3(
 
   assign counter_up = (speed != 8'hff) & (speed != 8'h00);
 
-  always@(posedge clk or posedge rst)
-      if(rst) begin
-        counter <= 8'h0;
-      end else begin
-        counter <= counter + {7'h0,counter_up};
-      end
-
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst) begin
-        motor_enable <= 1'b0;
-      end else begin
-        case(speed)
-          8'h00: motor_enable <= 1'b0;
-          8'hFF: motor_enable <= (direction_control != motor_direction) ? 1'b0: 1'b1;
-          default: 
-            case(motor_enable)
-              1'b0: motor_enable <= ~|counter;
-              1'b1: motor_enable <= counter != speed;
-            endcase
-        endcase
-      end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      counter <= 8'h0;
+    end else begin
+      counter <= counter + {7'h0,counter_up};
     end
+  end
 
-  always@(posedge clk)
-    case(motor_enable)
-      1'b0:    motor_direction <= direction_control;
-      default: motor_direction <= motor_direction;
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      motor_enable <= 1'b0;
+    end else case(speed)
+      8'h00   : motor_enable <= 1'b0;
+      8'hFF   : motor_enable <= (direction_control != motor_direction) ? 1'b0: 1'b1;
+      default : 
+        case(motor_enable)
+          1'b0: motor_enable <= ~|counter;
+          1'b1: motor_enable <= counter != speed;
+        endcase
     endcase
+  end
+
+  always@(posedge clk) begin
+    motor_direction <= (motor_enable) ? motor_direction : direction_control;
+  end
 endmodule

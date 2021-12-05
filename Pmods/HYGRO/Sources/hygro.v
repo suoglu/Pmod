@@ -100,49 +100,30 @@ module hygro(
   assign I2Cinit = ~inSLEEP;
 
   //State transactions
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
+  always@(posedge clk or posedge rst) begin
+      if(rst) begin
         state <= SLEEP;
-      else
-        case(state)
-          SLEEP:
-            begin
-              if(swRst)
-                state <= SWRST;
-              else if(updateConfig)
-                state <= CONFIG;
-              else if(measureT)
-                state <= TADDRS;
-              else if(measureH)
-                begin
-                  if(modeBoth)
-                    state <= TADDRS;
-                  else
-                    state <= HADDRS;
-                end
-            end
-          CONFIG:
-            begin
-              state <= (I2Cdone) ? SLEEP : state;
-            end
-          SWRST:
-            begin
-              state <= (I2Cdone) ? SLEEP : state;
-            end
-          TADDRS:
-            begin
-              state <= (I2Cdone) ? GETRES : state;
-            end
-          HADDRS:
-            begin
-              state <= (I2Cdone) ? GETRES : state;
-            end
-          GETRES:
-            begin
-              state <= (I2Cdone) ? SLEEP : state;
-            end
-        endcase
+      end else case(state)
+        SLEEP: begin
+          if(swRst)
+            state <= SWRST;
+          else if(updateConfig)
+            state <= CONFIG;
+          else if(measureT)
+            state <= TADDRS;
+          else if(measureH) begin
+            if(modeBoth)
+              state <= TADDRS;
+            else
+              state <= HADDRS;
+          end
+        end
+        CONFIG: state <= (I2Cdone) ? SLEEP : state;
+        SWRST : state <= (I2Cdone) ? SLEEP : state;
+        TADDRS: state <= (I2Cdone) ? GETRES : state;
+        HADDRS: state <= (I2Cdone) ? GETRES : state;
+        GETRES: state <= (I2Cdone) ? SLEEP : state;
+      endcase
     end
 
   //I2C states and I2C state drived signals
@@ -159,289 +140,173 @@ module hygro(
 
   //I2C state transactions
   assign I2Cdone = i2cByteCounterDONE & I2Cin_STOP;
-  always@(negedge i2c_2clk)
-    begin
-      SDA_dd <= SDA;
-    end
-  always@(negedge i2c_2clk or posedge rst)
-    begin
-      if(rst)
-        i2c_state <= I2C_READY;
-      else
-        case(i2c_state)
-          I2C_READY:
-            begin
-              i2c_state <= (~i2c_busy & I2Cinit & i2c_clk) ? I2C_START : i2c_state;
-            end
-          I2C_START:
-            begin
-              i2c_state <= (~SCL) ? I2C_ADDRS : i2c_state;
-            end
-          I2C_ADDRS:
-            begin
-              i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_WRITE_ACK : i2c_state;
-            end
-          I2C_WRITE_ACK:
-            begin
-              i2c_state <= (~SCL) ? ((~SDA_dd & ~i2cByteCounterDONE) ? ((~inGETRES) ? I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
-            end
-          I2C_WRITE:
-            begin
-              i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_WRITE_ACK : i2c_state;
-            end
-          I2C_READ:
-            begin
-              i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_READ_ACK : i2c_state;
-            end
-          I2C_READ_ACK:
-            begin
-              i2c_state <= (~SCL) ? ((i2cByteCounterDONE) ? I2C_STOP : I2C_READ) : i2c_state;
-            end
-          I2C_STOP:
-            begin
-              i2c_state <= (SCL) ?  I2C_READY : i2c_state;
-            end
-        endcase
-    end
+  always@(negedge i2c_2clk) begin
+    SDA_dd <= SDA;
+  end
+  always@(negedge i2c_2clk or posedge rst) begin
+    if(rst)
+      i2c_state <= I2C_READY;
+    else case(i2c_state)
+      I2C_READY     : i2c_state <= (~i2c_busy & I2Cinit & i2c_clk) ? I2C_START : i2c_state;
+      I2C_START     : i2c_state <= (~SCL) ? I2C_ADDRS : i2c_state;
+      I2C_ADDRS     : i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_WRITE_ACK : i2c_state;
+      I2C_WRITE_ACK : i2c_state <= (~SCL) ? ((~SDA_dd & ~i2cByteCounterDONE) ? ((~inGETRES) ? I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
+      I2C_WRITE     : i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_WRITE_ACK : i2c_state;
+      I2C_READ      : i2c_state <= (~SCL & i2cBitCounterDONE) ? I2C_READ_ACK : i2c_state;
+      I2C_READ_ACK  : i2c_state <= (~SCL) ? ((i2cByteCounterDONE) ? I2C_STOP : I2C_READ) : i2c_state;
+      I2C_STOP      : i2c_state <= (SCL) ?  I2C_READY : i2c_state;
+    endcase
+  end
 
   //SDA content control
   assign dataUpdating = I2Cin_READ | I2Cin_READ_ACK;
   assign gettingTEM = ((i2cByteCounter == 3'd1) | ((i2cByteCounter == 3'd2) & (i2cBitCounter < 3'd6))) & (modeBoth | tempM);
   assign gettingHUM = ((i2cByteCounter == 3'd3) | ((i2cByteCounter == 3'd4) & (i2cBitCounter < 3'd6))) | ((i2cByteCounter == 3'd1) | ((i2cByteCounter == 3'd2) & (i2cBitCounter < 3'd6))) & humM;
-  always@(posedge clk)
-    begin
-      case(state)
-        SLEEP:
-          begin
-            tempM <= 1'd0;
-             humM <= 1'd0;
-          end
-        TADDRS:
-          begin
-            tempM <= modeSingle;
-          end
-        HADDRS:
-          begin
-             humM <= modeSingle;
-          end
-      endcase 
-    end
+  always@(posedge clk) begin
+    case(state)
+      SLEEP: begin
+        tempM <= 1'd0;
+         humM <= 1'd0;
+      end
+      TADDRS: tempM <= modeSingle;
+      HADDRS: humM <= modeSingle;
+    endcase 
+  end
 
   //I2C signals control
   assign SCL = (I2Cin_READY) ? 1'bZ : i2c_clk;
   assign SDA = (SDA_Claim) ? SDA_Write : 1'bZ;
   assign SDA_Claim = I2Cin_START | I2Cin_ADDRS | I2Cin_WRITE | I2Cin_READ_ACK | I2Cin_STOP;
   assign SDA_Write = (I2Cin_READ_ACK | I2Cin_START | I2Cin_STOP) ? (I2Cin_READ_ACK & i2cByteCounterDONE) : SDAbuff[7];
-  always@(posedge clk)
-    begin
-      SDA_d <= SDA;
-    end
-  always@(posedge i2c_2clk)
-    begin
-      SCL_d <= SCL;
-    end
+  always@(posedge clk) begin
+    SDA_d <= SDA;
+  end
+  always@(posedge i2c_2clk) begin
+    SCL_d <= SCL;
+  end
   
   //I2C multi master control
   assign SDA_posedge = SDA & ~SDA_d;
   assign SDA_negedge = ~SDA & SDA_d;
   assign startCond = SCL & SDA_negedge;
   assign stopCond = SCL & SDA_posedge;
-  always@(posedge clk)
-    begin
-      if(I2Cin_READY)
-        begin
-          if(startCond)
-            i2c_busy <= 1'd1;
-          else if(stopCond)
-            i2c_busy <= 1'd0;
-        end
-      else
-        begin
-          i2c_busy <= 1'd0;
-        end
+  always@(posedge clk) begin
+    if(I2Cin_READY) begin //? is it needed?
+      if(startCond)
+        i2c_busy <= 1'd1;
+      else if(stopCond)
+        i2c_busy <= 1'd0;
+    end else begin
+      i2c_busy <= 1'd0;
     end
+  end
 
   //Responded
-  always@(negedge i2c_2clk)
-    begin
-      if(i2c_clk & I2Cin_WRITE_ACK & (i2cByteCounterDONE == 3'd1))
-        begin
-          sensNR <= SDA;
-        end
+  always@(negedge i2c_2clk) begin
+    if(i2c_clk & I2Cin_WRITE_ACK & (i2cByteCounterDONE == 3'd1))begin
+      sensNR <= SDA;
     end
+  end
 
   //I2C bit counter
   assign i2cBitCounterDONE = ~|i2cBitCounter;
-  always@(posedge SCL_d) 
-    begin
-      case(i2c_state)
-        I2C_ADDRS:
-          begin
-            i2cBitCounter <= i2cBitCounter + 3'd1;
-          end
-        I2C_WRITE:
-          begin
-            i2cBitCounter <= i2cBitCounter + 3'd1;
-          end
-        I2C_READ:
-          begin
-            i2cBitCounter <= i2cBitCounter + 3'd1;
-          end
-        default:
-          begin
-            i2cBitCounter <= 3'd0;
-          end
-      endcase
-    end
+  always@(posedge SCL_d) begin
+    case(i2c_state)
+      I2C_ADDRS : i2cBitCounter <= i2cBitCounter + 3'd1;
+      I2C_WRITE : i2cBitCounter <= i2cBitCounter + 3'd1;
+      I2C_READ  : i2cBitCounter <= i2cBitCounter + 3'd1;
+      default   : i2cBitCounter <= 3'd0;
+    endcase
+  end
 
   //I2C byte counter
-  always@(posedge I2Cin_ACK or posedge I2Cin_START)
-    begin
-      if(I2Cin_START)
-        begin
-          i2cByteCounter <= 3'd0;
-        end
-      else
-        begin
-          i2cByteCounter <= i2cByteCounter + 3'd1;
-        end
+  always@(posedge I2Cin_ACK or posedge I2Cin_START) begin
+    if(I2Cin_START) begin
+      i2cByteCounter <= 3'd0;
+    end else begin
+      i2cByteCounter <= i2cByteCounter + 3'd1;
     end
-  always@*
-    begin
-      case(state)
-        CONFIG:
-          begin
-            i2cByteCounterDONE = (i2cByteCounter == 3'd4);
-          end
-        SWRST:
-          begin
-            i2cByteCounterDONE = (i2cByteCounter == 3'd4);
-          end
-        TADDRS:
-          begin
-            i2cByteCounterDONE = (i2cByteCounter == 3'd2);
-          end
-        HADDRS:
-          begin
-            i2cByteCounterDONE = (i2cByteCounter == 3'd2);
-          end
-        GETRES:
-          begin
-            i2cByteCounterDONE = (modeSingle) ? (i2cByteCounter == 3'd3) : (i2cByteCounter == 3'd5);
-          end
-        default:
-          begin
-            i2cByteCounterDONE = 1'd1;
-          end
-      endcase
-    end
+  end
+  always@* begin
+    case(state)
+      CONFIG  : i2cByteCounterDONE = (i2cByteCounter == 3'd4);
+      SWRST   : i2cByteCounterDONE = (i2cByteCounter == 3'd4);
+      TADDRS  : i2cByteCounterDONE = (i2cByteCounter == 3'd2);
+      HADDRS  : i2cByteCounterDONE = (i2cByteCounter == 3'd2);
+      GETRES  : i2cByteCounterDONE = (modeSingle) ? (i2cByteCounter == 3'd3) : (i2cByteCounter == 3'd5);
+      default : i2cByteCounterDONE = 1'd1;
+    endcase
+  end
   
   //SDA buffer
-  always@*
-    begin
-      case(i2cByteCounter)
-        3'd0:
-          begin
-            SDAbuffin <= {CHIPADDRS,inGETRES};
-          end
-        3'd1:
-          begin
-            case(state)
-              CONFIG: SDAbuffin <= CONFIGREGADDRS;
-              SWRST: SDAbuffin <= CONFIGREGADDRS;
-              TADDRS: SDAbuffin <= TEMPREGADDRS;
-              HADDRS: SDAbuffin <= HUMREGADDRS;
-              default: SDAbuffin <= 8'h00;
-            endcase
-          end
-        3'd2:
-          begin
-            case(state)
-              CONFIG: SDAbuffin <= {2'b0,heater,acMode,1'b0,TRes,HRes};
-              SWRST: SDAbuffin <= CONFIGRSTVALUE;
-              default: SDAbuffin <= 8'h00;
-            endcase
-          end
-        default:
-          begin
-            SDAbuffin <= 8'h00;
-          end
-      endcase
-    end
-  always@(negedge i2c_2clk)
-    begin
-      if(~i2c_clk)
-        case(i2c_state)
-          I2C_START:
-            begin
-              SDAbuff <= SDAbuffin;
-            end
-          I2C_WRITE_ACK:
-            begin
-              SDAbuff <= SDAbuffin;
-            end
-          I2C_ADDRS:
-            begin
-              SDAbuff <= (SDAbuff << 1);
-            end
-          I2C_WRITE:
-            begin
-              SDAbuff <= (SDAbuff << 1);
-            end
+  always@* begin
+    case(i2cByteCounter)
+      3'd0: SDAbuffin <= {CHIPADDRS,inGETRES};
+      3'd1:
+        case(state)
+          CONFIG  : SDAbuffin <= CONFIGREGADDRS;
+          SWRST   : SDAbuffin <= CONFIGREGADDRS;
+          TADDRS  : SDAbuffin <= TEMPREGADDRS;
+          HADDRS  : SDAbuffin <= HUMREGADDRS;
+          default : SDAbuffin <= 8'h00;
         endcase
-    end
+      3'd2:
+        case(state)
+          CONFIG  : SDAbuffin <= {2'b0,heater,acMode,1'b0,TRes,HRes};
+          SWRST   : SDAbuffin <= CONFIGRSTVALUE;
+          default : SDAbuffin <= 8'h00;
+        endcase
+      default: SDAbuffin <= 8'h00;
+    endcase
+  end
+  always@(negedge i2c_2clk) begin
+    if(~i2c_clk)
+      case(i2c_state)
+        I2C_START: SDAbuff <= SDAbuffin;
+        I2C_WRITE_ACK: SDAbuff <= SDAbuffin;
+        I2C_ADDRS: SDAbuff <= (SDAbuff << 1);
+        I2C_WRITE: SDAbuff <= (SDAbuff << 1);
+      endcase
+  end
 
   //Temperature register
-  always@(negedge i2c_2clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          tem <= 14'd0;
-        end
-      else if (i2c_clk & I2Cin_READ)
-        begin
-          tem <= (gettingTEM) ? {tem[12:0], SDA}: tem;
-        end
+  always@(negedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+      tem <= 14'd0;
+    end else if (i2c_clk & I2Cin_READ) begin
+      tem <= (gettingTEM) ? {tem[12:0], SDA}: tem;
     end
+  end
 
   //Humidity register
-  always@(negedge i2c_2clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          hum <= 14'd0;
-        end
-      else if (i2c_clk & I2Cin_READ)
-        begin
-          hum <= (gettingHUM) ? {hum[12:0], SDA}: hum;
-        end
+  always@(negedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+      hum <= 14'd0;
+    end else if (i2c_clk & I2Cin_READ) begin
+      hum <= (gettingHUM) ? {hum[12:0], SDA}: hum;
     end
+  end
   
   //Handle config regs
   assign configUp = inCONFIG | rst;
   assign updateConfig = ({heater_reg, TRes_reg, HRes_reg, acMode_reg} !=  {heater, TRes, HRes, acMode});
   assign modeBoth = acMode_reg;
   assign modeSingle = ~acMode_reg;
-  always@(posedge configUp or posedge inSWRST)
-    begin
-      if(inSWRST)
-        begin
-          {heater_reg, TRes_reg, HRes_reg, acMode_reg} <= {1'd0, 1'd0,2'd0, 1'd1};
-        end
-      else
-        begin
-          {heater_reg, TRes_reg, HRes_reg, acMode_reg} <=  {heater, TRes, HRes, acMode};
-        end
+  always@(posedge configUp or posedge inSWRST) begin
+    if(inSWRST) begin
+      {heater_reg, TRes_reg, HRes_reg, acMode_reg} <= {1'd0, 1'd0,2'd0, 1'd1};
+    end else begin
+      {heater_reg, TRes_reg, HRes_reg, acMode_reg} <=  {heater, TRes, HRes, acMode};
     end
+  end
   
-  always@(posedge i2c_2clk or posedge rst)
-    begin
-      if(rst) begin
-          i2c_clk <= 1'b0;
-      end else begin
-          i2c_clk <= ~i2c_clk;
-      end
+  always@(posedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+        i2c_clk <= 1'b0;
+    end else begin
+        i2c_clk <= ~i2c_clk;
     end
+  end
 endmodule
 
 //Lite module uses default settings of sensor
@@ -525,208 +390,128 @@ module hygro_lite(
   assign SCL = (I2Cin_READY) ? 1'b1 : i2c_clk;
   assign SDA = (SDA_Claim) ? SDA_Write : 1'bZ;
   assign SDA_Claim = I2Cin_START | I2Cin_ADDRS | I2Cin_WRITE | I2Cin_READ_ACK | I2Cin_STOP;
-  always@(negedge i2c_2clk)
-    begin
-      SDA_d <= SDA;
-    end
+  always@(negedge i2c_2clk) begin
+    SDA_d <= SDA;
+  end
 
   //State transactions
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          state <= IDLE;
-        end
-      else
-        begin
-          case(state)
-            IDLE:
-              begin
-                state <= (measure & I2Cin_READY) ? BEG_MEAS : state;
-              end
-            BEG_MEAS:
-              begin
-                state <= (I2Cin_WRITE_ACK & SCL & i2c_2clk_negedge) ? ((SDA_d) ? IDLE : WAIT) : state;
-              end
-            WAIT:
-              begin
-                state <= (I2Cin_READY) ? GET_DAT : state;
-              end
-            GET_DAT:
-              begin
-                state <= (I2Cin_STOP) ? WAIT : ((I2Cin_READ) ? IDLE : state);
-              end
-          endcase
-          
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      state <= IDLE;
+    end else case(state)
+      IDLE     : state <= (measure & I2Cin_READY) ? BEG_MEAS : state;
+      BEG_MEAS : state <= (I2Cin_WRITE_ACK & SCL & i2c_2clk_negedge) ? ((SDA_d) ? IDLE : WAIT) : state;
+      WAIT     : state <= (I2Cin_READY) ? GET_DAT : state;
+      GET_DAT  : state <= (I2Cin_STOP) ? WAIT : ((I2Cin_READ) ? IDLE : state);
+    endcase
+  end
 
   //sensNR & responded
-  always@(posedge in_IDLE)
-    begin
-      sensNR <= ~responded;
-    end
-  always@(posedge clk)
-    begin
-      responded <= (responded & ~in_WAIT) | in_GET_DAT;
-    end
+  always@(posedge in_IDLE) begin
+    sensNR <= ~responded;
+  end
+  always@(posedge clk) begin
+    responded <= (responded & ~in_WAIT) | in_GET_DAT;
+  end
   
   
   //I2Cinit
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          I2Cinit <= 1'b0;
-        end
-      else
-        begin
-          case(I2Cinit)
-            1'b0:
-              begin
-                I2Cinit <= (in_BEG_MEAS | in_WAIT) & I2Cin_READY;
-              end
-            1'b1:
-              begin
-                I2Cinit <= I2Cin_READY;
-              end
-          endcase
-          
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      I2Cinit <= 1'b0;
+    end else case(I2Cinit)
+      1'b0: I2Cinit <= (in_BEG_MEAS | in_WAIT) & I2Cin_READY;
+      1'b1: I2Cinit <= I2Cin_READY;
+    endcase
+  end
   
   //Edge detection for i2c_2clk
   assign i2c_2clk_negedge = i2c_2clk_d & i2c_2clk;
-  always@(posedge clk)
-    begin
-      i2c_2clk_d <= i2c_2clk;
-    end
+  always@(posedge clk) begin
+    i2c_2clk_d <= i2c_2clk;
+  end
   
 
   //givingADDRS
-  always@(posedge clk)
-    begin
-      if(I2Cin_START)
-        givingADDRS <= 1'b1;
-      else if(I2Cin_READ | I2Cin_WRITE | I2Cin_STOP)
-        givingADDRS <= 1'b0;
-    end
+  always@(posedge clk) begin
+    if(I2Cin_START)
+      givingADDRS <= 1'b1;
+    else if(I2Cin_READ | I2Cin_WRITE | I2Cin_STOP)
+      givingADDRS <= 1'b0;
+  end
   
   //I2C State transactions
-  always@(negedge i2c_2clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          i2c_state <= I2Cin_READ;
-        end
-      else
-        begin
-          case(i2c_state)
-            I2C_READY:
-              begin
-                i2c_state <= (I2Cinit & i2c_clk) ? I2C_START : i2c_state;
-              end
-            I2C_START:
-              begin
-                i2c_state <= (~SCL) ? I2C_ADDRS : i2c_state;
-              end
-            I2C_ADDRS:
-              begin
-                i2c_state <= (~SCL & &bitCounter) ? I2C_WRITE_ACK : i2c_state;
-              end
-            I2C_WRITE_ACK:
-              begin
-                i2c_state <= (~SCL) ? ((~SDA_d & givingADDRS) ? ((in_WAIT) ?  I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
-              end
-            I2C_WRITE:
-              begin
-                i2c_state <= (~SCL & &bitCounter) ? I2C_WRITE_ACK : i2c_state;
-              end
-            I2C_READ:
-              begin
-                i2c_state <= (~SCL & &bitCounter) ? I2C_READ_ACK : i2c_state;
-              end
-            I2C_READ_ACK:
-              begin
-                i2c_state <= (~SCL) ? ((noMoreByte) ? I2C_STOP : I2C_READ) : i2c_state;
-              end
-            I2C_STOP:
-              begin
-                i2c_state <= (SCL) ? I2C_READY : i2c_state;
-              end
-          endcase
-        end
-    end
+  always@(negedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+      i2c_state <= I2Cin_READ;
+    end else case(i2c_state)
+      I2C_READY     :i2c_state <= (I2Cinit & i2c_clk) ? I2C_START : i2c_state;
+      I2C_START     : i2c_state <= (~SCL) ? I2C_ADDRS : i2c_state;
+      I2C_ADDRS     : i2c_state <= (~SCL & &bitCounter) ? I2C_WRITE_ACK : i2c_state;
+      I2C_WRITE_ACK : i2c_state <= (~SCL) ? ((~SDA_d & givingADDRS) ? ((in_WAIT) ?  I2C_WRITE : I2C_READ): I2C_STOP) : i2c_state;
+      I2C_WRITE     : i2c_state <= (~SCL & &bitCounter) ? I2C_WRITE_ACK : i2c_state;
+      I2C_READ      : i2c_state <= (~SCL & &bitCounter) ? I2C_READ_ACK : i2c_state;
+      I2C_READ_ACK  : i2c_state <= (~SCL) ? ((noMoreByte) ? I2C_STOP : I2C_READ) : i2c_state;
+      I2C_STOP      : i2c_state <= (SCL) ? I2C_READY : i2c_state;
+    endcase
+  end
   //noMoreByte
-  always@(negedge I2Cin_READ_ACK or posedge I2Cin_ADDRS)
-    begin
-      if(I2Cin_ADDRS)
-        noMoreByte <= 1'b0;
-      else
-        noMoreByte <= noMoreByte | (byteCounter == 2'd3);
-    end
+  always@(negedge I2Cin_READ_ACK or posedge I2Cin_ADDRS) begin
+    if(I2Cin_ADDRS)
+      noMoreByte <= 1'b0;
+    else
+      noMoreByte <= noMoreByte | (byteCounter == 2'd3);
+  end
   
 
   //Count read bytes
-  always@(negedge i2c_2clk)
-    begin //Count during read ack and stop counting when max reached, auto reset while giving address
-      byteCounter <= (I2Cin_ADDRS) ? 2'd0 : (byteCounter + {1'd0, (I2Cin_READ_ACK & i2c_clk)});
-    end
+  always@(negedge i2c_2clk) begin //Count during read ack and stop counting when max reached, auto reset while giving address
+    byteCounter <= (I2Cin_ADDRS) ? 2'd0 : (byteCounter + {1'd0, (I2Cin_READ_ACK & i2c_clk)});
+  end
 
   //Count Bits
-  always@(posedge i2c_clk)
-    begin
-      if(I2Cin_READ_ACK | I2Cin_READY | I2Cin_WRITE_ACK)
-        bitCounter <= 3'b111;
-      else if(I2Cin_ADDRS | I2Cin_READ | I2Cin_WRITE)
-        bitCounter <= bitCounter + 3'd1;
-    end
+  always@(posedge i2c_clk) begin
+    if(I2Cin_READ_ACK | I2Cin_READY | I2Cin_WRITE_ACK)
+      bitCounter <= 3'b111;
+    else if(I2Cin_ADDRS | I2Cin_READ | I2Cin_WRITE)
+      bitCounter <= bitCounter + 3'd1;
+  end
   
 
   //Handle sending addresses
   assign SDA_Write = (I2Cin_READ_ACK | I2Cin_START | I2Cin_STOP) ? (I2Cin_READ_ACK & noMoreByte) : SDA_w_buff[7];
-  always@(negedge i2c_2clk) //SDA_w_buff
-    begin
-      if(I2Cin_START)
-        SDA_w_buff <= {7'b1000000, in_GET_DAT};
-      else if(~SCL)
-        SDA_w_buff <= {SDA_w_buff[6:0], 1'b0};
-    end
+  always@(negedge i2c_2clk) begin
+    if(I2Cin_START)
+      SDA_w_buff <= {7'b1000000, in_GET_DAT};
+    else if(~SCL)
+      SDA_w_buff <= {SDA_w_buff[6:0], 1'b0};
+  end
   
   //Temperature register
-  always@(negedge i2c_2clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          tem <= 14'd0;
-        end
-      else if (i2c_clk & I2Cin_READ)
-        begin
-          tem <= (gettingTEM) ? {tem[12:0], SDA}: tem;
-        end
+  always@(negedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+      tem <= 14'd0;
+    end else if (i2c_clk & I2Cin_READ) begin
+      tem <= (gettingTEM) ? {tem[12:0], SDA}: tem;
     end
+  end
 
   //Humidity register
-  always@(negedge i2c_2clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          hum <= 14'd0;
-        end
-      else if (i2c_clk & I2Cin_READ)
-        begin
-          hum <= (gettingHUM) ? {hum[12:0], SDA}: hum;
-        end
+  always@(negedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+      hum <= 14'd0;
+    end else if (i2c_clk & I2Cin_READ) begin
+      hum <= (gettingHUM) ? {hum[12:0], SDA}: hum;
     end
+  end
 
-  always@(posedge i2c_2clk or posedge rst)
-    begin
-      if(rst) begin
-          i2c_clk <= 1'b0;
-      end else begin
-          i2c_clk <= ~i2c_clk;
-      end
+  always@(posedge i2c_2clk or posedge rst) begin
+    if(rst) begin
+        i2c_clk <= 1'b0;
+    end else begin
+        i2c_clk <= ~i2c_clk;
     end
+  end
 endmodule//hygro_lite
 
 //Generate 781.25kHz clock signal for i2c
@@ -740,87 +525,59 @@ module clockGen_i2c(
   assign clk_781k = clk_d[6];
 
   //50MHz
-  always@(posedge clk_i or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[0] <= 0;
-        end
-      else
-        begin
-          clk_d[0] <= ~clk_d[0];
-        end
+  always@(posedge clk_i or posedge rst)  begin
+    if(rst) begin
+      clk_d[0] <= 0;
+    end  else  begin
+      clk_d[0] <= ~clk_d[0];
     end
+  end
   //25MHz
-  always@(posedge clk_d[0] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[1] <= 0;
-        end
-      else
-        begin
-          clk_d[1] <= ~clk_d[1];
-        end
+  always@(posedge clk_d[0] or posedge rst)  begin
+    if(rst) begin
+      clk_d[1] <= 0;
+    end  else  begin
+      clk_d[1] <= ~clk_d[1];
     end
+  end
   //12.5MHz
-  always@(posedge clk_d[1] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[2] <= 0;
-        end
-      else
-        begin
-          clk_d[2] <= ~clk_d[2];
-        end
+  always@(posedge clk_d[1] or posedge rst)  begin
+    if(rst) begin
+      clk_d[2] <= 0;
+    end  else  begin
+      clk_d[2] <= ~clk_d[2];
     end
+  end
   //6.25MHz
-  always@(posedge clk_d[2] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[3] <= 0;
-        end
-      else
-        begin
-          clk_d[3] <= ~clk_d[3];
-        end
+  always@(posedge clk_d[2] or posedge rst)  begin
+    if(rst) begin
+      clk_d[3] <= 0;
+    end  else  begin
+      clk_d[3] <= ~clk_d[3];
     end
+  end
   //3.125MHz
-  always@(posedge clk_d[3] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[4] <= 0;
-        end
-      else
-        begin
-          clk_d[4] <= ~clk_d[4];
-        end
+  always@(posedge clk_d[3] or posedge rst)  begin
+    if(rst) begin
+      clk_d[4] <= 0;
+    end  else  begin
+      clk_d[4] <= ~clk_d[4];
     end
+  end
   //1.562MHz
-  always@(posedge clk_d[4] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[5] <= 0;
-        end
-      else
-        begin
-          clk_d[5] <= ~clk_d[5];
-        end
+  always@(posedge clk_d[4] or posedge rst)  begin
+    if(rst) begin
+      clk_d[5] <= 0;
+    end  else  begin
+      clk_d[5] <= ~clk_d[5];
     end
+  end
   //781.25kHz
-  always@(posedge clk_d[5] or posedge rst)
-    begin
-      if(rst)
-        begin
-          clk_d[6] <= 0;
-        end
-      else
-        begin
-          clk_d[6] <= ~clk_d[6];
-        end
+  always@(posedge clk_d[5] or posedge rst)  begin
+    if(rst) begin
+      clk_d[6] <= 0;
+    end  else  begin
+      clk_d[6] <= ~clk_d[6];
     end
+  end
 endmodule

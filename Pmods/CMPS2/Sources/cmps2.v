@@ -209,7 +209,7 @@ module cmps2(
   assign x_offset_x2 = {1'b0,x_set} + {1'b0,x_reset};
   assign y_offset_x2 = {1'b0,y_set} + {1'b0,y_reset};
   assign z_offset_x2 = {1'b0,z_set} + {1'b0,z_reset};
-  always@(posedge clk or posedge rst)
+  always@(posedge clk or posedge rst) begin
     if(rst) begin
       x_offset <= 16'h0;
       y_offset <= 16'h0;
@@ -219,12 +219,13 @@ module cmps2(
       y_offset <= (inCalibrate) ? y_offset_x2[16:1] : y_offset;
       z_offset <= (inCalibrate) ? z_offset_x2[16:1] : z_offset;
     end
+  end
   
   //Calculate measurement results
   assign x_axis_x2 = {1'b0,x_set} - {1'b0,x_reset};
   assign y_axis_x2 = {1'b0,y_set} - {1'b0,y_reset};
   assign z_axis_x2 = {1'b0,z_set} - {1'b0,z_reset};
-  always@(posedge clk or posedge rst)
+  always@(posedge clk or posedge rst) begin
     if(rst) begin
       x_axis <= 16'h0;
       y_axis <= 16'h0;
@@ -244,108 +245,107 @@ module cmps2(
         z_axis <= z_axis;
       end
     end
+  end
 
   //State transactions
   always@(posedge clk or posedge rst)
     if(rst)
       state <= STANDBY;
-    else 
-      case(state)
-        STANDBY:
-          begin
-            if(calibrate)
-              state <= RSET_REFILL;
-            else if(ch_res)
-              state <= CH_RESLTN;
-            else if(measure)
-              state <= MEASURE;
-          end
-        //Calibration mode, also updates measurement values
-        //Reset measurement
-        RSET_REFILL: //Write to Internal Control reg 0
-          state <= (I2C_done) ? RSET_A_STAT0 : state;
-        RSET_A_STAT0:
-          state <= (I2C_done) ? RSET_WAIT : state;
-        RSET_WAIT: 
-          state <= (I2C_done) ? ((sensor_ready) ? RSET : RSET_A_STAT0) : state;
-        RSET:
-          state <= (I2C_done) ? RSET_MEAS : state;
-        RSET_MEAS: 
-          state <= (I2C_done) ? RSET_A_STAT1 : state;
-        RSET_A_STAT1: 
-          state <= (I2C_done) ? RSET_POLL : state;
-        RSET_POLL: 
-          state <= (I2C_done) ? ((sensor_ready) ? RSET_A_DATA : RSET_A_STAT1) : state;
-        RSET_A_DATA: 
-          state <= (I2C_done) ? RSET_READ : state;
-        RSET_READ: 
-          state <= (I2C_done) ? SET_REFILL : state;
-        //Set measurement
-        SET_REFILL: 
-          state <= (I2C_done) ? SET_A_STAT0 : state;
-        SET_A_STAT0: 
-          state <= (I2C_done) ? SET_WAIT : state;
-        SET_WAIT: 
-          state <= (I2C_done) ? ((sensor_ready) ? SET : SET_A_STAT0) : state;
-        SET: 
-          state <= (I2C_done) ? SET_MEAS : state;
-        SET_MEAS: 
-          state <= (I2C_done) ? SET_A_STAT1 : state;
-        SET_A_STAT1: 
-          state <= (I2C_done) ? SET_POLL : state;
-        SET_POLL: 
-          state <= (I2C_done) ? ((sensor_ready) ? SET_A_DATA : SET_A_STAT1) : state;
-        SET_A_DATA: 
-          state <= (I2C_done) ? SET_READ : state;
-        SET_READ: 
-          state <= (I2C_done) ? CALIBRATE : state;
-        //Calculate all
-        CALIBRATE: 
-          state <= STANDBY;
-        //Normal measurement mode
-        MEASURE: 
-          state <= (I2C_done) ? STAT_AD : state;
-        STAT_AD: 
-          state <= (I2C_done) ? POLL : state;
-        POLL: 
-          state <= (I2C_done) ? ((sensor_ready) ? DATA_AD : STAT_AD) : state;
-        DATA_AD: 
-          state <= (I2C_done) ? READ : state;
-        READ: 
-          state <= (I2C_done) ? CALCULATE : state;
-        CALCULATE: 
-          state <= STANDBY;
-        //Change resolution
-        CH_RESLTN:
-          state <= (I2C_done) ? STANDBY : state;
-      endcase
+    else case(state)
+      STANDBY:
+        begin
+          if(calibrate)
+            state <= RSET_REFILL;
+          else if(ch_res)
+            state <= CH_RESLTN;
+          else if(measure)
+            state <= MEASURE;
+        end
+      //Calibration mode, also updates measurement values
+      //Reset measurement
+      RSET_REFILL: //Write to Internal Control reg 0
+        state <= (I2C_done) ? RSET_A_STAT0 : state;
+      RSET_A_STAT0:
+        state <= (I2C_done) ? RSET_WAIT : state;
+      RSET_WAIT: 
+        state <= (I2C_done) ? ((sensor_ready) ? RSET : RSET_A_STAT0) : state;
+      RSET:
+        state <= (I2C_done) ? RSET_MEAS : state;
+      RSET_MEAS: 
+        state <= (I2C_done) ? RSET_A_STAT1 : state;
+      RSET_A_STAT1: 
+        state <= (I2C_done) ? RSET_POLL : state;
+      RSET_POLL: 
+        state <= (I2C_done) ? ((sensor_ready) ? RSET_A_DATA : RSET_A_STAT1) : state;
+      RSET_A_DATA: 
+        state <= (I2C_done) ? RSET_READ : state;
+      RSET_READ: 
+        state <= (I2C_done) ? SET_REFILL : state;
+      //Set measurement
+      SET_REFILL: 
+        state <= (I2C_done) ? SET_A_STAT0 : state;
+      SET_A_STAT0: 
+        state <= (I2C_done) ? SET_WAIT : state;
+      SET_WAIT: 
+        state <= (I2C_done) ? ((sensor_ready) ? SET : SET_A_STAT0) : state;
+      SET: 
+        state <= (I2C_done) ? SET_MEAS : state;
+      SET_MEAS: 
+        state <= (I2C_done) ? SET_A_STAT1 : state;
+      SET_A_STAT1: 
+        state <= (I2C_done) ? SET_POLL : state;
+      SET_POLL: 
+        state <= (I2C_done) ? ((sensor_ready) ? SET_A_DATA : SET_A_STAT1) : state;
+      SET_A_DATA: 
+        state <= (I2C_done) ? SET_READ : state;
+      SET_READ: 
+        state <= (I2C_done) ? CALIBRATE : state;
+      //Calculate all
+      CALIBRATE: 
+        state <= STANDBY;
+      //Normal measurement mode
+      MEASURE: 
+        state <= (I2C_done) ? STAT_AD : state;
+      STAT_AD: 
+        state <= (I2C_done) ? POLL : state;
+      POLL: 
+        state <= (I2C_done) ? ((sensor_ready) ? DATA_AD : STAT_AD) : state;
+      DATA_AD: 
+        state <= (I2C_done) ? READ : state;
+      READ: 
+        state <= (I2C_done) ? CALCULATE : state;
+      CALCULATE: 
+        state <= STANDBY;
+      //Change resolution
+      CH_RESLTN:
+        state <= (I2C_done) ? STANDBY : state;
+    endcase
 
   //I2C state transactions
   always@(negedge clkI2Cx2 or posedge rst)
     if(rst)
         I2C_state <= I2C_READY;
-    else
-      case(I2C_state)
-        I2C_READY: 
-          I2C_state <= (inI2Cstate & SCLK & ~i2cBusy) ? I2C_START : I2C_state;
-        I2C_START: 
-          I2C_state <= (~SCL) ? I2C_ADDRS : I2C_state;
-        I2C_ADDRS: 
-          I2C_state <= (~SCL & bitCountDone) ? I2C_WRITE_ACK : I2C_state;
-        I2C_WRITE_ACK: 
-          I2C_state <= (~SCL) ? ((~SDA_d_i2c & ~byteCountDone) ? ((~read_nwrite) ? I2C_WRITE : I2C_READ): I2C_STOP) : I2C_state;
-        I2C_WRITE: 
-          I2C_state <= (~SCL & bitCountDone) ? I2C_WRITE_ACK : I2C_state;
-        I2C_READ: 
-          I2C_state <= (~SCL & bitCountDone) ? I2C_READ_ACK : I2C_state;
-        I2C_READ_ACK: 
-          I2C_state <= (~SCL) ? ((byteCountDone) ? I2C_STOP : I2C_READ) : I2C_state;
-        I2C_STOP: 
-          I2C_state <= (SCL) ? I2C_READY : I2C_state;
-      endcase
+    else case(I2C_state)
+      I2C_READY: 
+        I2C_state <= (inI2Cstate & SCLK & ~i2cBusy) ? I2C_START : I2C_state;
+      I2C_START: 
+        I2C_state <= (~SCL) ? I2C_ADDRS : I2C_state;
+      I2C_ADDRS: 
+        I2C_state <= (~SCL & bitCountDone) ? I2C_WRITE_ACK : I2C_state;
+      I2C_WRITE_ACK: 
+        I2C_state <= (~SCL) ? ((~SDA_d_i2c & ~byteCountDone) ? ((~read_nwrite) ? I2C_WRITE : I2C_READ): I2C_STOP) : I2C_state;
+      I2C_WRITE: 
+        I2C_state <= (~SCL & bitCountDone) ? I2C_WRITE_ACK : I2C_state;
+      I2C_READ: 
+        I2C_state <= (~SCL & bitCountDone) ? I2C_READ_ACK : I2C_state;
+      I2C_READ_ACK: 
+        I2C_state <= (~SCL) ? ((byteCountDone) ? I2C_STOP : I2C_READ) : I2C_state;
+      I2C_STOP: 
+        I2C_state <= (SCL) ? I2C_READY : I2C_state;
+    endcase
   
   //Raw data from sensor
-  always@(negedge clkI2Cx2 or posedge rst)
+  always@(negedge clkI2Cx2 or posedge rst) begin
     if(rst) begin
       x_set <= 16'h0;
       x_reset <= 16'h0;
@@ -369,29 +369,27 @@ module cmps2(
           endcase  
       end 
     end
+  end
   
   //Delays
-  always@(posedge clk)
-    begin
-      SDA_d <= SDA;
-      I2CinAck_d <= I2CinAck;
-      I2CinStop_d <= I2CinStop;
-    end
-  always@(negedge clkI2Cx2)
-    begin
-      SDA_d_i2c <= SDA;
-    end
+  always@(posedge clk) begin
+    SDA_d <= SDA;
+    I2CinAck_d <= I2CinAck;
+    I2CinStop_d <= I2CinStop;
+  end
+  always@(negedge clkI2Cx2) begin
+    SDA_d_i2c <= SDA;
+  end
 
   //Buffer control
   assign send_upload = I2CinStart | I2CinWriteAck;
   assign send_shift = I2CinAddrs | I2CinWrite;
-  always@(negedge clkI2Cx2) //Buffer
-    begin
-      if(send_upload)
-        send_buffer <= send_buffer_write;
-      else if(send_shift & ~SCL & |bitCounter)
-        send_buffer <= {send_buffer << 1};
-    end
+  always@(negedge clkI2Cx2) begin
+    if(send_upload)
+      send_buffer <= send_buffer_write;
+    else if(send_shift & ~SCL & |bitCounter)
+      send_buffer <= {send_buffer << 1};
+  end
   always@* //Buffer write
     case(byteCounter)
       3'b111: send_buffer_write = {i2c_ADDRESS, read_nwrite};
@@ -446,59 +444,56 @@ module cmps2(
 
   //bit counter
   assign bitCountDone = ~|bitCounter;
-  always@(posedge SCL)
-    begin
-      if(I2CinAck|I2CinStart)
-        bitCounter <= 3'd0;
-      else
-        bitCounter <= bitCounter + {2'd0,(I2CinAddrs|I2CinWrite|I2CinRead)};
-    end
+  always@(posedge SCL) begin
+    if(I2CinAck|I2CinStart)
+      bitCounter <= 3'd0;
+    else
+      bitCounter <= bitCounter + {2'd0,(I2CinAddrs|I2CinWrite|I2CinRead)};
+  end
   
   //byte counter
   assign byteCountUp = ~I2CinAck_d & I2CinAck;
-  always@(posedge clk) 
-    begin
-      if(I2CinStart)
-        byteCounter <= 3'b111;
-      else
-        byteCounter <= byteCounter + {2'd0,byteCountUp};
-    end
-  always@*
-    begin
-      if(poll_state | ptr_write_state)
-        byteCountDone = (byteCounter == 3'd1);
-      else if(reg_write_state)
-        byteCountDone = (byteCounter == 3'd2);
-      else if(data_read_state)
-        byteCountDone = (byteCounter == 3'd6);
-      else
-        byteCountDone = 1'b1;
-    end
+  always@(posedge clk) begin
+    if(I2CinStart)
+      byteCounter <= 3'b111;
+    else
+      byteCounter <= byteCounter + {2'd0,byteCountUp};
+  end
+  always@* begin
+    if(poll_state | ptr_write_state)
+      byteCountDone = (byteCounter == 3'd1);
+    else if(reg_write_state)
+      byteCountDone = (byteCounter == 3'd2);
+    else if(data_read_state)
+      byteCountDone = (byteCounter == 3'd6);
+    else
+      byteCountDone = 1'b1;
+  end
   
   //Store resolution config
-  always@(posedge clk or posedge rst)
+  always@(posedge clk or posedge rst) begin
     if(rst) begin
       res <= 2'd0;
     end else begin
       res <= (inChRes) ? resolution : res;
     end
+  end
   
   //Determine if an other master is using the bus
-  always@(posedge clk or posedge rst)
+  always@(posedge clk or posedge rst) begin
     if(rst)
       i2cBusy <= 1'b0;
-    else
-      case(i2cBusy)
-        1'b0: i2cBusy <= startCondition & I2CinReady;
-        1'b1: i2cBusy <= ~stopCondition & I2CinReady;
-      endcase
+    else case(i2cBusy)
+      1'b0: i2cBusy <= startCondition & I2CinReady;
+      1'b1: i2cBusy <= ~stopCondition & I2CinReady;
+    endcase
+  end
   
   //Divide clkI2Cx2 to get I2C clk
-  always@(posedge clkI2Cx2 or posedge rst)
-    begin
-      if(rst)
-        SCLK <= 1'b1;
-      else
-        SCLK <= ~SCLK;
-    end
+  always@(posedge clkI2Cx2 or posedge rst) begin
+    if(rst)
+      SCLK <= 1'b1;
+    else
+      SCLK <= ~SCLK;
+  end
 endmodule

@@ -43,110 +43,61 @@ module da2(
   //Handle SDATA buffer
   assign SDATAbuff_cont = {2'd0, chmode, value};
   assign SDATA = SDATAbuff[15];
-  always@(posedge SCLK or posedge SYNC)
-    begin
-      if(SYNC)
-        begin
-          SDATAbuff <= SDATAbuff_cont;
-        end
-      else
-        begin
-          SDATAbuff <= (count) ? {SDATAbuff[14:0], 1'b0} : SDATAbuff;
-        end
+  always@(posedge SCLK or posedge SYNC) begin
+    if(SYNC) begin
+      SDATAbuff <= SDATAbuff_cont;
+    end else begin
+      SDATAbuff <= (count) ? {SDATAbuff[14:0], 1'b0} : SDATAbuff;
     end
+  end
 
   //count
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          count <= 1'b0;
-        end
-      else
-        begin
-          case(count)
-            1'b0:
-              begin
-                count <= SCLK & contCount;
-              end
-            1'b1:
-              begin
-                count <= (counter != 4'd0) | contCount;
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      count <= 1'b0;
+    end else case(count)
+      1'b0: count <= SCLK & contCount;
+      1'b1: count <= (counter != 4'd0) | contCount;
+    endcase
+  end
   
   //contCount
-  always@(posedge clk or posedge SYNC)
-    begin
-      if(SYNC)
-        begin
-          contCount <= 1'b1;
-        end
-      else
-        begin
-          contCount <= working & contCount & (counter != 4'd15);
-        end
+  always@(posedge clk or posedge SYNC) begin
+    if(SYNC) begin
+      contCount <= 1'b1;
+    end else begin
+      contCount <= working & contCount & (counter != 4'd15);
     end
+  end
   
   //working
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          working <= 1'b0;
-        end
-      else
-        begin
-          case(working)
-            1'b0:
-              begin
-                working <= SYNC;
-              end
-            1'b1:
-              begin
-                working <= (counter != 4'd0) | contCount;
-              end
-          endcase
-          
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      working <= 1'b0;
+    end else case(working)
+      1'b0: working <= SYNC;
+      1'b1: working <= (counter != 4'd0) | contCount;
+    endcase
+  end
   
   //SYNC
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          SYNC <= 1'b0;
-        end
-      else
-        begin
-          case(SYNC)
-            1'b0:
-              begin
-                SYNC <= update & ~(contCount | count);
-              end
-            1'b1:
-              begin
-                SYNC <= 1'b0;
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+      SYNC <= 1'b0;
+    end else case(SYNC)
+      1'b0: SYNC <= update & ~(contCount | count);
+      1'b1: SYNC <= 1'b0;
+    endcase
+  end
   
   //Count SCLK
-  always@(negedge SCLK or posedge SYNC)
-    begin
-      if(SYNC)
-        begin
-          counter <= 4'd0;
-        end
-      else
-        begin
-          counter <= counter + {3'd0, count};
-        end
-    end 
+  always@(negedge SCLK or posedge SYNC) begin
+    if(SYNC) begin
+      counter <= 4'd0;
+    end else begin
+      counter <= counter + {3'd0, count};
+    end
+  end 
 endmodule//da2
 
 module da2_dual(
@@ -176,113 +127,64 @@ module da2_dual(
   assign SDATAbuff_cont0 = {2'd0, chmode0, value0};
   assign SDATAbuff_cont1 = {2'd0, chmode1, value1};
   assign SDATA = {SDATAbuff1[15], SDATAbuff0[15]};
-  always@(posedge SCLK or posedge SYNC)
-    begin
-      if(SYNC)
-        begin
-          SDATAbuff0 <= SDATAbuff_cont0;
-          SDATAbuff1 <= SDATAbuff_cont1;
-        end
-      else
-        begin
-          SDATAbuff0 <= (count) ? {SDATAbuff0[14:0], 1'b0} : SDATAbuff0;
-          SDATAbuff1 <= (count) ? {SDATAbuff1[14:0], 1'b0} : SDATAbuff1;
-        end
+  always@(posedge SCLK or posedge SYNC) begin
+    if(SYNC) begin
+      SDATAbuff0 <= SDATAbuff_cont0;
+      SDATAbuff1 <= SDATAbuff_cont1;
+    end else begin
+      SDATAbuff0 <= (count) ? {SDATAbuff0[14:0], 1'b0} : SDATAbuff0;
+      SDATAbuff1 <= (count) ? {SDATAbuff1[14:0], 1'b0} : SDATAbuff1;
     end
+  end
 
   //count
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          count <= 1'b0;
-        end
-      else
-        begin
-          case(count)
-            1'b0:
-              begin
-                count <= SCLK & contCount;
-              end
-            1'b1:
-              begin
-                count <= (counter != 4'd0) | contCount;
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+        count <= 1'b0;
+    end else case(count)
+      1'b0: count <= SCLK & contCount;
+      1'b1:  count <= (counter != 4'd0) | contCount;
+    endcase
+  end
   
   //contCount
-  always@(posedge clk or posedge SYNC)
-    begin
-      if(SYNC)
-        begin
-          contCount <= 1'b1;
-        end
-      else
-        begin
-          contCount <= working & contCount & (counter != 4'd15);
-        end
+  always@(posedge clk or posedge SYNC) begin
+    if(SYNC) begin
+      contCount <= 1'b1;
+    end else begin
+      contCount <= working & contCount & (counter != 4'd15);
     end
+  end
   
   
   //working
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          working <= 1'b0;
-        end
-      else
-        begin
-          case(working)
-            1'b0:
-              begin
-                working <= SYNC;
-              end
-            1'b1:
-              begin
-                working <= (counter != 4'd0) | contCount;
-              end
-          endcase
-          
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+        working <= 1'b0;
+    end else case(working)
+      1'b0: working <= SYNC;
+      1'b1: working <= (counter != 4'd0) | contCount;
+    endcase
+  end
   
   //SYNC
-  always@(posedge clk or posedge rst)
-    begin
-      if(rst)
-        begin
-          SYNC <= 1'b0;
-        end
-      else
-        begin
-          case(SYNC)
-            1'b0:
-              begin
-                SYNC <= update & ~(contCount | count);
-              end
-            1'b1:
-              begin
-                SYNC <= 1'b0;
-              end
-          endcase
-        end
-    end
+  always@(posedge clk or posedge rst) begin
+    if(rst) begin
+        SYNC <= 1'b0;
+    end else case(SYNC)
+      1'b0: SYNC <= update & ~(contCount | count);
+      1'b1: SYNC <= 1'b0;
+    endcase
+  end
   
   //Count SCLK
-  always@(negedge SCLK or posedge SYNC)
-    begin
-      if(SYNC)
-        begin
-          counter <= 4'd0;
-        end
-      else
-        begin
-          counter <= counter + {3'd0, count};
-        end
-    end 
+  always@(negedge SCLK or posedge SYNC) begin
+    if(SYNC) begin
+      counter <= 4'd0;
+    end else begin
+      counter <= counter + {3'd0, count};
+    end
+  end 
 endmodule//da2
 
 module da2AutoUpdate(
@@ -298,19 +200,15 @@ module da2AutoUpdate(
   assign update = (chmode != chmode_reg) | (value != value_reg);
 
   //Store values to compare
-  always@(posedge SYNC or posedge rst)
-    begin
-      if(rst)
-        begin
-          chmode_reg <= 2'd0;
-          value_reg <= 12'd0;
-        end
-      else
-        begin
-          chmode_reg <= chmode;
-          value_reg <= value;
-        end
+  always@(posedge SYNC or posedge rst) begin
+    if(rst) begin
+      chmode_reg <= 2'd0;
+      value_reg <= 12'd0;
+    end else begin
+      chmode_reg <= chmode;
+      value_reg <= value;
     end
+  end
 endmodule//da2AutoUpdate
 
 module da2AutoUpdate_dual(
@@ -328,23 +226,19 @@ module da2AutoUpdate_dual(
   assign update = (chmode0 != chmode_reg0) | (value0 != value_reg0) | (chmode1 != chmode_reg1) | (value1 != value_reg1);
 
   //Store values to compare
-  always@(posedge SYNC or posedge rst)
-    begin
-      if(rst)
-        begin
-          chmode_reg0 <= 2'd0;
-          value_reg0 <= 12'd0;
-          chmode_reg1 <= 2'd0;
-          value_reg1 <= 12'd0;
-        end
-      else
-        begin
-          chmode_reg0 <= chmode0;
-          value_reg0 <= value0;
-          chmode_reg1 <= chmode1;
-          value_reg1 <= value1;
-        end
+  always@(posedge SYNC or posedge rst) begin
+    if(rst) begin
+      chmode_reg0 <= 2'd0;
+      value_reg0 <= 12'd0;
+      chmode_reg1 <= 2'd0;
+      value_reg1 <= 12'd0;
+    end else begin
+      chmode_reg0 <= chmode0;
+      value_reg0 <= value0;
+      chmode_reg1 <= chmode1;
+      value_reg1 <= value1;
     end
+  end
 endmodule//da2AutoUpdate
 
 module da2ClkEn(
@@ -356,13 +250,12 @@ module da2ClkEn(
 
   assign SCLK = (enabled) ? ext_spi_clk : 1'b0;
 
-  always@(posedge clk)
-    begin
-      if(~en)
-        enabled <= 1'b0;
-      else
-        enabled <= (enabled) ? 1'b1 : (~ext_spi_clk & en);
-    end
+  always@(posedge clk) begin
+    if(~en)
+      enabled <= 1'b0;
+    else
+      enabled <= (enabled) ? 1'b1 : (~ext_spi_clk & en);
+  end
 endmodule
 
 module clkDiv25en(
@@ -373,27 +266,19 @@ module clkDiv25en(
   reg clk_m;
 
   //50 MHz
-  always@(posedge clk)
-    begin
-      if(~en)
-        begin
-          clk_m <= 1'b0;
-        end
-      else
-        begin
-          clk_m <= ~clk_m;
-        end
+  always@(posedge clk) begin
+    if(~en) begin
+      clk_m <= 1'b0;
+    end else begin
+      clk_m <= ~clk_m;
     end
+  end
   //25 MHz
-  always@(posedge clk_m or negedge en)
-    begin
-      if(~en)
-        begin
-          SCLK <= 1'b0;
-        end
-      else
-        begin
-          SCLK <= ~SCLK;
-        end
+  always@(posedge clk_m or negedge en) begin
+    if(~en) begin
+      SCLK <= 1'b0;
+    end else begin
+      SCLK <= ~SCLK;
     end
+  end
 endmodule//clkDiv25

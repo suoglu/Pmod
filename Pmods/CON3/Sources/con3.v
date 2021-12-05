@@ -49,29 +49,32 @@ module con3#(
   assign last_cycle = (cycle_num == LAST_CYCLE);
 
   //Servo control with regisrers
-  always@(posedge clk or posedge module_rst)
+  always@(posedge clk or posedge module_rst) begin
     if(module_rst) begin
       servo <= 1'b0;
     end else begin
       servo <= servo ^ servo_inv;
+    end
   end
 
   //Count angle steps
-  always@(posedge clk_256kHz or posedge module_rst)
+  always@(posedge clk_256kHz or posedge module_rst) begin
     if(module_rst) begin
       counter <= 8'hFF;
     end else begin
       counter <= counter + 8'h1;
+    end
   end
-  
+
   //ON-Controlled-Off cycles
-  always@(posedge clk or posedge module_rst)
+  always@(posedge clk or posedge module_rst) begin
     if(module_rst) begin
       cycle_num <= {CYCLE_C_WIDTH{1'b1}};
     end else begin
       cycle_num <= (last_cycle & count_done) ? {CYCLE_C_WIDTH{1'b0}}  : (cycle_num + {{(CYCLE_C_WIDTH-1){1'b0}}, count_done});
     end
-  
+  end
+
   //Delayed signals
   always@(posedge clk) begin
     count_max_reg <= count_max;
@@ -92,17 +95,19 @@ module con3_clk_gen#(
 
     assign count_done = (counter == COUNTER_LIMIT);
 
-    always@(posedge clk or posedge rst)
+    always@(posedge clk or posedge rst) begin
       if(rst) begin
         clk_256kHz <= 1'b0;
       end else begin
         clk_256kHz <= clk_256kHz ^ count_done;
+      end
     end
 
-    always@(posedge clk or posedge rst)
+    always@(posedge clk or posedge rst) begin
       if(rst) begin
         counter <= {COUNTER_SIZE{1'b0}};
       end else begin
         counter <= (count_done) ? {COUNTER_SIZE{1'b0}} : (counter + {{(COUNTER_SIZE-1){1'b0}},1'b1});
+      end
     end
 endmodule

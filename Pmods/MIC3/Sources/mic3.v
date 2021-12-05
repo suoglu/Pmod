@@ -47,66 +47,49 @@ module mic3(
   assign new_data = last_POST & in_IDLE;
 
   //delayed in_POST
-  always@(posedge clk)
-    begin
-      last_POST <= in_POST;
-    end
+  always@(posedge clk) begin
+    last_POST <= in_POST;
+  end
   
   //stopper
-  always @(posedge clk) 
-    begin
-      stopper <= (in_IDLE) ? 1'b1 : ((transaction_counter == 4'd8) ? 1'b0 : stopper);
-    end
+  always @(posedge clk) begin
+    stopper <= (in_IDLE) ? 1'b1 : ((transaction_counter == 4'd8) ? 1'b0 : stopper);
+  end
   
   //SPI states
-  always@(posedge clk)
-    begin
-      if(rst)
-        begin
-          state <= IDLE;
-        end
-      else
-        begin
-          case(state)
-            IDLE: state <= (read) ? PRE : state;
-            PRE: state <= (ext_spi_clk) ? WORKING : state;
-            WORKING: state <= (~|{transaction_counter, stopper}) ? POST : state;
-            POST: state <= IDLE;
-          endcase
-        end
-    end
+  always@(posedge clk) begin
+    if(rst) begin
+      state <= IDLE;
+    end else case(state)
+      IDLE    : state <= (read) ? PRE : state;
+      PRE     : state <= (ext_spi_clk) ? WORKING : state;
+      WORKING : state <= (~|{transaction_counter, stopper}) ? POST : state;
+      POST    : state <= IDLE;
+    endcase
+  end
 
   //SPI transaction counter
-  always@(posedge SCLK or posedge rst)
-    begin
-      if(rst)
-        begin
-          transaction_counter <= 4'd0;
-        end
-      else
-        begin
-          transaction_counter <= transaction_counter + 4'd1;
-        end
+  always@(posedge SCLK or posedge rst) begin
+    if(rst) begin
+      transaction_counter <= 4'd0;
+    end else begin
+      transaction_counter <= transaction_counter + 4'd1;
     end
+  end
 
   //Receive buffer
-  always@(posedge SCLK or posedge rst)
-    begin
-      if(rst)
-        begin
-          rx_buff <= 12'd0;
-        end
-      else
-        begin
-          rx_buff <= {rx_buff[11:0], MISO};
-        end
+  always@(posedge SCLK or posedge rst) begin
+    if(rst) begin
+      rx_buff <= 12'd0;
+    end else begin
+      rx_buff <= {rx_buff[11:0], MISO};
     end
+  end
 
   //Store receive buffer data to audio
-  always@(posedge clk)
-    begin  
-      audio <= (in_POST) ? rx_buff[12:1] : audio;
-    end
+  always@(posedge clk) begin  
+    audio <= (in_POST) ? rx_buff[12:1] : audio;
+  end
 
   assign CS = in_IDLE;
 
