@@ -30,8 +30,8 @@ This interface can be used to gather data from Pmod [TMP2](https://reference.dig
 |  `clk`   |   I   | 1 | System Clock |
 |  `rst`   |   I   | 1 | System Reset |
 |  `clkI2Cx2`   |   I   | 1 | I²C Clock source |
-|  `SCL`   |   IO   | 1 | I²C Clock Pin |
-|  `SDA`   |   IO   | 1 | I²C Data Pin |
+|  `SCL`*   |   IO   | 1 | I²C Clock Pin |
+|  `SDA`*   |   IO   | 1 | I²C Data Pin |
 |  `address_bits`   |   I   | 2 | Address Ports of the [ADT7420](https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf) |
 |  `shutdown`   |   I   | 1 | Shutdown the module |
 |  `resolution`   |   I   | 1 | Increase resolution, 16 bit vs 13 bit |
@@ -52,6 +52,8 @@ This interface can be used to gather data from Pmod [TMP2](https://reference.dig
 |  `temperature_i`   |   O   | 16 | Temperature input |
 
 I: Input  O: Output
+
+\* contain pins \_i, \_o and \_t
 
 **Note:** `rst` will also software resets the [ADT7420](https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf).
 

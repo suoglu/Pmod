@@ -15,8 +15,12 @@ module tmp2(
   input rst,
   input clkI2Cx2, //!max 800 kHz
   //I2C pins
-  inout SCL/* synthesis keep = 1 */,
-  inout SDA/* synthesis keep = 1 */,
+  input  SCL_i,
+  output SCL_o,
+  output SCL_t,
+  input  SDA_i,
+  output SDA_o,
+  output SDA_t,
   //Configurations
   input [1:0] address_bits,
   input shutdown,
@@ -72,6 +76,7 @@ module tmp2(
   reg I2CinAck_d, I2CinStop_d, SDA_d_i2c;
   //Generate I2C signals with tri-state
   reg SCLK; //Internal I2C clock, always thicks
+  wire SDA, SCL;
   wire SCL_claim;
   wire SDA_claim;
   wire SDA_write;
@@ -248,10 +253,14 @@ module tmp2(
     end
 
   //Tri-state control for I2C lines
-  assign SCL = (SCL_claim) ?    SCLK   : 1'bZ;
-  assign SDA = (SDA_claim) ? SDA_write : 1'bZ;
+  assign SCL = (SCL_claim) ?    SCLK   : SCL_i;
+  assign SDA = (SDA_claim) ? SDA_write : SDA_i;
+  assign SCL_o = SCL;
+  assign SDA_o = SDA;
   assign SCL_claim = ~I2CinReady;
   assign SDA_claim = I2CinStart | I2CinAddrs | I2CinWrite | I2CinReadAck | I2CinStop;
+  assign SCL_t = ~SCL_claim;
+  assign SDA_t = ~SDA_claim;
   assign SDA_write = (I2CinStart | I2CinReadAck | I2CinStop) ? (I2CinReadAck & byteCountDone) : send_buffer[7];
 
   //Buffer control

@@ -32,8 +32,8 @@ Module `cmps2` offers two measurement modes. Normal measurement (initiated with 
 |  `clk`   |   I   | 1 | System Clock |
 |  `rst`   |   I   | 1 | System Reset |
 |  `clkI2Cx2`   |   I   | 1 | I²C Clock source |
-|  `SCL`   |   IO   | 1 | I²C Clock Pin |
-|  `SDA`   |   IO   | 1 | I²C Data Pin |
+|  `SCL`*   |   IO   | 1 | I²C Clock Pin |
+|  `SDA`*   |   IO   | 1 | I²C Data Pin |
 |  `x_axis`   |   O   | 16 | Measurement result for X axis |
 |  `y_axis`   |   O   | 16 | Measurement result for Y axis |
 |  `z_axis`   |   O   | 16 | Measurement result for Z axis |
@@ -47,6 +47,8 @@ Module `cmps2` offers two measurement modes. Normal measurement (initiated with 
 |  `valid`   |   O   | 1 | New measurement results ready and valid |
 
 I: Input  O: Output
+
+\* contain pins \_i, \_o and \_t
 
 **Note:** Maximum frequency of `clkI2Cx2` is 800 kHz, `SCL` will have half of this frequency.
 

@@ -49,6 +49,8 @@ his interface can be used to gather data from Pmod [TMP3](https://reference.digi
 
 I: Input  O: Output
 
+\* contain pins \_i, \_o and \_t
+
 **Note:** Maximum frequency of `clkI2Cx2` is 800 kHz, `SCL` will have half of this frequency.
 
 **(Synthesized) Utilization on Artix-7 XC7A35T-1CPG236C:**

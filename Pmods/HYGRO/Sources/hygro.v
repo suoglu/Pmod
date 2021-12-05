@@ -34,8 +34,12 @@ module hygro(
   input [1:0] HRes,
   input swRst,
   //I2C pins
-  inout SCL/* synthesis keep = 1 */, 
-  inout SDA/* synthesis keep = 1 */);
+  input  SCL_i,
+  output SCL_o,
+  output SCL_t,
+  input  SDA_i,
+  output SDA_o,
+  output SDA_t);
   localparam CHIPADDRS = 7'h40,
           TEMPREGADDRS = 8'h00,
            HUMREGADDRS = 8'h01,
@@ -45,6 +49,7 @@ module hygro(
   wire SDA_Claim;
   wire SDA_Write;
   reg SCL_d;
+  wire SCL, SDA;
   //I2C flow control
   wire gettingTEM, gettingHUM;
   reg SDA_d, SDA_dd;
@@ -174,10 +179,14 @@ module hygro(
   end
 
   //I2C signals control
-  assign SCL = (I2Cin_READY) ? 1'bZ : i2c_clk;
-  assign SDA = (SDA_Claim) ? SDA_Write : 1'bZ;
+  assign SCL = (I2Cin_READY) ? SCL_i : i2c_clk;
+  assign SDA = (SDA_Claim) ? SDA_Write : SDA_i;
+  assign SCL_o = SCL;
+  assign SDA_o = SDA;
   assign SDA_Claim = I2Cin_START | I2Cin_ADDRS | I2Cin_WRITE | I2Cin_READ_ACK | I2Cin_STOP;
   assign SDA_Write = (I2Cin_READ_ACK | I2Cin_START | I2Cin_STOP) ? (I2Cin_READ_ACK & i2cByteCounterDONE) : SDAbuff[7];
+  assign SCL_t = I2Cin_READY;
+  assign SDA_t = ~SDA_Claim;
   always@(posedge clk) begin
     SDA_d <= SDA;
   end

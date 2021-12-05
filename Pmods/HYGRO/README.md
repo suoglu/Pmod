@@ -65,8 +65,8 @@ I: Input  O: Output
 |  `sensNR`   | O | 1 | Sensor is not responding |
 |  `tem`   | O | 14 | Most recent temperature reading |
 |  `hum`   | O | 14 | Most recent humidity reading |
-|  `SCL`   | IO | 1 | I²C clock |
-|  `SDA`   | IO | 1 | I²C data |
+|  `SCL`*   | IO | 1 | I²C clock |
+|  `SDA`*   | IO | 1 | I²C data |
 |  `heater`   | I | 1 | Heater |
 |  `acMode`   | I | 1 | Acquisition Mode  |
 | `TRes` | I | 1 | Temperature Measurement Resolution |
@@ -74,6 +74,8 @@ I: Input  O: Output
 |  `swRst`   | I | 1 | Software Reset |
 
 I: Input O: Output
+
+\* contain pins \_i, \_o and \_t
 
 I²C clock source, `i2c_2clk`, should be generated externally. Module `clockGen_i2c` can be used to generate 781,25 kHz I²C clock source (390,62 kHz I²C clock).
 

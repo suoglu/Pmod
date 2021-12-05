@@ -4,7 +4,7 @@
  * ------------------------------------------------ *
  * File        : cmps2.v                            *
  * Author      : Yigit Suoglu                       *
- * Last Edit   : 09/06/2021                         *
+ * Last Edit   : 05/12/2021                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod CMPS2                    *
@@ -15,8 +15,12 @@ module cmps2(
   input rst,
   input clkI2Cx2, //!max 800 kHz
   //I2C pins
-  inout SCL/* synthesis keep = 1 */,
-  inout SDA/* synthesis keep = 1 */,
+  input  SCL_i,
+  output SCL_o,
+  output SCL_t,
+  input  SDA_i,
+  output SDA_o,
+  output SDA_t,
   //Measurement results
   output reg [15:0] x_axis,
   output reg [15:0] y_axis,
@@ -109,6 +113,7 @@ module cmps2(
   wire bitCountDone;
   wire byteCountUp;
   //Generate I2C signals with tri-state
+  wire SDA, SCL;
   reg SCLK; //Internal I2C clock, always thicks
   wire SCL_claim;
   wire SDA_claim;
@@ -199,11 +204,15 @@ module cmps2(
   assign      I2CinAck = I2CinWriteAck | I2CinReadAck;
 
   //Tri-state control for I2C lines
-  assign SCL = (SCL_claim) ?    SCLK   : 1'bZ;
-  assign SDA = (SDA_claim) ? SDA_write : 1'bZ;
+  assign SCL = (SCL_claim) ?    SCLK   : SCL_i;
+  assign SDA = (SDA_claim) ? SDA_write : SDA_i;
+  assign SCL_o = SCL;
+  assign SDA_o = SDA;
   assign SCL_claim = ~I2CinReady;
   assign SDA_claim = I2CinStart | I2CinAddrs | I2CinWrite | I2CinReadAck | I2CinStop;
   assign SDA_write = (I2CinStart | I2CinReadAck | I2CinStop) ? (I2CinReadAck & byteCountDone) : send_buffer[7];
+  assign SCL_t = ~SCL_claim;
+  assign SDA_t = ~SDA_claim;
 
   //Calculate offset
   assign x_offset_x2 = {1'b0,x_set} + {1'b0,x_reset};
