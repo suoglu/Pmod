@@ -54,13 +54,3 @@ Module `dpot` tested with [board.v](Test/board.v) and [Basys3.xdc](Test/Basys3.x
 **Last simulation:** 1 April 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 1 April 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
-
-## Warning
-
-In referance manual from [reference.digilentinc.com](https://reference.digilentinc.com/reference/pmod/pmoddpot/reference-manual) it is written that
-> ...provide 8-bits of data on the falling Serial Clock...
-
-However, in the AD5160 manual from [analog.com](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) it says
-> ...positive-edge sensitive CLK...
-
-Modules in this repository implemented assuming the data is sampled in the positive edge of the SCLK, and the negative edge of the SCLK is used to shift data and change chip select signal. Everthing seem to work in this implementation.
