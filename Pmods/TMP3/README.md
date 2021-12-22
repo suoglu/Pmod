@@ -39,7 +39,7 @@ his interface can be used to gather data from Pmod [TMP3](https://reference.digi
 |  `fault_queue`   |   I   | 2 | Fault queue configuration |
 |  `interrupt_mode`   |   I   | 1 | Enable alert interrupt mode |
 |  `i2cBusy`   |   O   | 1 | I²C in use by another master |
-|  `busy`   |   O   | 1 | Module in I²C in transmisson |
+|  `busy`   |   O   | 1 | Module in I²C in transmission |
 |  `update`   |   I   | 1 | Get temperature reading |
 |  `write_temperature`   |   I   | 1 | Write to temperature register |
 |  `write_hyst_nLim`   |   I   | 1 | Choose temperature register; 1: Hyst, 0: Limit |
@@ -62,7 +62,7 @@ I: Input  O: Output
 
 The [TMP3](https://reference.digilentinc.com/reference/pmod/pmodtmp3/start) interface module tested with test module [tester_tmp3.v](Test/tester_tmp3.v) and constrains [Basys3.xdc](Test/Basys3.xdc).
 
-Test module handles getting data and commands from board IO and controls interface module accrodingly. A 800 kHz clock applied to `clkI2Cx2`. Leftmost switch is connected to `shutdown`, following switch to `write_hyst_nLim`. Next switch used to read temperature continuously. Remaining switches used to gather data. Upper button used to write to temperature registers, bottom button to update configurations and right to get a new reading. Read temperature measurements displayed on seven segment displays. I²C pins connected to upper JB header. I²C pins and alert pin are monitored via [DDiscovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start).
+Test module handles getting data and commands from board IO and controls interface module accordingly. A 800 kHz clock applied to `clkI2Cx2`. Leftmost switch is connected to `shutdown`, following switch to `write_hyst_nLim`. Next switch used to read temperature continuously. Remaining switches used to gather data. Upper button used to write to temperature registers, bottom button to update configurations and right to get a new reading. Read temperature measurements displayed on seven segment displays. I²C pins connected to upper JB header. I²C pins and alert pin are monitored via [DDiscovery](https://reference.digilentinc.com/reference/instrumentation/digital-discovery/start).
 
 Reading measurements, shutdown mode, writing to temperature registers and all alert options are tested.
 
@@ -73,5 +73,5 @@ Reading measurements, shutdown mode, writing to temperature registers and all al
 ## Issues
 
 * Some glitches in `SDA`, only when `SCL` is low.
-* Some issues with on board pullup registers.
+* Some issues with on board pull-up resistors.
 * Continuous read from temperature register causes NACK after a few reads (~13). This doesn't brake the system.
