@@ -1055,16 +1055,16 @@
       <xilinx:taxonomies>
         <xilinx:taxonomy>/ADC</xilinx:taxonomy>
         <xilinx:taxonomy>/AXI_Peripheral</xilinx:taxonomy>
-        <xilinx:taxonomy>/Embedded_Processing/AXI_Peripheral/Analog</xilinx:taxonomy>
+        <xilinx:taxonomy>/Analog</xilinx:taxonomy>
         <xilinx:taxonomy>/Pmod</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>AD1</xilinx:displayName>
       <xilinx:autoFamilySupportLevel>level_0</xilinx:autoFamilySupportLevel>
-      <xilinx:coreRevision>15</xilinx:coreRevision>
+      <xilinx:coreRevision>16</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>user.org:user:ad1:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2021-12-12T12:40:12Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2021-12-23T21:38:31Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="ui.data.coregen.df@5695cc39_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.df@6cf1b310_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
@@ -1252,6 +1252,15 @@
         <xilinx:tag xilinx:name="ui.data.coregen.df@4e7cef35_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.df@64de2fb0_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.df@79ecd2eb_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@75fd05d_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@3f822878_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@1e9b27e_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@6cd6f77e_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@fdff2c1_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@34a85dcb_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@a2542cd_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@d4c2046_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@1691c73e_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/AD1/Sources/ip_repo/ad1_1.0</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
