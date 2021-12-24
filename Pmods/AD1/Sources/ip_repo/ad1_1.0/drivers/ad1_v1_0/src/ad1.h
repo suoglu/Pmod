@@ -2,7 +2,7 @@
  * Title       : Pmod AD1 Software Driver           *
  * Project     : Pmod AD1 interface                 *
  * ------------------------------------------------ *
- * File        : ad1_v1_0.v                         *
+ * File        : ad1.h                              *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 10/12/2021                         *
  * ------------------------------------------------ *
