@@ -20,3 +20,6 @@ WIP*
 #Text editor configs
 *.geany
 .vscode
+
+#Repo specific
+main*.cpp
