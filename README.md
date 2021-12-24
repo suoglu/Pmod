@@ -24,7 +24,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  [COLOR](Pmods/COLOR)   |   I²C   |   Native   | [TCS3472](https://ams.com/documents/20143/36005/TCS3472_DS000390_3-00.pdf/6fe47e15-e32f-7fa7-03cb-22935da44b26) | Color Sensor Module | - |
 |  [CON3](Pmods/CON3)   |   GPIO   |   Native   | None |  R/C Servo Connectors  | - |
 |  [DA2](Pmods/DA2)   |   GPIO   |   Native   | [DAC121S101-Q1](https://www.ti.com/lit/ds/symlink/dac121s101.pdf) | Digital-to-analog converter | - |
-|  [DPOT](Pmods/DPOT)   |   SPI   |   Native   | [AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) | Digital Potentiometer | - |
+|  [DPOT](Pmods/DPOT)   |   SPI   |   Native, AXI4-Lite   | [AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) | Digital Potentiometer | - |
 |  [ENC](Pmods/ENC)   |   GPIO   |   Native   | None | Rotary Encoder | - |
 |  [HB3](Pmods/HB3)   |   GPIO   |   Native   | H-bridge |  H-bridge Driver with Feedback Inputs  | - |
 |  [HYGRO](Pmods/HYGRO)   |   I²C   |   Native   | [HDC1080](https://www.ti.com/lit/ds/symlink/hdc1080.pdf) | Relative humidity and temperature sensor | - |

@@ -1,0 +1,2 @@
+# Source List for iVerilog
+hdl/dpot_v1_0.v

@@ -1,0 +1,91 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Dec 24 12:39:54 2021
+[*]
+[dumpfile] "/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0/sim.vcd"
+[dumpfile_mtime] "Fri Dec 24 12:39:07 2021"
+[dumpfile_size] 10951
+[savefile] "/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0/sim/sim.gtkw"
+[timestart] 0
+[size] 1920 1011
+[pos] -1 -1
+*-17.947887 435000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[treeopen] tb.uut.
+[sst_width] 221
+[signals_width] 257
+[sst_expanded] 1
+[sst_vpaned_height] 607
+@820
+tb.state[240:0]
+@28
+tb.s_axi_aclk
+tb.s_axi_aresetn
+tb.ext_spi_clk
+@200
+-DROT Connections
+@28
+tb.SCK
+tb.MOSI
+tb.nCS
+@200
+-AXI Read Addr
+@28
+tb.s_axi_arready
+tb.s_axi_arvalid
+@22
+tb.s_axi_araddr[3:0]
+@200
+-AXI Read Data
+@28
+tb.s_axi_rready
+tb.s_axi_rvalid
+@22
+tb.s_axi_rdata[31:0]
+@28
+tb.s_axi_rresp[1:0]
+@200
+-AXI Write Addr
+@28
+tb.s_axi_awready
+tb.s_axi_awvalid
+@22
+tb.s_axi_awaddr[3:0]
+@200
+-AXI Write Data
+@29
+tb.s_axi_wready
+@28
+tb.s_axi_wvalid
+@22
+tb.s_axi_wdata[31:0]
+@200
+-AXI Write Resp
+@28
+tb.s_axi_bready
+tb.s_axi_bvalid
+tb.s_axi_bresp[1:0]
+@200
+-UUT
+-State Info
+@22
+tb.uut.buffer[7:0]
+@28
+tb.uut.update
+@22
+tb.uut.value[7:0]
+@28
+tb.uut.writingNew
+tb.uut.countDone
+tb.uut.txCounter[2:0]
+@200
+-Addresses
+@22
+tb.uut.read_address[3:0]
+tb.uut.write_address[3:0]
+@28
+tb.uut.read_address_valid
+tb.uut.write_address_valid
+tb.uut.write_ch_ready
+[pattern_trace] 1
+[pattern_trace] 0
