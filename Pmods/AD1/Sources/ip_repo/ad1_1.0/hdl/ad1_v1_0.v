@@ -235,8 +235,8 @@
 
     //Read Channel handshake (Addr & data)
     reg s_axi_rvalid_hold; //This will hold read data channel stable until master accepts tx
-    assign s_axi_rvalid  =      read_done | s_axi_rvalid_hold;
-    assign s_axi_arready = (~s_axi_rvalid | s_axi_rready) & (~blocking | ~busy | nonDataRead);
+    assign s_axi_rvalid  =           read_done | s_axi_rvalid_hold;
+    assign s_axi_arready = (~s_axi_rvalid_hold | s_axi_rready) & (~blocking | ~busy | nonDataRead);
     always@(posedge s_axi_aclk) begin
       if(~s_axi_aresetn) begin
         s_axi_rvalid_hold <= 0;
