@@ -12,8 +12,7 @@
 #ifndef AD1_H
 #define AD1_H
 
-class ad1
-{
+class ad1{
   private:
     //? Use array for channels?
     volatile unsigned long* ch0;
