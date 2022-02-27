@@ -4,11 +4,11 @@
 
 1. About
 2. Brief information about Pmod DPOT
-3. Standalone
+3. Native Core
    1. Interface Description
    2. Simulation
    3. Test
-4. IP Core
+4. AXI4-Lite IP Core
    1. Basic Information on IP
    2. Interfaces/Ports
    3. Register Map
@@ -25,9 +25,9 @@ Simple interface for the [Digilent Pmod DPOT](https://reference.digilentinc.com/
 
 The [Digilent Pmod DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start) contains a [Analog Devices AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) digital potentiometer. [AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf) can be utilized in two diffrent way: a rheostat where users set a desired resistance between one outside terminal and the wiper terminal or in a voltage divider mode where the two outside terminals are powered at set voltages and a ratio of resistance is specified.
 
-## Standalone
+## Native Interface Core
 
-### Standalone Interface Description
+### Native Interface Description
 
 This interface can be used to gather data from Pmod [DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start) (or any other [AD5160](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5160.pdf)) easily.
 
@@ -48,15 +48,15 @@ I: Input  O: Output
 
 25 MHz `spi_clk_i` can be generated from 100 MHz clock with `clkDiv`.
 
-### Standalone Simulation
+### Native Interface Simulation
 
 Modules `dpot` and `autoUpdate` simulated on [sim.v](Simulation/sim.v).
 
-### Standalone Test
+### Native Interface Test
 
 Module `dpot` tested with [board.v](Test/board.v) and [Basys3.xdc](Test/Basys3.xdc) with clock divider `clkDiv`. Module `autoUpdate` is not tested. `update` connected to leftmost switch and `value` is connected to eight rightmost switches. Pmod [DPOT](https://reference.digilentinc.com/reference/pmod/pmoddpot/start) used as voltage divider. Approximately  1 V applied between ports A and B. Voltage value of port W observed with [OpenScope MZ](https://reference.digilentinc.com/reference/instrumentation/openscope-mz/start).
 
-## IP Core
+## AXI4-Lite IP Core
 
 ### Basic Information on IP
 
@@ -89,13 +89,13 @@ Read and write to control potentiometer value. This is the only register in this
 
 ## Status Information
 
-### Standalone Status
+### Native Interface Status
 
 **Last simulation:** 1 April 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 1 April 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
 
-### IP Status
+### AXI4-Lite IP Status
 
 **Last simulation:** 24 December 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 

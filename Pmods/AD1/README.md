@@ -4,13 +4,13 @@
 
 1. About
 2. Brief information about Pmod AD1
-3. Standalone
+3. Native Interface Core
    1. Modules
    2. Interface Description
    3. Utilization
    4. Simulation
    5. Test
-4. IP Core
+4. AXI4-Lite IP Core
    1. Basic Information on IP
    2. Interfaces/Ports
    3. Register Map
@@ -27,9 +27,9 @@ Simple interface for the [Digilent Pmod AD1](https://reference.digilentinc.com/r
 
 The [Digilent Pmod AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start) contains two [Analog Devices AD7476A](https://www.analog.com/media/cn/technical-documentation/evaluation-documentation/AD7476A_7477A_7478A.pdf) 12 bit analog-to-digital converters. Module communicates with the host board via SPI-like protocol.
 
-## Standalone
+## Native Interface
 
-### Standalone Modules
+### Native Interface Modules
 
 **`ad1`**
 
@@ -51,7 +51,7 @@ Generates 20 MHz 40% duty cycle SCLK for [AD1](https://reference.digilentinc.com
 
 Generates a SCLK for [AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start) serial interface from an external clock.
 
-### Standalone Interface Description
+### Native Interface Description
 
 This interface can be used to gather data from Pmod [AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start) (or any other [AD7476A](https://www.analog.com/media/cn/technical-documentation/evaluation-documentation/AD7476A_7477A_7478A.pdf)) easily.
 
@@ -85,7 +85,7 @@ I: Input  O: Output
 
 **Note:** `clk` should be faster than `SCLK_i`.
 
-### Standalone (Synthesized) Utilization (On Artix-7)
+### Native Interface Core (Synthesized) Utilization (On Artix-7)
 
 |   Module   | Slice LUTs as Logic | Slice Registers as FF |
 | :------: | :----: | :----: |
@@ -95,15 +95,15 @@ I: Input  O: Output
 | `AD1clockGEN_20MHz40` | 2 | 3 |
 | `AD1clockEN` | 1 | 1 |
 
-### Standalone Simulation
+### Native Interface Simulation
 
 Module simulated in [sim.v](Simulation/sim.v). `SDATA` is connected to a  10 MHz clock signal.
 
-### Standalone Test
+### Native Interface Test
 
 Module is tested on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual) with [test_board.v](Test/test_board.v). Module `ad1` tested with `AD1clockGEN_20MHz40`. [AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start) connected to JB, and convertion results shown at seven segment display. Arbitary voltage level provided from DC power supply of [OpenScope MZ](https://reference.digilentinc.com/reference/instrumentation/openscope-mz/start?redirect=1).
 
-## IP Core
+## AXI4-Lite IP Core
 
 ### Basic Information on IP
 
@@ -171,13 +171,13 @@ Writing starts a new measurement. In blocking mode, reading also starts a new me
 
 ## Status Information
 
-### Standalone Status
+### Native Interface Status
 
 **Last simulation:** 3 January 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last test:** 3 January 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
 
-### IP Status
+### AXI4-Lite IP Status
 
 **Last simulation:** 12 December 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
