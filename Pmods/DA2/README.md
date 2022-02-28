@@ -4,12 +4,18 @@
 
 1. About
 2. Brief information about Pmod DA2
-3. Modules
-4. Interface Description
-5. Utilization
-6. Simulation
-7. Test
-8. Status Information
+3. Native Interface Core
+   1. Modules
+   2. Interface Description
+   3. Utilization
+   4. Simulation
+   5. Test
+4. AXI4-Lite IP Core
+   1. Basic Information on IP
+   2. Interfaces/Ports
+   3. Register Map
+   4. Utilization
+5. Status Information
 
 ---
 
@@ -21,7 +27,9 @@ Simple interface for the [Digilent Pmod DA2](https://reference.digilentinc.com/r
 
 The [Digilent Pmod DA2](https://reference.digilentinc.com/reference/pmod/pmodda2/start) is a 2 channel 12-bit Digital-to-Analog Converter module capable of outputting data up to 16.5 MSa. It contains two [Texas Instruments DAC121S101](https://www.ti.com/lit/ds/symlink/dac121s101.pdf)s.
 
-## Modules
+## Native Interface
+
+### Native Interface Modules
 
 **`da2`**
 
@@ -43,7 +51,7 @@ Generate `update` automatically when `value` and/or `chmod` changes.
 
 Can be used to generate SCLK from external clock source. It does not change clock frequnecy but disables it when not in use.
 
-## Interface Ports
+### Native Interface Ports
 
 ***Note:** Dual modules has two bit `SDATA` and two `chmod` and `value` ports, one for each channel.*
 
@@ -107,9 +115,7 @@ This module generates `SCLK` from `ext_spi_clk`.
 |  `ext_spi_clk`   | I | 1 | SPI clock source |
 |  `SCLK`   | O | 1 | Serial Clock |
 
-## (Synthesized) Utilization
-
-### On Artix-7
+### Native Interface (Synthesized) Utilization on Artix-7
 
 |   Module   | Slice LUTs as Logic | Slice Registers as FF | Slice Registers as Latch |
 | :------: | :----: | :----: | :----: |
@@ -120,16 +126,28 @@ This module generates `SCLK` from `ext_spi_clk`.
 | `da2AutoUpdate_dual` | 11 | 28 | 0 |
 |`da2ClkEn`  | 1 | 1 | 0 |
 
-## Simulation
+### Native Interface Simulation
 
 Module simulated in [sim.v](Simulation/sim.v).
 
-## Test
+### Native Interface Test
 
 Interface module tested on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual) with [test.v](Test/test.v). A sawtooth value generator is implemented to generate dynamic `value` signal. Implemented generator can generate increasing or decreasing sawtooth signal, controled by the third left most switch. Source of the `value` signal can be controled via the second left most switch, and it can be either sawtooth generator or right most switches. Value of the switches shown on seven segment displays. Port `update` connected to right button and left most switch. And Pmod connecter to upper part of JB. Output of the [DA2](https://reference.digilentinc.com/reference/pmod/pmodda2/start) monitored using the oscilloscope of the [OpenScope MZ](https://reference.digilentinc.com/reference/instrumentation/openscope-mz/start).
 
+## AXI4-Lite IP Core
+
+---
+
 ## Status Information
+
+### Native Interface Status
 
 **Last simulation:** 6 January 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last test:** 27 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+### AXI4-Lite IP Status
+
+**Last simulation:** 28 February 2022, with [Icarus Verilog](http://iverilog.icarus.com).
+
+**Last test:** 12 December 2021, on [Digilent Arty A7](https://digilent.com/reference/programmable-logic/arty-a7/reference-manual).
