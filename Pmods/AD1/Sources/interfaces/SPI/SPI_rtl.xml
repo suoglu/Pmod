@@ -2,12 +2,12 @@
 <spirit:abstractionDefinition xmlns:xilinx="http://www.xilinx.com" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <spirit:vendor>suoglu.github.io</spirit:vendor>
   <spirit:library>interface</spirit:library>
-  <spirit:name>dual_spi_miso_rtl</spirit:name>
+  <spirit:name>SPI_rtl</spirit:name>
   <spirit:version>1.0</spirit:version>
-  <spirit:busType spirit:vendor="suoglu.github.io" spirit:library="interface" spirit:name="dual_spi_miso" spirit:version="1.0"/>
+  <spirit:busType spirit:vendor="suoglu.github.io" spirit:library="interface" spirit:name="SPI" spirit:version="1.0"/>
   <spirit:ports>
     <spirit:port>
-      <spirit:logicalName>SS_O</spirit:logicalName>
+      <spirit:logicalName>SS</spirit:logicalName>
       <spirit:description>Slave Select Output</spirit:description>
       <spirit:wire>
         <spirit:onMaster>
@@ -22,7 +22,7 @@
       </spirit:wire>
     </spirit:port>
     <spirit:port>
-      <spirit:logicalName>SCK_O</spirit:logicalName>
+      <spirit:logicalName>SCK</spirit:logicalName>
       <spirit:description>SPI Clock Output</spirit:description>
       <spirit:wire>
         <spirit:qualifier>
@@ -40,26 +40,40 @@
       </spirit:wire>
     </spirit:port>
     <spirit:port>
-      <spirit:logicalName>MISO0_I</spirit:logicalName>
-      <spirit:description>Input Data Port 0</spirit:description>
+      <spirit:logicalName>MISO</spirit:logicalName>
+      <spirit:description>Input Data Port</spirit:description>
       <spirit:wire>
         <spirit:qualifier>
           <spirit:isData>true</spirit:isData>
         </spirit:qualifier>
         <spirit:onMaster>
-          <spirit:presence>required</spirit:presence>
           <spirit:width>1</spirit:width>
           <spirit:direction>in</spirit:direction>
         </spirit:onMaster>
         <spirit:onSlave>
-          <spirit:presence>required</spirit:presence>
           <spirit:width>1</spirit:width>
         </spirit:onSlave>
       </spirit:wire>
     </spirit:port>
     <spirit:port>
-      <spirit:logicalName>MISO1_I</spirit:logicalName>
-      <spirit:description>Input Data Port 1</spirit:description>
+      <spirit:logicalName>MOSI</spirit:logicalName>
+      <spirit:description>Output Data Port</spirit:description>
+      <spirit:wire>
+        <spirit:qualifier>
+          <spirit:isData>true</spirit:isData>
+        </spirit:qualifier>
+        <spirit:onMaster>
+          <spirit:width>1</spirit:width>
+        </spirit:onMaster>
+        <spirit:onSlave>
+          <spirit:width>1</spirit:width>
+          <spirit:direction>in</spirit:direction>
+        </spirit:onSlave>
+      </spirit:wire>
+    </spirit:port>
+    <spirit:port>
+      <spirit:logicalName>MISO_1</spirit:logicalName>
+      <spirit:description>Alternative Input Data Port</spirit:description>
       <spirit:wire>
         <spirit:qualifier>
           <spirit:isData>true</spirit:isData>
@@ -71,12 +85,25 @@
         <spirit:onSlave>
           <spirit:width>1</spirit:width>
         </spirit:onSlave>
+        <spirit:defaultValue>0</spirit:defaultValue>
+      </spirit:wire>
+    </spirit:port>
+    <spirit:port>
+      <spirit:logicalName>MOSI_1</spirit:logicalName>
+      <spirit:description>Alternative Output Data Port</spirit:description>
+      <spirit:wire>
+        <spirit:qualifier>
+          <spirit:isData>true</spirit:isData>
+        </spirit:qualifier>
+        <spirit:onMaster>
+          <spirit:width>1</spirit:width>
+        </spirit:onMaster>
+        <spirit:onSlave>
+          <spirit:width>1</spirit:width>
+          <spirit:direction>in</spirit:direction>
+        </spirit:onSlave>
+        <spirit:defaultValue>1</spirit:defaultValue>
       </spirit:wire>
     </spirit:port>
   </spirit:ports>
-  <spirit:vendorExtensions>
-    <xilinx:abstractionDefinitionInfo>
-      <xilinx:displayName>Dual SPI MISO</xilinx:displayName>
-    </xilinx:abstractionDefinitionInfo>
-  </spirit:vendorExtensions>
 </spirit:abstractionDefinition>

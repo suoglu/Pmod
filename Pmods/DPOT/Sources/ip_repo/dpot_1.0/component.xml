@@ -926,8 +926,8 @@
         <xilinx:taxonomy>/Pmod</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>DPOT</xilinx:displayName>
-      <xilinx:coreRevision>6</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2021-12-24T12:56:07Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>7</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2022-02-28T14:14:45Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="ui.data.coregen.df@65f2f3fb_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.df@4168c99e_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
@@ -1006,6 +1006,11 @@
         <xilinx:tag xilinx:name="ui.data.coregen.df@2203cfa7_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.df@2c01f451_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.df@7e821ef4_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@2f778857_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@69ddd4db_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@2d790583_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@76dff9a6_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.df@24e8a6b6_ARCHIVE_LOCATION">/home/suoglu/Projects/Personal/pmod/Pmods/DPOT/Sources/ip_repo/dpot_1.0</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
