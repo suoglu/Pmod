@@ -17,9 +17,12 @@ tmp_*
 *tmp
 WIP*
 
-#Text editor configs
+# Text editor configs
 *.geany
 .vscode
 
-#Repo specific
+# Utills
+.uart_tool/
+
+# Repo specific
 main*.cpp
