@@ -136,7 +136,87 @@ Interface module tested on [Digilent Basys 3](https://reference.digilentinc.com/
 
 ## AXI4-Lite IP Core
 
----
+### Basic Information on IP
+
+IP core provides a basic interface to [DA2](https://reference.digilentinc.com/reference/pmod/pmodda2/start) (or any other [DAC121S101](https://www.ti.com/lit/ds/symlink/dac121s101.pdf)) with [AXI4-Lite](https://developer.arm.com/documentation/ihi0022/latest) protocol.
+
+When dual mode disabled, only one of the data channels is active.
+
+In fast update mode; when refresh bit is set during a write to configuration register, remaining bits are ignored and not changed.
+
+When buffering mode enabled; writing to data registers does not automatically update DAC outputs, a refresh is needed.
+
+### Interfaces/Ports
+
+- AXI4-Lite
+  - Following ports are not implemented:
+    - Write strobes (WSTRB)
+    - Non-secure and Secure accesses (AxPROT)
+- External SPI Clock Input
+  - Clock to be used in SPI connection, max 20 MHz.
+- SPI
+  - CS: Chip Select
+  - SCK: SPI clock
+  - DA: Data channel 0 MOSI
+  - DB: Data channel 1 MOSI (Only in dual mode)
+
+### Register Map
+
+**0x0 Data Channel A:**
+
+Channel A output value. Writing updates the output value when buffering mode is not enabled.
+
+**0x4 Data Channel B:**
+
+Channel B output value. Writing updates the output value when buffering mode is not enabled. Valid only in dual mode.
+
+**0x8 Status Register:**
+
+|31:4|3|2|1|0|
+|:---:|:---:|:---:|:---:|:---:|
+|Reserved|Fast Refresh HW|Dual Mode|Data Invalid|Busy|
+
+- Fast Refresh HW: Fast refresh implementation.
+- Dual Mode: Dual channel implementation.
+- Data Invalid: The data on IP and the output of the DAC are not the same.
+- Busy: On going transmission.
+
+**0xC Configuration Register:**
+
+|31:2|6|5:4|3:2|1|0|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|Reserved|Fast Refresh|PDM B|PDM A|Refresh|Buffering Mode|
+
+- Fast refresh: Software fast refresh mode. When enabled; setting refresh bit makes other bits to be ignored while writing to the configuration register.
+- PDM: Power down mode for respective channels. PDM B is only valid in dual mode. See below for power down modes.
+- Refresh: Update DAC output with IP values.
+- Buffering Mode: Disables auto refreshing when data registers or power down modes were written.
+
+**Power Down Modes:**
+
+|Value|Mode|
+|:---:|---|
+|0x0|Normal Operation|
+|0x1|1kΩ to ground|
+|0x2|100kΩ to ground|
+|0x3|High Impedance|
+
+### (Synthesized) Utilization of IP on Artix-7
+
+**Dual Channel Mode:**
+
+- Slice LUTs as Logic: 79
+- Slice Registers as Flip Flop: 94
+
+**Single Channel Mode:**
+
+- Slice LUTs as Logic: 53
+- Slice Registers as Flip Flop: 55
+
+**Dual Channel Mode with fast refresh implementation:**
+
+- Slice LUTs as Logic: 78
+- Slice Registers as Flip Flop: 94
 
 ## Status Information
 
@@ -150,4 +230,4 @@ Interface module tested on [Digilent Basys 3](https://reference.digilentinc.com/
 
 **Last simulation:** 28 February 2022, with [Icarus Verilog](http://iverilog.icarus.com).
 
-**Last test:** 12 December 2021, on [Digilent Arty A7](https://digilent.com/reference/programmable-logic/arty-a7/reference-manual).
+**Last test:** 13 March 2021, on [Digilent Arty A7](https://digilent.com/reference/programmable-logic/arty-a7/reference-manual).

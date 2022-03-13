@@ -35,7 +35,7 @@ public:
   void chPDMode(unsigned char value, bool baseChannel = true);
   bool inDualMode();
   bool isBusy();
-  bool isInvalid();
+  bool isValid();
   bool isFastRefresh(bool hard = false);
   bool isBufferingMode();
   PDMode powerDownMode(unsigned char channel);

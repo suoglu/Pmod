@@ -92,8 +92,8 @@ bool da2::isBusy(){
   return getStatus() & 0x1u;
 }
 
-bool da2::isInvalid(){
-  return getStatus() & 0x2u;
+bool da2::isValid(){
+  return ~(getStatus() & 0x2)u;
 }
 
 bool da2::isFastRefresh(bool hard){

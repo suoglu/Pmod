@@ -144,7 +144,7 @@ module tb();
     @(posedge s_axi_aclk); #1;
     s_axi_aresetn = 1;
     @(posedge s_axi_aclk); #1;
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     //Basic AXI cases
     state = "valid write & read";
     s_axi_awaddr = uut.OFFSET_CONFIG;
@@ -174,7 +174,7 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "unvalid write & read";
     s_axi_awaddr = uut.OFFSET_STATUS;
     s_axi_wdata = 32'h0;
@@ -203,7 +203,7 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "AXI write data first";
     s_axi_awaddr = uut.OFFSET_CONFIG;
     s_axi_wdata = 32'h0;
@@ -225,7 +225,7 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "AXI write addr first";
     s_axi_wdata = 32'h1;
     s_axi_awvalid = 1;
@@ -246,7 +246,7 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "AXI write res wait";
     s_axi_awaddr = uut.OFFSET_CONFIG;
     s_axi_wdata = 32'h0;
@@ -258,7 +258,7 @@ module tb();
     s_axi_wvalid = 0;
     repeat(2) @(posedge s_axi_aclk); #1;
     s_axi_bready = 1;
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "AXI read not ready";
     s_axi_rready = 0;
     s_axi_arvalid = 1;
@@ -272,13 +272,13 @@ module tb();
     s_axi_arvalid = 0;
     repeat(2) @(posedge s_axi_aclk); #1;
     s_axi_rready = 1;
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     //Test AD interface
     state = "Reset";
     s_axi_aresetn = 0;
     @(posedge s_axi_aclk); #1;
     s_axi_aresetn = 1;
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Update one channel";
     s_axi_awaddr = uut.OFFSET_CH0;
     s_axi_wdata = 32'h1A;
@@ -310,7 +310,7 @@ module tb();
     while(uut.busy) begin
       @(posedge s_axi_aclk); #1;
     end
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Write same value";
     s_axi_awaddr = uut.OFFSET_CH0;
     s_axi_wdata = 32'h1A;
@@ -331,11 +331,11 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(4) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     while(uut.busy) begin
       @(posedge s_axi_aclk); #1;
     end
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Update channel mode";
     s_axi_awaddr = uut.OFFSET_CONFIG;
     s_axi_wdata = 32'b1000;
@@ -356,11 +356,11 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(4) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     while(uut.busy) begin
       @(posedge s_axi_aclk); #1;
     end
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Enable Buff & Ch Modes";
     s_axi_awaddr = uut.OFFSET_CONFIG;
     s_axi_wdata = 32'b11001;
@@ -381,11 +381,11 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(4) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     while(uut.busy) begin
       @(posedge s_axi_aclk); #1;
     end
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Read Status";
     s_axi_araddr = uut.OFFSET_STATUS;
     s_axi_arvalid = 1;
@@ -418,7 +418,7 @@ module tb();
     while(uut.busy | uut.dataInvalid) begin
       @(posedge s_axi_aclk); #1;
     end
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Update channel A";
     s_axi_awaddr = uut.OFFSET_CH0;
     s_axi_wdata = 32'hBCA;
@@ -439,7 +439,7 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Update channel B";
     s_axi_awaddr = uut.OFFSET_CH1;
     s_axi_wdata = 32'hAF5;
@@ -460,7 +460,7 @@ module tb();
         s_axi_wvalid = 0;
       end
     join
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Read Status";
     s_axi_araddr = uut.OFFSET_STATUS;
     s_axi_arvalid = 1;
@@ -493,7 +493,7 @@ module tb();
     while(uut.busy | uut.dataInvalid) begin
       @(posedge s_axi_aclk); #1;
     end
-    repeat(2) @(posedge s_axi_aclk); #1;
+    repeat(2) @(posedge ext_spi_clk); #1;
     state = "Finish";
     repeat(4) @(posedge s_axi_aclk); #1;
     $finish;

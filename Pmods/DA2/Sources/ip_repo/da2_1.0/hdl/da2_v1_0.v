@@ -65,7 +65,8 @@
     localparam RES_OKAY = 2'b00,
                RES_ERR  = 2'b10; //Slave error
 
-    reg [3:0] counter; //Bit counter for the transmisson
+    reg [4:0] counter; //Bit counter for the transmisson
+    wire countDone;
 
     localparam IDLE  = 1'b0,
              UPDATE  = 1'b1;
@@ -74,20 +75,13 @@
     wire inIDLE   = (state == IDLE);
     wire inUPDATE = (state == UPDATE);
 
-    //Detect ext spi clk edge
-    reg ext_spi_clk_d;
-    always@(posedge s_axi_aclk) begin
-      ext_spi_clk_d <= ext_spi_clk;
-    end
-    wire ext_spi_clk_posedge = ~ext_spi_clk_d & ext_spi_clk;
-
     //Board connections
     reg [1:0] D; //Pack in to array
     assign {DB, DA} = D;
 
 
     // Use external clk for SPI
-    assign SCK = (inUPDATE) ? ext_spi_clk : 1'b1;
+    assign SCK = (~CS) ? ext_spi_clk : 1'b1;
 
 
     //Addresses
@@ -218,22 +212,22 @@
 
 
     //Data counter
-    wire countDone = (counter == 4'h0);
+    assign countDone = (counter == 5'h10);
     always@(negedge ext_spi_clk or negedge s_axi_aresetn) begin
       if(~s_axi_aresetn | inIDLE) begin
-        counter = 4'h0;
+        counter = 5'h0;
       end else begin
-        counter = counter + 4'h1;
+        counter = counter + 5'h1;
       end
     end
 
 
     //State Transactions
-    always@(posedge s_axi_aclk) begin
+    always@(posedge ext_spi_clk or negedge s_axi_aresetn) begin
       if(~s_axi_aresetn) begin
         state <= IDLE;
       end else case(state)
-        IDLE: state <= updateData & ext_spi_clk_posedge;
+        IDLE: state <= updateData;
         UPDATE: state <= ~CS;
       endcase
     end
