@@ -107,7 +107,7 @@ Module is tested on [Digilent Basys 3](https://reference.digilentinc.com/referen
 
 ### Basic Information on IP
 
-IP core provides a basic interface with [AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start) (or any other [AD7476A](https://www.analog.com/media/cn/technical-documentation/evaluation-documentation/AD7476A_7477A_7478A.pdf)) with [AXI4-Lite](https://developer.arm.com/documentation/ihi0022/latest) protocol.
+IP core provides a basic interface to [AD1](https://reference.digilentinc.com/reference/pmod/pmodad1/start) (or any other [AD7476A](https://www.analog.com/media/cn/technical-documentation/evaluation-documentation/AD7476A_7477A_7478A.pdf)) with [AXI4-Lite](https://developer.arm.com/documentation/ihi0022/latest) protocol.
 
 When dual mode disabled, only one of the data channels is active.
 
