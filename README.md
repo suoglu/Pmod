@@ -31,7 +31,7 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 |  [KYPD](Pmods/KYPD)   |   GPIO   |   Native   | None | 4x4 Keypad | - |
 |  [MIC3](Pmods/MIC3)   |   SPI   |   Native   | [ADCS7476](http://www.ti.com/lit/ds/symlink/adcs7476.pdf), [SPA2410LR5H-B](https://reference.digilentinc.com/_media/reference/pmod/pmodmic3/mic3microphone_datasheet.pdf) | Small microphone module | - |
 |  [OLED](Pmods/OLED)   |   SPI   |   Native   | [SSD1306](https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf), [OLED](https://cdn-shop.adafruit.com/datasheets/UG-2832HSWEG04.pdf) |  128x32 OLED Display  | - |
-|  [TC1](Pmods/TC1)   |   SPI   |   Native   | [MAX31855](https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf) | K-Type Thermocouple Module | - |
+|  [TC1](Pmods/TC1)   |   SPI   |   Native, AXI4-Lite    | [MAX31855](https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf) | K-Type Thermocouple Module | - |
 |  [TMP2](Pmods/TMP2)   |   I²C   |   Native   | [ADT7420](https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf) |  Temperature Sensor  | - |
 |  [TMP3](Pmods/TMP3)   |   I²C   |   Native   | [TCN75A](https://ww1.microchip.com/downloads/en/DeviceDoc/21935D.pdf) |  Temperature Sensor  | - |
 

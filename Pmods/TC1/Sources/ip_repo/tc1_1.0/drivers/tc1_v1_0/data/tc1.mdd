@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER tc1
+	OPTION supported_peripherals = (tc1);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = tc1;
+END DRIVER

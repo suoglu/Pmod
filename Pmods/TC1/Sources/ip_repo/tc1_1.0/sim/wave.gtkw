@@ -1,0 +1,282 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Thu Jun 16 19:55:17 2022
+[*]
+[dumpfile] "/home/suoglu/Projects/Personal/pmod/Pmods/TC1/Sources/ip_repo/tc1_1.0/sim.vcd"
+[dumpfile_mtime] "Thu Jun 16 19:53:09 2022"
+[dumpfile_size] 14095
+[savefile] "/home/suoglu/Projects/Personal/pmod/Pmods/TC1/Sources/ip_repo/tc1_1.0/sim/wave.gtkw"
+[timestart] 0
+[size] 1920 1011
+[pos] -1 -1
+*-14.125559 85000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 221
+[signals_width] 348
+[sst_expanded] 1
+[sst_vpaned_height] 287
+@200
+-UUT0
+@820
+[color] 2
+tb.state[240:0]
+[color] 6
+tb.uut_num[80:0]
+@28
+tb.s_axi_aclk
+tb.s_axi_aresetn
+tb.ext_spi_clk
+@200
+-Read Addr
+@28
+tb.readAHS0
+tb.s_axi_arvalid0
+tb.s_axi_arready0
+@25
+tb.s_axi_araddr0[4:0]
+@200
+-Read Data
+@28
+tb.readDHS0
+tb.s_axi_rvalid0
+tb.s_axi_rready0
+@22
+tb.s_axi_rdata0[31:0]
+@28
+tb.s_axi_rresp0[1:0]
+@200
+-Write Addr
+@28
+tb.writeAHS0
+tb.s_axi_awvalid0
+tb.s_axi_awready0
+@25
+tb.s_axi_awaddr0[4:0]
+@200
+-Write Data
+@28
+tb.writeDHS0
+tb.s_axi_wvalid0
+tb.s_axi_wready0
+@22
+tb.s_axi_wdata0[31:0]
+@200
+-Write Resp
+@28
+tb.writeRHS0
+tb.s_axi_bvalid0
+tb.s_axi_bready0
+tb.s_axi_bresp0[1:0]
+@200
+-Module Connections
+@28
+tb.SCLK0
+tb.CSn0
+tb.MISO0
+@200
+-Test Data
+@28
+tb.D_fault0
+@22
+tb.I_TD0[11:0]
+tb.TC_TD0[13:0]
+@28
+tb.faults_0[2:0]
+@200
+-Read Data
+@28
+tb.uut0.faults_read[2:0]
+@22
+tb.uut0.internal_t_read[11:0]
+tb.uut0.junc_t_read[13:0]
+tb.uut0.raw_data[31:0]
+@200
+-Module Config & Status
+@28
+tb.uut0.auto_update
+tb.uut0.busy
+tb.uut0.manual_update
+tb.uut0.quick_update
+tb.uut0.timer_update
+tb.uut0.with_buffers
+tb.uut0.with_timer
+@200
+-
+-UUT1
+@820
+[color] 2
+tb.state[240:0]
+[color] 6
+tb.uut_num[80:0]
+@28
+tb.s_axi_aclk
+tb.s_axi_aresetn
+tb.ext_spi_clk
+@200
+-Read Addr
+@28
+tb.readAHS1
+tb.s_axi_arvalid1
+tb.s_axi_arready1
+@25
+tb.s_axi_araddr1[4:0]
+@200
+-Read Data
+@28
+tb.readDHS1
+tb.s_axi_rvalid1
+tb.s_axi_rready1
+@22
+tb.s_axi_rdata1[31:0]
+@28
+tb.s_axi_rresp1[1:0]
+@200
+-Write Addr
+@28
+tb.writeAHS1
+tb.s_axi_awvalid1
+tb.s_axi_awready1
+@25
+tb.s_axi_awaddr1[4:0]
+@200
+-Write Data
+@28
+tb.writeDHS1
+tb.s_axi_wvalid1
+tb.s_axi_wready2
+@22
+tb.s_axi_wdata1[31:0]
+@200
+-Write Resp
+@28
+tb.writeRHS1
+tb.s_axi_bvalid1
+tb.s_axi_bready1
+@c00028
+tb.s_axi_bresp1[1:0]
+@28
+(0)tb.s_axi_bresp1[1:0]
+(1)tb.s_axi_bresp1[1:0]
+@1401200
+-group_end
+@200
+-Module Connections
+@28
+tb.SCLK1
+tb.CSn1
+tb.MISO1
+@200
+-Test Data
+@28
+tb.D_fault1
+@22
+tb.I_TD1[11:0]
+tb.TC_TD1[13:0]
+@28
+tb.faults_1[2:0]
+@200
+-Read Data
+@28
+tb.uut1.faults_read[2:0]
+@22
+tb.uut1.internal_t_read[11:0]
+tb.uut1.junc_t_read[13:0]
+tb.uut1.raw_data[31:0]
+@200
+-Module Config & Status
+@28
+tb.uut1.auto_update
+tb.uut1.busy
+tb.uut1.manual_update
+tb.uut1.quick_update
+tb.uut1.timer_update
+tb.uut1.with_buffers
+tb.uut1.with_timer
+@200
+-
+-UUT2
+@820
+[color] 2
+tb.state[240:0]
+[color] 6
+tb.uut_num[80:0]
+@28
+tb.s_axi_aclk
+tb.s_axi_aresetn
+tb.ext_spi_clk
+@200
+-Read Addr
+@28
+tb.readAHS2
+tb.s_axi_arvalid2
+tb.s_axi_arready2
+@25
+tb.s_axi_araddr2[4:0]
+@200
+-Read Data
+@28
+tb.readDHS2
+tb.s_axi_rvalid2
+tb.s_axi_rready2
+@22
+tb.s_axi_rdata2[31:0]
+@28
+tb.s_axi_rresp2[1:0]
+@200
+-Write Addr
+@28
+tb.writeAHS2
+tb.s_axi_awvalid2
+tb.s_axi_awready2
+@25
+tb.s_axi_awaddr2[4:0]
+@200
+-Write Data
+@28
+tb.writeDHS2
+tb.s_axi_wvalid2
+tb.s_axi_wready1
+@22
+tb.s_axi_wdata2[31:0]
+@200
+-Write Resp
+@28
+tb.writeRHS2
+tb.s_axi_bvalid2
+tb.s_axi_bready2
+tb.s_axi_bresp2[1:0]
+@200
+-Module Connections
+@28
+tb.SCLK2
+tb.CSn2
+tb.MISO2
+@200
+-Test Data
+@28
+tb.D_fault2
+@22
+tb.I_TD2[11:0]
+tb.TC_TD2[13:0]
+@28
+tb.faults_2[2:0]
+@200
+-Read Data
+@28
+tb.uut2.faults_read[2:0]
+@22
+tb.uut2.internal_t_read[11:0]
+tb.uut2.junc_t_read[13:0]
+tb.uut2.raw_data[31:0]
+@200
+-Module Config & Status
+@28
+tb.uut2.auto_update
+tb.uut2.busy
+tb.uut2.manual_update
+tb.uut2.quick_update
+tb.uut2.timer_update
+tb.uut2.with_buffers
+tb.uut2.with_timer
+[pattern_trace] 1
+[pattern_trace] 0
