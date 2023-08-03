@@ -5,6 +5,7 @@
  * File        : tmp2.v                             *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 29/04/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod TMP2                     *

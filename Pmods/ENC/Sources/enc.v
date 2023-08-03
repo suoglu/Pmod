@@ -5,6 +5,7 @@
  * File        : enc.v                              *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 02/04/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Decoder for Pmod ENC               *
  * ------------------------------------------------ *

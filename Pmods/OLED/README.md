@@ -17,6 +17,7 @@
 4. Simulation
 5. Tests
 6. Status Information
+7. Licence
 
 ---
 
@@ -217,3 +218,7 @@ Module `oled_bitmap` is tested on [Digilent Arty 7](https://reference.digilentin
 **Last simulation:** 13 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 20 May 2021, on [Digilent Arty A7](https://reference.digilentinc.com/programmable-logic/arty-a7/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

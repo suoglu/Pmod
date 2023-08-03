@@ -9,6 +9,7 @@
 5. Test
 6. Status Information
 7. Warning
+8. Licence
 
 ---
 
@@ -59,3 +60,7 @@ Module `enc` tested on [test.v](Test/test.v). Positive edges of `dir0` and `dir1
 **Last simulation:** 5 February 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last test:** 2 April 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

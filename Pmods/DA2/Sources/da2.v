@@ -5,6 +5,7 @@
  * File        : da2.v                              *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 27/05/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod DA2                      *

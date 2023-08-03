@@ -6,6 +6,7 @@
  * File        : dpot_v1_0.v                        *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 24/12/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : AXI Lite interface to communicate  *
  *               with Pmod DPOT (AD5160)            *

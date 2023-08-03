@@ -5,6 +5,7 @@
  * File        : kypd.v                             *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 03/02/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Decoder for Pmod KYPD              *
  * ------------------------------------------------ *

@@ -5,6 +5,7 @@
  * File        : clk_div.v                   *
  * Author      : Yigit Suoglu                *
  * Last Edit   : 23/11/2020                  *
+ * Licence     : CERN-OHL-W                  *
  * ----------------------------------------- *
  * Description : Collection clock dividers   *
  * ----------------------------------------- */

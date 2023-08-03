@@ -14,6 +14,7 @@
    3. Register Map
    4. Utilization
 5. Status Information
+6. Licence
 
 ---
 
@@ -100,3 +101,7 @@ Read and write to control potentiometer value. This is the only register in this
 **Last simulation:** 24 December 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last test:** 24 December 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

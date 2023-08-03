@@ -12,6 +12,7 @@
  * ------------------------------------------------ */
 
 module tb();
+  parameter MAX_SIM_CYCLES = 1000000;
   parameter C_S_AXI_DATA_WIDTH = 32;
   parameter C_S_AXI_ADDR_WIDTH = 5;
   reg[C_S_AXI_ADDR_WIDTH-1:0] s_axi_awaddr0;
@@ -155,6 +156,12 @@ module tb();
   reg[10*8:0] uut_num = "2";
   integer i;
   genvar g;
+
+  initial begin
+    repeat(MAX_SIM_CYCLES) @(posedge s_axi_aclk); #1;
+    $display("ERROR: Timeout! Reached %d cycles.", MAX_SIM_CYCLES);
+    $finish;
+  end
 
   initial begin
     $dumpfile("sim.vcd");

@@ -8,6 +8,7 @@
 4. Tests
 5. Status Information
 6. Issues
+7. Licence
 
 ---
 
@@ -86,3 +87,7 @@ Reading measurements, shutdown mode, writing to temperature registers, interrupt
 ## Issues
 
 * Some issues with `SCL` frequency. See the notes in *Interface Description* section.
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

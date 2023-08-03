@@ -9,6 +9,7 @@
 5. Status Information
 6. Issues
 7. Possible Future Improvements
+8. Licence
 
 ---
 
@@ -85,3 +86,7 @@ Module `colorlite` tested with [color_test.v](Pmods/COLOR/Test/color_test.v) and
 
 - Full module that enables more features, such as interrupts
 - Some processing over color data to make it more accurate
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

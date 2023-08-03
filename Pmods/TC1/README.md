@@ -8,6 +8,7 @@
 4. Simulation
 5. Tests
 6. Status Information
+7. Licence
 
 ---
 
@@ -74,3 +75,7 @@ The [TC1](https://reference.digilentinc.com/reference/pmod/pmodtc1/start) interf
 **Last simulation:** 25 April 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 25 April 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

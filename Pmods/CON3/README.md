@@ -9,6 +9,7 @@
 5. Test
 6. Status Information
 7. Issues
+8. Licence
 
 ---
 
@@ -80,3 +81,7 @@ Initially `servo` pins are monitored with [DDiscovery](https://reference.digilen
 **Last Simulation:** 30 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 30 May 2021, on [Digilent Arty A7](https://reference.digilentinc.com/reference/programmable-logic/arty-a7/start).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

@@ -16,6 +16,7 @@
    3. Register Map
    4. Utilization
 5. Status Information
+6. Licence
 
 ---
 
@@ -231,3 +232,7 @@ Channel B output value. Writing updates the output value when buffering mode is 
 **Last simulation:** 28 February 2022, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last test:** 13 March 2021, on [Digilent Arty A7](https://digilent.com/reference/programmable-logic/arty-a7/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

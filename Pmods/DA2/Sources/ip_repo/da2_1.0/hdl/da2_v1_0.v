@@ -6,6 +6,7 @@
  * File        : da2_v1_0.v                         *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 27/02/2022                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : AXI Lite interface to communicate  *
  *               with Pmod DA2 (DAC121S101-Q1)      *

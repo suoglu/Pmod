@@ -6,6 +6,7 @@
  * File        : ad1_v1_0.v                         *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 10/12/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : AXI Lite interface to communicate  *
  *               with Pmod AD1 (AD7476A)            *

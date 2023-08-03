@@ -6,6 +6,7 @@
  * File        : tc1_v1_0.v                         *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 16/06/2022                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : AXI Lite interface to communicate  *
  *               with Pmod TC1 (MAX31855)           *

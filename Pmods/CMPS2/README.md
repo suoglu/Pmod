@@ -8,6 +8,7 @@
 4. Tests
 5. Status Information
 6. Issues
+7. Licence
 
 ---
 
@@ -79,3 +80,7 @@ The [CMPS2](https://reference.digilentinc.com/reference/pmod/pmodcmps2/start) in
 ## Issues
 
 * For some measurements, least significant bit of the result is wrong, resulting 0.5mG error.
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

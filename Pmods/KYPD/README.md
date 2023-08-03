@@ -7,6 +7,7 @@
 3. Interface Description
 4. Test
 5. Status
+6. Licence
 
 ---
 
@@ -52,3 +53,7 @@ Module `kypd` tested with [kypdTest.v](Test/kypdTest.v) and [Basys3.xdc](Test/Ba
 ## Status Information
 
 **Last test:** 3 Fabruary 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

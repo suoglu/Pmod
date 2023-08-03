@@ -8,6 +8,7 @@
 4. Simulation
 5. Tests
 6. Status Information
+7. Licence
 
 ---
 
@@ -65,3 +66,7 @@ Second test utilizes pmod [DA2](Pmods/DA2) to output read audio data from pmod [
 **Last simulation:** 12 December 2020, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 27 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

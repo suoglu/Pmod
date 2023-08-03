@@ -5,6 +5,7 @@
  * File        : hb3.v                              *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 28/05/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Interface for HB3                  *
  * ------------------------------------------------ *

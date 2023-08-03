@@ -9,6 +9,7 @@
 5. Test
 6. Status Information
 7. Issues
+8. Licence
 
 ---
 
@@ -56,3 +57,7 @@ Module `hb3` direcly with [Basys3.xdc](Test/Basys3.xdc). First `motor_direction`
 **Last Simulation:** 28 May 2021, with [Vivado Simulator](https://www.xilinx.com/products/design-tools/vivado/simulator.html).
 
 **Last test:** 28 May 2021, on [Digilent Basys 3](https://reference.digilentinc.com/reference/programmable-logic/basys-3/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

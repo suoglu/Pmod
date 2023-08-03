@@ -8,6 +8,7 @@
 4. Tests
 5. Status Information
 6. Issues
+7. Licence
 
 ---
 
@@ -75,3 +76,7 @@ Reading measurements, shutdown mode, writing to temperature registers and all al
 * Some glitches in `SDA`, only when `SCL` is low.
 * Some issues with on board pull-up resistors.
 * Continuous read from temperature register causes NACK after a few reads (~13). This doesn't brake the system.
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

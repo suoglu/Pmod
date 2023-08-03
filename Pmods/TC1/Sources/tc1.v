@@ -5,6 +5,7 @@
  * File        : tc1.v                              *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 25/04/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod TC1                      *

@@ -5,6 +5,7 @@
  * File        : color.v                            *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 20/01/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod COLOR                    *

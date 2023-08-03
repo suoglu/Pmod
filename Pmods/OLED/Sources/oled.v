@@ -5,6 +5,7 @@
  * File        : oled.v                             *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 17/06/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod OLED                     *

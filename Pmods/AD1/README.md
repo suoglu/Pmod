@@ -16,6 +16,7 @@
    3. Register Map
    4. Utilization
 5. Status Information
+6. Licence
 
 ---
 
@@ -182,3 +183,7 @@ Writing starts a new measurement. In blocking mode, reading also starts a new me
 **Last simulation:** 12 December 2021, with [Icarus Verilog](http://iverilog.icarus.com).
 
 **Last test:** 12 December 2021, on [Digilent Arty A7](https://digilent.com/reference/programmable-logic/arty-a7/reference-manual).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

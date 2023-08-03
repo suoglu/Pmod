@@ -5,6 +5,7 @@
  * File        : ad1.v                              *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 06/01/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod AD1                      *

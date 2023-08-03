@@ -5,6 +5,7 @@
  * File        : ssd_util.v                              *
  * Author      : Yigit Suoglu                            *
  * Last Edit   : 21/11/2020                              *
+ * Licence     : CERN-OHL-W                              *
  * ----------------------------------------------------- *
  * Description : Modules related to 7 Segment Displays   *
  * ----------------------------------------------------- */

@@ -5,6 +5,7 @@
 1. About
 2. List of Available Pmods
 3. Information about Test Codes
+4. Licence
 
 [![Repo on GitLab](https://img.shields.io/badge/repo-GitLab-6C488A.svg)](https://gitlab.com/suoglu/pmod)
 [![Repo on GitHub](https://img.shields.io/badge/repo-GitHub-3D76C2.svg)](https://github.com/suoglu/Pmod)
@@ -38,6 +39,10 @@ This repository contains interfaces for some of the [Digilent Pmod](https://refe
 ## Information about Test Codes
 
 Test modules use utility modules such as button debouncers. Verilog code for these utility modules can be found in [Utils](Utils) directory of this repository, as well as their own [repository](https://gitlab.com/suoglu/verilog-utilty-modules).
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal
 
 ---
 

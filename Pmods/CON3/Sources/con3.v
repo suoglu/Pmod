@@ -5,6 +5,7 @@
  * File        : con3.v                             *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 29/05/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Interface for CON3                 *
  * ------------------------------------------------ *

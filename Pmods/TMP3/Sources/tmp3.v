@@ -5,6 +5,7 @@
  * File        : tmp3.v                             *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 27/04/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interface to communicate    *
  *               with Pmod TMP3                     *

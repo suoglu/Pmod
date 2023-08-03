@@ -5,6 +5,7 @@
  * File        : trubuff.v                   *
  * Author      : Yigit Suoglu                *
  * Last Edit   : 04/12/2021                  *
+ * Licence     : CERN-OHL-W                  *
  * ----------------------------------------- *
  * Description : Three state buffer          *
  * ----------------------------------------- */

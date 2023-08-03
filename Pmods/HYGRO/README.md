@@ -11,6 +11,7 @@
 7. Test
 8. Status Information
 9. Issues
+10. Licence
 
 ---
 
@@ -114,3 +115,7 @@ Module `hygro` is tested on [Digilent Basys 3](https://reference.digilentinc.com
 ## Issues
 
 * **In `hygro`:** Changing measurement resolutions doesn't seem to work, even though I²C transmission looks correct.
+
+## License
+
+CERN Open Hardware Licence Version 2 - Weakly Reciprocal

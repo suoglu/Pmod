@@ -5,6 +5,7 @@
  * File        : rgb_led_pwm.v                           *
  * Author      : Yigit Suoglu                            *
  * Last Edit   : 19/01/2021                              *
+ * Licence     : CERN-OHL-W                              *
  * ----------------------------------------------------- *
  * Description : Generate PWM signals to control RGB led *
  * ----------------------------------------------------- */

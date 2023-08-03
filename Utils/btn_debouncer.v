@@ -5,6 +5,7 @@
  * File        : btn_debouncer.v              *
  * Author      : Yigit Suoglu                 *
  * Last Edit   : 23/11/2020                   *
+ * Licence     : CERN-OHL-W                   *
  * ------------------------------------------ *
  * Description : Debouncer module for buttons *
  * ------------------------------------------ */

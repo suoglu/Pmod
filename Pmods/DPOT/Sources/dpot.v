@@ -5,6 +5,7 @@
  * File        : dpot.v                             *
  * Author      : Yigit Suoglu                       *
  * Last Edit   : 01/04/2021                         *
+ * Licence     : CERN-OHL-W                         *
  * ------------------------------------------------ *
  * Description : Simple interfaces to communicate   *
  *               with Pmod DPOT                     *
